@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  credits       Int       @default(100)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  generations Generation[]
+  characters Character[]
+  projects Project[]
+  posts Post[]
+  likes Like[]
+  purchases Purchase[]
+  socialAccounts SocialAccount[]
+  scheduledPosts ScheduledPost[]
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  clipsJson String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Character {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+  name         String
+  refImageUrls String
+  createdAt    DateTime @default(now())
+}
+
+model Generation {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  model      String
+  mediaType  String
+  prompt     String
+  imageUrl   String?
+  status     String
+  resultUrl  String?
+  error      String?
+  createdAt  DateTime @default(now())
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  mediaUrl    String
+  mediaType   String
+  toolUsed    String?
+  likes       Int      @default(0)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model CreditPackage {
+  id            String  @id @default(cuid())
+  name          String
+  credits       Int
+  priceUsd      Int     // cents
+  stripePriceId String? // placeholder for real Stripe
+  popular       Boolean @default(false)
+}
+
+model Purchase {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  packageId       String
+  credits         Int
+  amountUsd       Int      // cents
+  stripeSessionId String?
+  status          String   @default("completed") // completed|pending|failed
+  createdAt       DateTime @default(now())
+}
+
+model SocialAccount {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform       String    // "instagram"|"tiktok"|"x"|"youtube"
+  platformUserId String?
+  username       String?
+  accessToken    String
+  refreshToken   String?
+  tokenExpiry    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([userId, platform])
+}
+
+model ScheduledPost {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform       String   // "instagram"|"tiktok"|"x"|"youtube"
+  mediaUrl       String
+  mediaType      String   // "image"|"video"
+  caption        String?
+  scheduledFor   DateTime
+  status         String   @default("pending") // pending|posted|failed
+  platformPostId String?
+  error          String?
+  createdAt      DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

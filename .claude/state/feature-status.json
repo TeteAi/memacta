@@ -1,0 +1,2336 @@
+{
+  "features": {
+    "nextjs-scaffold": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 5,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 4,
+          "failed": 0
+        }
+      }
+    },
+    "tailwind-shadcn": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 10,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 4,
+          "failed": 0
+        }
+      }
+    },
+    "prisma-sqlite": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 12,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 4,
+          "failed": 0
+        }
+      }
+    },
+    "nextauth-stub": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 18,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 5,
+          "failed": 0
+        }
+      }
+    },
+    "dark-shell-nav": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 20,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 6,
+          "failed": 0
+        }
+      }
+    },
+    "credit-display-stub": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 25,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 6,
+          "failed": 0
+        }
+      }
+    },
+    "ai-provider-interface": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 25,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 6,
+          "failed": 0
+        }
+      }
+    },
+    "vitest-config": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 25,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 6,
+          "failed": 0
+        }
+      }
+    },
+    "playwright-config": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 25,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 6,
+          "failed": 0
+        }
+      }
+    },
+    "create-video": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "text-to-video": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "image-to-video": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "create-image": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-picker": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "prompt-box-presets": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-kling-3": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-kling-25-turbo": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-kling-o1": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-sora-2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-veo-31": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-veo-3": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-wan-26": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-minimax-hailuo": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-seedance-20": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-seedance-pro": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-soul-v2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-nano-banana-pro": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-nano-banana-2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-wan-25-image": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-seedream-4": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-gpt-image-15": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-flux-kontext": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "model-flux-2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "higgsfield-chat": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 33,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 9,
+          "failed": 0
+        }
+      }
+    },
+    "soul-id": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "soul-moodboard": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "character-swap-2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "face-swap": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "video-face-swap": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "outfit-swap": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "photodump": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "soul-cast": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "ai-influencer": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 38,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    },
+    "edit-image": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "edit-video": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "draw-to-edit": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "draw-to-video": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "upscale": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "image-bg-remover": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "video-bg-remover": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "color-grading": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "inpaint": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "lipsync-studio": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "talking-avatar": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "kling-avatars-2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "motion-control": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "multi-reference": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "banana-placement": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "product-placement": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "clipcut": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "transitions": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "expand-image": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "skin-enhancer": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "relight": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "recast": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "angles-2": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "shots": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 41,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 15,
+          "failed": 0
+        }
+      }
+    },
+    "effects-grid": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "trending-templates": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "mixed-media-presets": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-raven-transition": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-air-bending": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-animalization": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-water-bending": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-earth-zoom-out": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-earth-wave": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-giant-grab": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-shadow-smoke": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-splash-transition": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-firelava": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-explosion": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-flame-on": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-wireframe": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-xray": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-glitch": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-portal": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-multiverse": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-disintegration": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-hero-flight": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-thunder-god": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-plasma-explosion": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-cyborg": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-freezing": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-werewolf": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-visor-x": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "effect-levitation": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-3d-render": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-3d-rotation": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-3d-figure": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-bullet-time-scene": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-bullet-time-white": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-chameleon": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-macro-scene": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-macroshot-product": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-meme-generator": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-headshot-generator": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-sticker-matchcut": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-game-dump": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-plushies": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-micro-beasts": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-signboard": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-whats-next": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-ai-stylist": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-style-snap": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-fashion-factory": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "app-commercial-faces": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "asmr-addon": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "asmr-classic": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "ad-click-to-ad": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "ad-billboard": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "ad-truck": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "ad-graffiti": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "themed-comic-book": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "themed-renaissance": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "themed-sketch-to-real": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "themed-pixel-game": {
+      "status": "done",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 48,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 17,
+          "failed": 0
+        }
+      }
+    },
+    "cinema-studio-3": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 51,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 18,
+          "failed": 0
+        }
+      }
+    },
+    "cinema-studio-25": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 51,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 18,
+          "failed": 0
+        }
+      }
+    },
+    "soul-cinema": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 51,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 18,
+          "failed": 0
+        }
+      }
+    },
+    "cinematic-video-generator": {
+      "status": "done",
+      "startedAt": "2026-04-09",
+      "completedAt": "2026-04-09",
+      "testReport": {
+        "unit": {
+          "passed": 51,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 18,
+          "failed": 0
+        }
+      }
+    },
+    "library-tabs": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "community-gallery": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "soul-cinema-community": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "soul-community": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "mixed-media-community": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "creator-profile": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "likes": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "project-submit": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "contests": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "creative-challenge": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "blog": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "original-series": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "explore-home": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 68,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 25,
+          "failed": 0
+        }
+      }
+    },
+    "pricing-page": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "credit-purchase": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "stripe-stub": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "team-plan": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "enterprise": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "trust-page": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "privacy-policy": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "terms": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "cookie-notice": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "contact": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "about": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 31,
+          "failed": 0
+        }
+      }
+    },
+    "vercel-deploy": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "supervisor_notes": "Build passes; deployment-ready"
+    },
+    "smoke-tests": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 77,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 32,
+          "failed": 0
+        }
+      },
+      "supervisor_notes": "77 unit + 32 e2e all green"
+    },
+    "ci-pipeline": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "supervisor_notes": "CI pipeline config ready"
+    },
+    "social-posting": {
+      "status": "done",
+      "startedAt": "2026-04-10",
+      "completedAt": "2026-04-10",
+      "testReport": {
+        "unit": {
+          "passed": 89,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 37,
+          "failed": 0
+        }
+      },
+      "supervisor_notes": "Social media posting: OAuth stubs, share modal, scheduled posts, 4 platform support"
+    }
+  },
+  "currentFeature": null,
+  "lastUpdated": "2026-04-10",
+  "supervisorFinalAudit": {
+    "date": "2026-04-10",
+    "buildStatus": "PASS",
+    "prismaModels": [
+      "User",
+      "Project",
+      "Character",
+      "Generation",
+      "Post",
+      "Like",
+      "CreditPackage",
+      "Purchase",
+      "Account",
+      "Session",
+      "VerificationToken"
+    ],
+    "aiProviderFiles": [
+      "provider.ts",
+      "mock-provider.ts",
+      "index.ts",
+      "models.ts"
+    ],
+    "componentDirs": [
+      "brand.tsx",
+      "chat",
+      "community",
+      "create",
+      "effects",
+      "footer.tsx",
+      "library",
+      "nav.tsx",
+      "nav-server.tsx",
+      "studio",
+      "tools",
+      "ui"
+    ],
+    "routesCompiled": true,
+    "totalFeatures": 140,
+    "allDone": true
+  }
+}

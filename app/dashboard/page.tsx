@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   if (!userId) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-16 text-center">
-        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent mb-4">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-brand-gradient mb-4">Dashboard</h1>
         <p className="text-white/70 mb-6">Sign in to view your content performance</p>
         <Link
           href="/api/auth/signin"

@@ -42,7 +42,7 @@ export default async function CommunityPage() {
   return (
     <main className="p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Community</h1>
+        <h1 className="text-3xl font-bold text-brand-gradient">Community</h1>
         <div className="flex gap-3">
           <Link
             href="/community/contests"

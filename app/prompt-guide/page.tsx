@@ -20,7 +20,7 @@ export default function PromptGuidePage() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Prompt Guide</h1>
+        <h1 className="text-3xl font-bold text-brand-gradient">Prompt Guide</h1>
         <p className="text-white/70 mt-2">Master the art of AI prompting to create stunning visuals</p>
       </div>
 

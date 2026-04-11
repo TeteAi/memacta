@@ -10,7 +10,7 @@ export default function AppsPage() {
   return (
     <main className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">All Apps & Tools</h1>
+        <h1 className="text-3xl font-bold text-brand-gradient">All Apps & Tools</h1>
         <p className="text-white/70 mt-2">{ALL_TOOLS.length}+ AI-powered creative tools at your fingertips</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

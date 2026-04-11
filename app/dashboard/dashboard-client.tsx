@@ -113,7 +113,7 @@ export default function DashboardClient({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-bold text-white">
-            Welcome back, <span className="bg-brand-gradient bg-clip-text text-transparent">{userName}</span>
+            Welcome back, <span className="text-brand-gradient">{userName}</span>
           </h1>
           <p className="text-white/60 mt-1">Here&apos;s how your content is performing</p>
         </div>

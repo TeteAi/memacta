@@ -3,7 +3,7 @@ export const metadata = { title: "memacta - Terms of Service" };
 export default function TermsPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-4xl font-bold mb-8 bg-brand-gradient bg-clip-text text-transparent">
+      <h1 className="text-4xl font-bold mb-8 text-brand-gradient">
         Terms of Service
       </h1>
 

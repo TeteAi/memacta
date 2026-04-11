@@ -27,9 +27,9 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
       </svg>
     ),
     items: [
-      { label: "Text to Video", href: "/create?tool=text-to-video" },
-      { label: "Image to Video", href: "/create?tool=image-to-video" },
-      { label: "Image Generation", href: "/create?tool=image-gen" },
+      { label: "Text to Video", href: "/create/video" },
+      { label: "Image to Video", href: "/create/image-to-video" },
+      { label: "Image Generation", href: "/create/image" },
     ],
   },
   {

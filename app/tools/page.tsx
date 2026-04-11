@@ -32,7 +32,7 @@ export default function ToolsIndex() {
   return (
     <main className="max-w-6xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Tools</h1>
+        <h1 className="text-3xl font-bold text-brand-gradient">Tools</h1>
         <p className="text-white/70 mt-2">Powerful AI tools for every creative need</p>
       </div>
 

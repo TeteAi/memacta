@@ -6,7 +6,7 @@ export default function StudioPage() {
     <main className="mx-auto max-w-5xl px-6 py-10">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Cinema Studio</h1>
+          <h1 className="text-3xl font-bold text-brand-gradient">Cinema Studio</h1>
           <p className="text-white/70 mt-2">Compose multi-shot cinematic sequences with AI</p>
         </div>
         <Link

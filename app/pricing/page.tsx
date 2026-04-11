@@ -33,7 +33,7 @@ export default async function PricingPage() {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 mb-6">
           <span className="text-sm text-white/80">Simple, transparent pricing</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-brand-gradient bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-brand-gradient">
           Choose Your Plan
         </h1>
         <p className="text-white/70 text-lg max-w-2xl mx-auto">

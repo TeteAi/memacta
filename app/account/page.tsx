@@ -69,7 +69,7 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-8 bg-brand-gradient bg-clip-text text-transparent">
+      <h1 className="text-3xl font-bold mb-8 text-brand-gradient">
         Account
       </h1>
 

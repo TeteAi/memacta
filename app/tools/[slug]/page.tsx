@@ -18,7 +18,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <span className="text-white/30">/</span>
           <span className="text-sm text-white/70 capitalize">{tool.category}</span>
         </div>
-        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">{tool.name}</h1>
+        <h1 className="text-3xl font-bold text-brand-gradient">{tool.name}</h1>
         <p className="text-white/70 mt-2">{tool.description}</p>
         <div className="flex items-center gap-2 mt-3">
           <span className="text-[10px] px-2.5 py-1 rounded-full bg-white/15 text-white/70 capitalize font-medium">{tool.category}</span>

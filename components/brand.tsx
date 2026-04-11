@@ -5,7 +5,7 @@ export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "bg-brand-gradient bg-clip-text text-transparent font-black tracking-tight",
+        "text-brand-gradient font-black tracking-tight",
         className,
       )}
     >

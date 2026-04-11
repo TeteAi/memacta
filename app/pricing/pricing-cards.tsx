@@ -73,7 +73,7 @@ export default function PricingCards({ packages }: { packages: CreditPackage[] }
                 </span>
               )}
               <h3 className="text-xl font-bold mt-2 text-white">{pkg.name}</h3>
-              <p className="text-3xl font-black mt-4 bg-brand-gradient bg-clip-text text-transparent">
+              <p className="text-3xl font-black mt-4 text-brand-gradient">
                 {formatUsd(pkg.priceUsd)}
               </p>
               <p className="text-white/60 text-sm mt-1">{pkg.credits} credits</p>

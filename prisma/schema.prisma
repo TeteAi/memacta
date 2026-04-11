@@ -137,6 +137,24 @@ model ScheduledPost {
   platformPostId String?
   error          String?
   createdAt      DateTime @default(now())
+  analytics      PostAnalytics?
+}
+
+model PostAnalytics {
+  id             String   @id @default(cuid())
+  scheduledPostId String
+  scheduledPost  ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+  platform       String
+  views          Int      @default(0)
+  likes          Int      @default(0)
+  comments       Int      @default(0)
+  shares         Int      @default(0)
+  clicks         Int      @default(0)
+  impressions    Int      @default(0)
+  engagementRate Float    @default(0)
+  fetchedAt      DateTime @default(now())
+
+  @@unique([scheduledPostId])
 }
 
 model Account {

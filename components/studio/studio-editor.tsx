@@ -66,14 +66,14 @@ export default function StudioEditor({ projectId, initialName = "", initialClips
   return (
     <div className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted-foreground">Project name</span>
+        <span className="text-white/50 font-medium">Project name</span>
         <input
           type="text"
           aria-label="Project name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="My cinema project"
-          className="bg-background border border-border rounded px-3 py-2"
+          className="bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
         />
       </label>
       <Timeline clips={clips} onDelete={deleteClip} onMove={moveClip} />
@@ -83,7 +83,7 @@ export default function StudioEditor({ projectId, initialName = "", initialClips
           type="button"
           onClick={save}
           disabled={saving}
-          className="rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold disabled:opacity-60"
+          className="rounded-xl bg-brand-gradient text-white px-6 py-2.5 text-sm font-semibold disabled:opacity-40 glow-btn transition-all"
         >
           {saving ? "Saving..." : "Save Project"}
         </button>

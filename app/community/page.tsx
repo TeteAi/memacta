@@ -42,17 +42,17 @@ export default async function CommunityPage() {
   return (
     <main className="p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Community</h1>
+        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Community</h1>
         <div className="flex gap-3">
           <Link
             href="/community/contests"
-            className="text-sm text-brand-cyan hover:underline"
+            className="text-sm font-medium px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
           >
             Contests
           </Link>
           <Link
             href="/community/submit"
-            className="px-4 py-2 rounded-lg bg-brand-gradient text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-5 py-2 rounded-xl bg-brand-gradient text-white text-sm font-semibold hover:opacity-90 transition-all glow-btn"
           >
             Submit Project
           </Link>
@@ -60,13 +60,13 @@ export default async function CommunityPage() {
       </div>
 
       {featuredCards.length > 0 && cards.length > 0 && (
-        <p className="text-xs text-muted-foreground mb-4">
+        <p className="text-xs text-white/40 mb-4">
           Showing community posts and featured showcase content
         </p>
       )}
 
       {allCards.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">
+        <p className="text-white/40 text-center py-16">
           No posts yet. Be the first to share your creation!
         </p>
       ) : (

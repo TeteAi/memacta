@@ -19,7 +19,6 @@ export default function HeroReel({ items }: HeroReelProps) {
       return;
     }
     el.scrollLeft += 0.5;
-    // Loop back when we've scrolled half (since content is doubled)
     if (el.scrollLeft >= el.scrollWidth / 2) {
       el.scrollLeft = 0;
     }
@@ -31,26 +30,21 @@ export default function HeroReel({ items }: HeroReelProps) {
     return () => cancelAnimationFrame(animRef.current);
   }, [animate]);
 
-  // Double items for seamless looping
   const doubled = [...items, ...items];
 
   return (
     <div
       ref={scrollRef}
-      className="flex gap-4 overflow-x-auto scrollbar-hide py-4"
+      className="flex gap-4 overflow-x-auto py-4 px-4"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      onMouseEnter={() => {
-        pausedRef.current = true;
-      }}
-      onMouseLeave={() => {
-        pausedRef.current = false;
-      }}
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
       data-testid="hero-reel"
     >
       {doubled.map((item, idx) => (
         <div
           key={`${item.id}-${idx}`}
-          className="flex-shrink-0 w-64 md:w-80 rounded-xl overflow-hidden border border-white/10 bg-white/5"
+          className="flex-shrink-0 w-64 md:w-80 rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:border-purple-500/50 transition-all hover:scale-[1.02] cursor-pointer group"
         >
           <div className="aspect-video relative">
             {item.mediaType === "video" ? (
@@ -73,11 +67,15 @@ export default function HeroReel({ items }: HeroReelProps) {
                 data-testid="reel-image"
               />
             )}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-              <p className="text-sm font-medium text-white truncate">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <p className="text-sm font-semibold text-white truncate">
                 {item.title}
               </p>
-              <p className="text-xs text-white/60">{item.tool}</p>
+              <p className="text-xs text-white/60 flex items-center gap-1 mt-0.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-gradient" />
+                {item.tool}
+              </p>
             </div>
           </div>
         </div>

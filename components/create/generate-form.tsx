@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import ModelPicker from "./model-picker";
 import PromptBox from "./prompt-box";
 import { videoModels, imageModels, getModel } from "@/lib/ai/models";
@@ -75,28 +74,28 @@ export default function GenerateForm({ mediaType }: Props) {
       <PromptBox value={prompt} onChange={setPrompt} />
       {mediaType === "video" && (
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted-foreground">Image URL (optional, for image-to-video)</span>
+          <span className="text-white/50 text-sm font-medium">Image URL (optional, for image-to-video)</span>
           <input
             type="url"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="Optional image URL for image-to-video"
-            className="bg-card border border-border rounded-lg px-3 py-2 text-sm"
+            className="bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
           />
         </label>
       )}
       <div className="flex flex-col gap-1 text-sm">
-        <span className="text-muted-foreground">Aspect ratio</span>
+        <span className="text-white/50 text-sm font-medium">Aspect ratio</span>
         <div className="flex gap-2">
           {aspects.map((a) => (
             <button
               key={a}
               type="button"
               onClick={() => setAspectRatio(a)}
-              className={`rounded-full border px-3 py-1 text-xs ${
+              className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
                 aspectRatio === a
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent"
+                  ? "bg-brand-gradient text-white shadow-sm"
+                  : "bg-white/10 text-white/60 hover:bg-white/20"
               }`}
             >
               {a}
@@ -104,19 +103,17 @@ export default function GenerateForm({ mediaType }: Props) {
           ))}
         </div>
       </div>
-      <Button type="button" onClick={onGenerate} disabled={loading || !prompt}>
-        Generate
-      </Button>
+      <button type="button" onClick={onGenerate} disabled={loading || !prompt} className="w-full py-3 rounded-xl bg-brand-gradient text-white font-bold text-sm hover:opacity-90 transition-all glow-btn disabled:opacity-40 disabled:cursor-not-allowed">{loading ? "Generating..." : "Generate"}</button>
       <div data-testid="result">
-        {loading && <p>Generating…</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && <p className="text-white/50 text-center animate-pulse">Generating your creation...</p>}
+        {error && <p className="text-[#FE2C55] bg-[#FE2C55]/10 rounded-lg px-4 py-2 text-sm">{error}</p>}
         {result?.url && (
           <>
             {mediaType === "video" ? (
-              <video controls src={result.url} className="w-full rounded-lg" />
+              <video controls src={result.url} className="w-full rounded-xl border border-white/10" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={result.url} alt="result" className="w-full rounded-lg" />
+              <img src={result.url} alt="result" className="w-full rounded-xl border border-white/10" />
             )}
             <div className="mt-2">
               <ShareButton mediaUrl={result.url} mediaType={mediaType} caption={prompt} />

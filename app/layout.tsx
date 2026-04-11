@@ -5,7 +5,7 @@ import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "memacta",
-  description: "memacta",
+  description: "Create stunning AI videos, images, and effects with memacta - the most powerful creative platform on the web",
 };
 
 export default function RootLayout({

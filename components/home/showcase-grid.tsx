@@ -13,15 +13,15 @@ export default function ShowcaseGrid({ items }: ShowcaseGridProps) {
       {items.map((item) => (
         <div
           key={item.id}
-          className="group rounded-xl border border-border bg-white/5 overflow-hidden hover:border-brand-pink transition-colors"
+          className="group rounded-xl overflow-hidden bg-[#12121e] border border-white/5 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10 cursor-pointer"
           data-testid="showcase-card"
         >
-          <div className="aspect-video relative bg-white/10">
+          <div className="aspect-video relative bg-white/5">
             {item.mediaType === "video" ? (
               <video
                 src={item.mediaUrl}
                 poster={item.thumbnailUrl}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 muted
                 autoPlay
                 loop
@@ -31,19 +31,24 @@ export default function ShowcaseGrid({ items }: ShowcaseGridProps) {
               <img
                 src={item.mediaUrl}
                 alt={item.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
               />
             )}
-            <span className="absolute top-2 right-2 px-2 py-0.5 text-[10px] rounded-full bg-black/60 text-white/80 backdrop-blur-sm">
+            <span className="absolute top-2 right-2 px-2 py-0.5 text-[10px] font-medium rounded-full bg-brand-gradient text-white">
               {item.category}
             </span>
           </div>
           <div className="p-3">
-            <p className="text-sm font-medium truncate">{item.title}</p>
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-              <span>{item.creator}</span>
-              <span className="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">
+            <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+            <div className="flex items-center justify-between text-xs text-white/40 mt-1.5">
+              <span className="flex items-center gap-1">
+                <span className="w-4 h-4 rounded-full bg-white/10 inline-flex items-center justify-center text-[8px]">
+                  {item.creator[0]}
+                </span>
+                {item.creator}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-medium text-white/60">
                 {item.tool}
               </span>
             </div>

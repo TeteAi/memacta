@@ -12,9 +12,9 @@ export default function ModelPicker({ mediaType, value, onChange }: Props) {
   const models = mediaType === "video" ? videoModels() : imageModels();
   return (
     <label className="flex flex-col gap-1 text-sm">
-      <span className="text-muted-foreground">Model</span>
+      <span className="text-white/50 text-sm font-medium">Model</span>
       <select
-        className="bg-card border border-border rounded-lg px-3 py-2 text-sm"
+        className="bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none appearance-none cursor-pointer"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

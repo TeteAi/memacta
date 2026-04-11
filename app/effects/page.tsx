@@ -5,9 +5,11 @@ export const metadata = { title: "memacta – Effects" };
 
 export default function Page() {
   return (
-    <main className="max-w-6xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Effects</h1>
-      <p className="text-white/70">Browse visual effects and trending templates.</p>
+    <main className="max-w-7xl mx-auto px-6 py-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Effects & Templates</h1>
+        <p className="text-white/50 mt-2">Browse 100+ visual effects and trending templates to enhance your creations</p>
+      </div>
       <EffectsGrid effects={EFFECTS} />
     </main>
   );

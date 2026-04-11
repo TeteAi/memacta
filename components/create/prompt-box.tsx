@@ -16,7 +16,7 @@ export default function PromptBox({ value, onChange }: Props) {
   };
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm text-muted-foreground" htmlFor="prompt-box">
+      <label className="text-white/50 text-sm font-medium" htmlFor="prompt-box">
         Prompt
       </label>
       <textarea
@@ -24,7 +24,7 @@ export default function PromptBox({ value, onChange }: Props) {
         rows={3}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-card border border-border rounded-lg p-3 w-full"
+        className="bg-[#1e1e32] border border-white/10 rounded-xl p-4 w-full text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none resize-none"
         placeholder="Describe your scene..."
       />
       <div className="flex flex-wrap gap-2">
@@ -33,7 +33,7 @@ export default function PromptBox({ value, onChange }: Props) {
             key={p}
             type="button"
             onClick={() => applyPreset(p)}
-            className="rounded-full border px-3 py-1 text-xs hover:bg-accent"
+            className="rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/60 hover:bg-white/20 hover:text-white transition-all"
           >
             {p}
           </button>

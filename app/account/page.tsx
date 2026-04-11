@@ -18,7 +18,7 @@ export default async function AccountPage() {
     return (
       <main className="mx-auto max-w-4xl px-6 py-12 text-center">
         <h1 className="text-3xl font-bold mb-4">Account</h1>
-        <p className="text-muted-foreground mb-6">Sign in to view your account</p>
+        <p className="text-white/50 mb-6">Sign in to view your account</p>
         <Link href="/api/auth/signin">
           <Button>Sign In</Button>
         </Link>
@@ -62,7 +62,7 @@ export default async function AccountPage() {
   if (!user) {
     return (
       <main className="mx-auto max-w-4xl px-6 py-12 text-center">
-        <p className="text-muted-foreground">User not found.</p>
+        <p className="text-white/40">User not found.</p>
       </main>
     );
   }
@@ -73,22 +73,22 @@ export default async function AccountPage() {
         Account
       </h1>
 
-      <div className="rounded-xl border border-border bg-card p-6 mb-8">
+      <div className="rounded-2xl border border-white/10 bg-[#12121e] p-6 mb-8">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-sm text-muted-foreground">Email</p>
+            <p className="text-sm text-white/40">Email</p>
             <p className="font-medium" data-testid="account-email">{user.email}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Name</p>
-            <p className="font-medium">{user.name || "Not set"}</p>
+            <p className="text-sm text-white/40">Name</p>
+            <p className="font-medium text-white">{user.name || <span className="text-white/30">Not set</span>}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Credits</p>
+            <p className="text-sm text-white/40">Credits</p>
             <p className="font-medium text-brand-cyan" data-testid="account-credits">{user.credits}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Joined</p>
+            <p className="text-sm text-white/40">Joined</p>
             <p className="font-medium">{user.createdAt.toLocaleDateString()}</p>
           </div>
         </div>
@@ -115,12 +115,12 @@ export default async function AccountPage() {
       </div>
 
       {purchases.length === 0 ? (
-        <p className="text-muted-foreground">No purchases yet.</p>
+        <p className="text-white/40 text-center py-8">No purchases yet. Visit the pricing page to get started!</p>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-2xl border border-white/10 bg-[#12121e] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-secondary/50">
+              <tr className="border-b border-white/10 bg-white/5">
                 <th className="text-left p-3 font-medium">Date</th>
                 <th className="text-left p-3 font-medium">Credits</th>
                 <th className="text-left p-3 font-medium">Amount</th>
@@ -129,7 +129,7 @@ export default async function AccountPage() {
             </thead>
             <tbody>
               {purchases.map((p: { id: string; credits: number; amountUsd: number; status: string; createdAt: Date; userId: string; packageId: string; stripeSessionId: string | null }) => (
-                <tr key={p.id} className="border-b border-border last:border-0" data-testid="purchase-row">
+                <tr key={p.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors" data-testid="purchase-row">
                   <td className="p-3">{p.createdAt.toLocaleDateString()}</td>
                   <td className="p-3">{p.credits}</td>
                   <td className="p-3">{formatUsd(p.amountUsd)}</td>

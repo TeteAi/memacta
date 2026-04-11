@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Session } from "next-auth";
 import { BrandMark } from "@/components/brand";
+import CreditsDisplay from "@/components/credits-display";
 
 const links = [
   { href: "/", label: "Home" },
@@ -79,9 +80,9 @@ export default function Nav({
         <div className="flex items-center gap-3">
           {session?.user ? (
             <>
-              <span className="hidden sm:inline-flex text-sm text-white bg-white/15 px-3 py-1 rounded-full font-medium">
-                {session.user.credits} credits
-              </span>
+              <div className="hidden sm:block">
+                <CreditsDisplay />
+              </div>
               <Link
                 href="/account"
                 className="hidden sm:block px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/10 transition-colors"

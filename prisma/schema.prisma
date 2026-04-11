@@ -12,7 +12,7 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
-  credits       Int       @default(100)
+  credits       Int       @default(3)
   emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())
@@ -28,6 +28,34 @@ model User {
   purchases Purchase[]
   socialAccounts SocialAccount[]
   scheduledPosts ScheduledPost[]
+  subscription   Subscription?
+  transactions   CreditTransaction[]
+}
+
+model Subscription {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            String    @default("free")
+  stripeCustomerId  String?
+  stripeSubId       String?
+  status            String    @default("active")
+  currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  balance     Int
+  type        String
+  description String?
+  modelId     String?
+  createdAt   DateTime @default(now())
 }
 
 model Project {

@@ -127,7 +127,7 @@ export const P2_TOOLS: ToolDef[] = [
     id: "ai-influencer",
     slug: "ai-influencer",
     name: "AI Influencer",
-    description: "Generate an AI influencer shot from a prompt alone.",
+    description: "Create a complete AI influencer with custom appearance, personality, and style. Generate consistent characters for social media content.",
     category: "identity",
     mediaOut: "image",
     inputs: [{ key: "prompt", label: "Prompt", type: "prompt" }],

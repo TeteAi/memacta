@@ -80,10 +80,10 @@ function formatNumber(n: number): string {
 
 function StatCard({ label, value, icon, gradient }: { label: string; value: string; icon: React.ReactNode; gradient?: string }) {
   return (
-    <div className="rounded-xl bg-[#12121e] border border-white/10 p-5 hover:border-purple-500/30 transition-all">
+    <div className="rounded-xl bg-[#181828] border border-white/15 p-5 hover:border-purple-500/30 transition-all">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-white/40 text-sm">{label}</span>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${gradient ?? "bg-white/10"} text-white`}>
+        <span className="text-white/60 text-sm">{label}</span>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${gradient ?? "bg-white/15"} text-white`}>
           {icon}
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function DashboardClient({
           <h1 className="text-3xl font-bold text-white">
             Welcome back, <span className="bg-brand-gradient bg-clip-text text-transparent">{userName}</span>
           </h1>
-          <p className="text-white/40 mt-1">Here&apos;s how your content is performing</p>
+          <p className="text-white/60 mt-1">Here&apos;s how your content is performing</p>
         </div>
         <div className="flex gap-3">
           <Link
@@ -126,7 +126,7 @@ export default function DashboardClient({
           </Link>
           <Link
             href="/account"
-            className="px-5 py-2.5 rounded-xl bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-all"
+            className="px-5 py-2.5 rounded-xl bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-all"
           >
             Settings
           </Link>
@@ -175,17 +175,17 @@ export default function DashboardClient({
 
       <div className="grid lg:grid-cols-3 gap-6 mb-10">
         {/* Connected Platforms */}
-        <div className="rounded-2xl bg-[#12121e] border border-white/10 p-6">
+        <div className="rounded-2xl bg-[#181828] border border-white/15 p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-white">Platforms</h2>
-            <Link href="/account" className="text-xs text-white/40 hover:text-white transition-colors">Manage</Link>
+            <Link href="/account" className="text-xs text-white/60 hover:text-white transition-colors">Manage</Link>
           </div>
           {connectedPlatforms.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-white/40 text-sm mb-4">No platforms connected yet</p>
+              <p className="text-white/60 text-sm mb-4">No platforms connected yet</p>
               <Link
                 href="/account"
-                className="text-sm px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+                className="text-sm px-4 py-2 rounded-lg bg-white/15 text-white hover:bg-white/25 transition-colors"
               >
                 Connect Accounts
               </Link>
@@ -193,13 +193,13 @@ export default function DashboardClient({
           ) : (
             <div className="space-y-3">
               {connectedPlatforms.map((p) => (
-                <div key={p.platform} className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+                <div key={p.platform} className="flex items-center gap-3 p-3 rounded-xl bg-white/10">
                   <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${PLATFORM_COLORS[p.platform] ?? "from-gray-500 to-gray-600"} flex items-center justify-center text-white`}>
                     {PLATFORM_ICONS[p.platform]}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white capitalize">{p.platform}</p>
-                    <p className="text-xs text-white/40 truncate">@{p.username}</p>
+                    <p className="text-xs text-white/60 truncate">@{p.username}</p>
                   </div>
                   <span className="w-2 h-2 rounded-full bg-green-400" title="Connected" />
                 </div>
@@ -209,14 +209,14 @@ export default function DashboardClient({
         </div>
 
         {/* Upcoming Scheduled Posts */}
-        <div className="rounded-2xl bg-[#12121e] border border-white/10 p-6">
+        <div className="rounded-2xl bg-[#181828] border border-white/15 p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-white">Scheduled</h2>
-            <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full text-white/50">{upcoming.length} pending</span>
+            <span className="text-xs bg-white/15 px-2 py-0.5 rounded-full text-white/70">{upcoming.length} pending</span>
           </div>
           {upcoming.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-white/40 text-sm mb-4">No scheduled posts</p>
+              <p className="text-white/60 text-sm mb-4">No scheduled posts</p>
               <Link
                 href="/create"
                 className="text-sm px-4 py-2 rounded-lg bg-brand-gradient text-white hover:opacity-90 transition-all"
@@ -227,13 +227,13 @@ export default function DashboardClient({
           ) : (
             <div className="space-y-2">
               {upcoming.slice(0, 5).map((post) => (
-                <div key={post.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+                <div key={post.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/10">
                   <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${PLATFORM_COLORS[post.platform] ?? "from-gray-500 to-gray-600"} flex items-center justify-center text-white flex-shrink-0`}>
                     {PLATFORM_ICONS[post.platform]}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-white/70 truncate">{post.caption || "No caption"}</p>
-                    <p className="text-[10px] text-white/30 mt-0.5">
+                    <p className="text-[10px] text-white/50 mt-0.5">
                       {new Date(post.scheduledFor).toLocaleDateString()} at{" "}
                       {new Date(post.scheduledFor).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
@@ -248,14 +248,14 @@ export default function DashboardClient({
         </div>
 
         {/* Recent Creations */}
-        <div className="rounded-2xl bg-[#12121e] border border-white/10 p-6">
+        <div className="rounded-2xl bg-[#181828] border border-white/15 p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-white">Recent Creations</h2>
-            <Link href="/library" className="text-xs text-white/40 hover:text-white transition-colors">View all</Link>
+            <Link href="/library" className="text-xs text-white/60 hover:text-white transition-colors">View all</Link>
           </div>
           {recentCreations.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-white/40 text-sm mb-4">No creations yet</p>
+              <p className="text-white/60 text-sm mb-4">No creations yet</p>
               <Link
                 href="/create"
                 className="text-sm px-4 py-2 rounded-lg bg-brand-gradient text-white hover:opacity-90 transition-all"
@@ -266,7 +266,7 @@ export default function DashboardClient({
           ) : (
             <div className="space-y-2">
               {recentCreations.slice(0, 5).map((c) => (
-                <Link key={c.id} href={`/library/${c.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                <Link key={c.id} href={`/library/${c.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/10 transition-colors">
                   <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
                     {c.resultUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -279,7 +279,7 @@ export default function DashboardClient({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-white/70 truncate">{c.prompt}</p>
-                    <p className="text-[10px] text-white/30 mt-0.5">{new Date(c.createdAt).toLocaleDateString()}</p>
+                    <p className="text-[10px] text-white/50 mt-0.5">{new Date(c.createdAt).toLocaleDateString()}</p>
                   </div>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full flex-shrink-0 ${
                     c.status === "completed" ? "bg-green-500/20 text-green-400" :
@@ -296,23 +296,23 @@ export default function DashboardClient({
       </div>
 
       {/* Posted Content Performance */}
-      <div className="rounded-2xl bg-[#12121e] border border-white/10 p-6">
+      <div className="rounded-2xl bg-[#181828] border border-white/15 p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-bold text-white">Content Performance</h2>
-            <p className="text-xs text-white/40 mt-0.5">Track how your posted content is performing across platforms</p>
+            <p className="text-xs text-white/60 mt-0.5">Track how your posted content is performing across platforms</p>
           </div>
         </div>
 
         {recentPosts.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-14 h-14 mx-auto rounded-xl bg-white/5 flex items-center justify-center mb-4">
+            <div className="w-14 h-14 mx-auto rounded-xl bg-white/10 flex items-center justify-center mb-4">
               <svg className="w-7 h-7 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
               </svg>
             </div>
-            <p className="text-white/50 text-sm mb-2">No posted content yet</p>
-            <p className="text-white/30 text-xs mb-6 max-w-sm mx-auto">
+            <p className="text-white/70 text-sm mb-2">No posted content yet</p>
+            <p className="text-white/50 text-xs mb-6 max-w-sm mx-auto">
               Create content, share it to your connected platforms, and track performance here
             </p>
             <Link
@@ -327,18 +327,18 @@ export default function DashboardClient({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left p-3 font-medium text-white/50">Content</th>
-                  <th className="text-left p-3 font-medium text-white/50">Platform</th>
-                  <th className="text-right p-3 font-medium text-white/50">Views</th>
-                  <th className="text-right p-3 font-medium text-white/50">Likes</th>
-                  <th className="text-right p-3 font-medium text-white/50">Comments</th>
-                  <th className="text-right p-3 font-medium text-white/50">Shares</th>
-                  <th className="text-right p-3 font-medium text-white/50">Rate</th>
+                  <th className="text-left p-3 font-medium text-white/70">Content</th>
+                  <th className="text-left p-3 font-medium text-white/70">Platform</th>
+                  <th className="text-right p-3 font-medium text-white/70">Views</th>
+                  <th className="text-right p-3 font-medium text-white/70">Likes</th>
+                  <th className="text-right p-3 font-medium text-white/70">Comments</th>
+                  <th className="text-right p-3 font-medium text-white/70">Shares</th>
+                  <th className="text-right p-3 font-medium text-white/70">Rate</th>
                 </tr>
               </thead>
               <tbody>
                 {recentPosts.map((post) => (
-                  <tr key={post.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr key={post.id} className="border-b border-white/10 hover:bg-white/10 transition-colors">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
@@ -357,7 +357,7 @@ export default function DashboardClient({
                         <div className={`w-6 h-6 rounded-md bg-gradient-to-br ${PLATFORM_COLORS[post.platform] ?? "from-gray-500 to-gray-600"} flex items-center justify-center text-white`}>
                           {PLATFORM_ICONS[post.platform]}
                         </div>
-                        <span className="text-white/50 capitalize text-xs">{post.platform}</span>
+                        <span className="text-white/70 capitalize text-xs">{post.platform}</span>
                       </div>
                     </td>
                     <td className="p-3 text-right text-white/70">{formatNumber(post.views)}</td>
@@ -368,7 +368,7 @@ export default function DashboardClient({
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         post.engagementRate >= 5 ? "bg-green-500/20 text-green-400" :
                         post.engagementRate >= 2 ? "bg-yellow-500/20 text-yellow-400" :
-                        "bg-white/10 text-white/50"
+                        "bg-white/15 text-white/70"
                       }`}>
                         {post.engagementRate.toFixed(1)}%
                       </span>
@@ -394,7 +394,7 @@ export default function DashboardClient({
           </div>
           <div>
             <p className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">Create Content</p>
-            <p className="text-xs text-white/40">Generate videos & images</p>
+            <p className="text-xs text-white/60">Generate videos & images</p>
           </div>
         </Link>
 
@@ -409,7 +409,7 @@ export default function DashboardClient({
           </div>
           <div>
             <p className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors">My Library</p>
-            <p className="text-xs text-white/40">Browse your creations</p>
+            <p className="text-xs text-white/60">Browse your creations</p>
           </div>
         </Link>
 
@@ -424,7 +424,7 @@ export default function DashboardClient({
           </div>
           <div>
             <p className="text-sm font-semibold text-white group-hover:text-orange-300 transition-colors">Community</p>
-            <p className="text-xs text-white/40">Share & get inspired</p>
+            <p className="text-xs text-white/60">Share & get inspired</p>
           </div>
         </Link>
       </div>

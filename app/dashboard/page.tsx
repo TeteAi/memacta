@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-16 text-center">
         <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent mb-4">Dashboard</h1>
-        <p className="text-white/50 mb-6">Sign in to view your content performance</p>
+        <p className="text-white/70 mb-6">Sign in to view your content performance</p>
         <Link
           href="/api/auth/signin"
           className="inline-block px-6 py-3 rounded-xl bg-brand-gradient text-white font-semibold glow-btn"

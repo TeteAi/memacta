@@ -41,7 +41,7 @@ export default function LibraryTabs({ items }: { items: LibraryItem[] }) {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === tab
                 ? "bg-brand-gradient text-white"
-                : "bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10"
+                : "bg-white/10 text-muted-foreground hover:text-foreground hover:bg-white/20"
             }`}
           >
             {tab}
@@ -50,7 +50,7 @@ export default function LibraryTabs({ items }: { items: LibraryItem[] }) {
       </nav>
 
       {filtered.length === 0 ? (
-        <p className="text-white/40 text-center py-16">
+        <p className="text-white/60 text-center py-16">
           No items yet. Start creating to fill your library!
         </p>
       ) : (
@@ -59,9 +59,9 @@ export default function LibraryTabs({ items }: { items: LibraryItem[] }) {
             <Link
               key={item.id}
               href={`/library/${item.id}`}
-              className="group rounded-xl border border-white/10 bg-[#12121e] overflow-hidden hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all"
+              className="group rounded-xl border border-white/15 bg-[#181828] overflow-hidden hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all"
             >
-              <div className="aspect-video bg-white/5 flex items-center justify-center overflow-hidden">
+              <div className="aspect-video bg-white/10 flex items-center justify-center overflow-hidden">
                 {item.thumbnail ? (
                   <img
                     src={item.thumbnail}
@@ -69,14 +69,14 @@ export default function LibraryTabs({ items }: { items: LibraryItem[] }) {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <span className="text-white/30 text-xs">
+                  <span className="text-white/50 text-xs">
                     No preview
                   </span>
                 )}
               </div>
               <div className="p-3">
                 <p className="text-sm font-semibold text-white truncate">{item.title}</p>
-                <p className="text-xs text-white/40 mt-1">
+                <p className="text-xs text-white/60 mt-1">
                   {item.type} &middot; {item.date}
                 </p>
               </div>

@@ -10,11 +10,11 @@ function ToolGrid({ tools }: { tools: ToolDef[] }) {
           key={t.slug}
           href={`/tools/${t.slug}`}
           data-testid={`tool-card-${t.slug}`}
-          className="rounded-xl border border-white/10 bg-[#12121e] p-5 hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all group"
+          className="rounded-xl border border-white/10 bg-[#181828] p-5 hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all group"
         >
           <div className="font-semibold text-white group-hover:text-purple-300 transition-colors">{t.name}</div>
-          <div className="text-sm text-white/50 mt-1">{t.description}</div>
-          <span className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-white/40 group-hover:text-white/70 transition-colors">
+          <div className="text-sm text-white/70 mt-1">{t.description}</div>
+          <span className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-white/60 group-hover:text-white/80 transition-colors">
             Try it
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -33,7 +33,7 @@ export default function ToolsIndex() {
     <main className="max-w-6xl mx-auto px-6 py-10">
       <div className="mb-10">
         <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Tools</h1>
-        <p className="text-white/50 mt-2">Powerful AI tools for every creative need</p>
+        <p className="text-white/70 mt-2">Powerful AI tools for every creative need</p>
       </div>
 
       <section className="mb-10">

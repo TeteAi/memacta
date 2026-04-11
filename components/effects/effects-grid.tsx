@@ -31,7 +31,7 @@ export function EffectsGrid({ effects }: { effects: Effect[] }) {
             className={`text-sm font-medium transition-all ${
               filter === t.key
                 ? "bg-brand-gradient text-white rounded-full px-4 py-2"
-                : "bg-white/10 text-white/60 rounded-full px-4 py-2 hover:bg-white/20"
+                : "bg-white/15 text-white/70 rounded-full px-4 py-2 hover:bg-white/25"
             }`}
           >
             {t.label}
@@ -44,13 +44,13 @@ export function EffectsGrid({ effects }: { effects: Effect[] }) {
             key={e.id}
             href={`/effects/${e.id}`}
             data-testid={`effect-card-${e.id}`}
-            className="block rounded-xl bg-[#12121e] border border-white/10 overflow-hidden hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all group"
+            className="block rounded-xl bg-[#181828] border border-white/15 overflow-hidden hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all group"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={e.thumbnail} alt={e.name} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500" />
             <div className="p-2">
               <h3 className="text-sm font-semibold text-white">{e.name}</h3>
-              <p className="text-xs text-white/40 capitalize">{e.category}</p>
+              <p className="text-xs text-white/60 capitalize">{e.category}</p>
             </div>
           </Link>
         ))}

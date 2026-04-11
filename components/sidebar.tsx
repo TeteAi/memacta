@@ -210,14 +210,14 @@ function SectionDropdown({ section, pathname }: { section: SidebarSection; pathn
         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all group ${
           hasActiveChild
             ? "text-white bg-white/5"
-            : "text-white/60 hover:text-white hover:bg-white/5"
+            : "text-white/70 hover:text-white hover:bg-white/10"
         }`}
       >
-        <span className={`flex-shrink-0 ${hasActiveChild ? "text-purple-400" : "text-white/40 group-hover:text-white/60"}`}>
+        <span className={`flex-shrink-0 ${hasActiveChild ? "text-purple-400" : "text-white/50 group-hover:text-white/70"}`}>
           {section.icon}
         </span>
         <span className="flex-1 text-left">{section.title}</span>
-        <span className="text-white/30">
+        <span className="text-white/40">
           <svg
             className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
             fill="none"
@@ -231,7 +231,7 @@ function SectionDropdown({ section, pathname }: { section: SidebarSection; pathn
       </button>
 
       {open && (
-        <div className="mt-0.5 ml-4 pl-3 border-l border-white/5 space-y-0.5">
+        <div className="mt-0.5 ml-4 pl-3 border-l border-white/10 space-y-0.5">
           {section.items.map((item) => {
             const active = pathname === item.href;
             return (
@@ -241,7 +241,7 @@ function SectionDropdown({ section, pathname }: { section: SidebarSection; pathn
                 className={`block px-3 py-1.5 rounded-md text-[13px] transition-all ${
                   active
                     ? "text-white bg-brand-gradient font-medium"
-                    : "text-white/50 hover:text-white hover:bg-white/5"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
                 {item.label}
@@ -269,7 +269,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 bg-[#0c0c18] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 bg-[#111122] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -287,10 +287,10 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
                   className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     active
                       ? "bg-brand-gradient text-white"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  <span className={active ? "text-white" : "text-white/40"}>{link.icon}</span>
+                  <span className={active ? "text-white" : "text-white/50"}>{link.icon}</span>
                   {link.label}
                 </Link>
               );
@@ -300,7 +300,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           {/* Divider */}
           <div className="px-3 py-2">
             <div className="border-t border-white/5" />
-            <p className="text-[10px] font-semibold text-white/30 uppercase tracking-wider mt-3 mb-1 px-1">
+            <p className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mt-3 mb-1 px-1">
               Tools & Features
             </p>
           </div>
@@ -312,7 +312,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
         </div>
 
         {/* Bottom CTA */}
-        <div className="p-3 border-t border-white/5">
+        <div className="p-3 border-t border-white/10">
           <Link
             href="/create"
             onClick={onClose}

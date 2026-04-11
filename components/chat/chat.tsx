@@ -34,7 +34,7 @@ export default function Chat() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 min-h-[300px] max-h-[500px] overflow-y-auto rounded-xl p-4 bg-[#0e0e1a]">
         {messages.length === 0 && (
-          <p className="text-white/30 text-sm text-center mt-20">Ask anything about video creation, prompts, or creative techniques...</p>
+          <p className="text-white/50 text-sm text-center mt-20">Ask anything about video creation, prompts, or creative techniques...</p>
         )}
         {messages.map((m, i) => (
           <div
@@ -60,7 +60,7 @@ export default function Chat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
+          className="flex-1 bg-[#1e1e32] border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
         />
         <button type="submit" disabled={loading || !input.trim()} className="px-5 py-3 rounded-xl bg-brand-gradient text-white text-sm font-semibold disabled:opacity-40 hover:opacity-90 transition-all">{loading ? "..." : "Send"}</button>
       </form>

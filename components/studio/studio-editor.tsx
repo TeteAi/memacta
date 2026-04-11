@@ -66,14 +66,14 @@ export default function StudioEditor({ projectId, initialName = "", initialClips
   return (
     <div className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-white/50 font-medium">Project name</span>
+        <span className="text-white/70 font-medium">Project name</span>
         <input
           type="text"
           aria-label="Project name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="My cinema project"
-          className="bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
+          className="bg-[#1e1e32] border border-white/15 rounded-xl px-4 py-3 text-white placeholder:text-white/50 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
         />
       </label>
       <Timeline clips={clips} onDelete={deleteClip} onMove={moveClip} />

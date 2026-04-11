@@ -44,7 +44,7 @@ export default function HeroReel({ items }: HeroReelProps) {
       {doubled.map((item, idx) => (
         <div
           key={`${item.id}-${idx}`}
-          className="flex-shrink-0 w-64 md:w-80 rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:border-purple-500/50 transition-all hover:scale-[1.02] cursor-pointer group"
+          className="flex-shrink-0 w-64 md:w-80 rounded-xl overflow-hidden border border-white/15 bg-white/10 hover:border-purple-500/50 transition-all hover:scale-[1.02] cursor-pointer group"
         >
           <div className="aspect-video relative">
             {item.mediaType === "video" ? (
@@ -72,7 +72,7 @@ export default function HeroReel({ items }: HeroReelProps) {
               <p className="text-sm font-semibold text-white truncate">
                 {item.title}
               </p>
-              <p className="text-xs text-white/60 flex items-center gap-1 mt-0.5">
+              <p className="text-xs text-white/70 flex items-center gap-1 mt-0.5">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-gradient" />
                 {item.tool}
               </p>

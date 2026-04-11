@@ -50,11 +50,11 @@ export default async function LibraryPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">My Library</h1>
-          <p className="text-white/40 text-sm mt-1">All your creations in one place</p>
+          <p className="text-white/60 text-sm mt-1">All your creations in one place</p>
         </div>
         <Link
           href="/"
-          className="text-sm font-medium px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+          className="text-sm font-medium px-4 py-2 rounded-lg bg-white/15 text-white hover:bg-white/25 transition-colors"
         >
           &larr; Back to Home
         </Link>
@@ -63,14 +63,14 @@ export default async function LibraryPage() {
       {hasContent ? (
         <LibraryTabs items={items} />
       ) : (
-        <div className="text-center py-20 rounded-2xl bg-[#12121e] border border-white/5" data-testid="library-empty-state">
-          <div className="w-16 h-16 mx-auto rounded-xl bg-white/5 flex items-center justify-center mb-6">
-            <svg className="w-8 h-8 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="text-center py-20 rounded-2xl bg-[#181828] border border-white/10" data-testid="library-empty-state">
+          <div className="w-16 h-16 mx-auto rounded-xl bg-white/10 flex items-center justify-center mb-6">
+            <svg className="w-8 h-8 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
             </svg>
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Your creations will appear here</h2>
-          <p className="text-white/40 mb-10 max-w-sm mx-auto">
+          <p className="text-white/60 mb-10 max-w-sm mx-auto">
             Generate your first image or video to get started. It only takes a few seconds!
           </p>
 

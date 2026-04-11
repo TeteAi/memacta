@@ -55,14 +55,14 @@ export default function ToolCategories() {
         <Link
           key={cat.name}
           href={cat.href}
-          className="group relative rounded-xl overflow-hidden bg-[#12121e] border border-white/5 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10"
+          className="group relative rounded-xl overflow-hidden bg-[#181828] border border-white/15 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10"
           data-testid="tool-category-card"
         >
           <div className="aspect-[16/9] relative">
             <img
               src={cat.thumbnail}
               alt={cat.name}
-              className="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
+              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#12121e] via-[#12121e]/40 to-transparent" />
@@ -73,7 +73,7 @@ export default function ToolCategories() {
             )}
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <h3 className="text-lg font-bold text-white">{cat.name}</h3>
-              <p className="text-sm text-white/50 mt-0.5">{cat.description}</p>
+              <p className="text-sm text-white/70 mt-0.5">{cat.description}</p>
               <span className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-white bg-white/10 group-hover:bg-brand-gradient px-3 py-1 rounded-full transition-all">
                 Try it &rarr;
               </span>

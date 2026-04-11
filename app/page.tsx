@@ -63,19 +63,19 @@ export default function Page() {
         <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-[128px]" />
 
         <div className="relative flex flex-col items-center justify-center pt-24 pb-12 px-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 mb-6 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 mb-6 backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-sm text-white/80">Powered by 18+ AI models</span>
+            <span className="text-sm text-white">Powered by 18+ AI models</span>
           </div>
 
           <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-4">
             <BrandMark />
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/70 text-center max-w-2xl leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 text-center max-w-2xl leading-relaxed">
             Create stunning AI videos, images, and effects.
             <br />
-            <span className="text-white/90 font-medium">Share everywhere in one click.</span>
+            <span className="text-cyan-400 font-semibold">Share everywhere in one click.</span>
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-8">
@@ -101,7 +101,7 @@ export default function Page() {
                 <p className="text-2xl md:text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">
                   {stat.value}
                 </p>
-                <p className="text-xs md:text-sm text-white/50 mt-1">{stat.label}</p>
+                <p className="text-xs md:text-sm text-white/70 mt-1">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -109,7 +109,7 @@ export default function Page() {
       </section>
 
       {/* Auto-scrolling hero reel */}
-      <section className="py-8 overflow-hidden bg-[#0a0a14]">
+      <section className="py-8 overflow-hidden bg-[#0e0e1a]">
         <HeroReel items={reelItems} />
       </section>
 
@@ -119,7 +119,7 @@ export default function Page() {
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
             Everything you need to <span className="bg-brand-gradient bg-clip-text text-transparent">create</span>
           </h2>
-          <p className="text-white/50 text-lg max-w-xl mx-auto">
+          <p className="text-white/70 text-lg max-w-xl mx-auto">
             Professional-grade AI tools, all in one place
           </p>
         </div>
@@ -135,7 +135,7 @@ export default function Page() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-white mb-2">{feat.title}</h3>
-              <p className="text-sm text-white/50 leading-relaxed">{feat.desc}</p>
+              <p className="text-sm text-white/70 leading-relaxed">{feat.desc}</p>
             </div>
           ))}
         </div>
@@ -146,11 +146,11 @@ export default function Page() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold">Trending Now</h2>
-            <p className="text-white/50 mt-1">See what the community is creating</p>
+            <p className="text-white/70 mt-1">See what the community is creating</p>
           </div>
           <Link
             href="/community"
-            className="text-sm font-medium px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+            className="text-sm font-medium px-4 py-2 rounded-lg bg-white/15 text-white hover:bg-white/25 transition-colors"
           >
             View All &rarr;
           </Link>
@@ -164,7 +164,7 @@ export default function Page() {
           <h2 className="text-3xl font-bold mb-3">
             Explore <span className="bg-brand-gradient bg-clip-text text-transparent">AI Tools</span>
           </h2>
-          <p className="text-white/50 text-lg">Pick a tool and start creating in seconds</p>
+          <p className="text-white/70 text-lg">Pick a tool and start creating in seconds</p>
         </div>
         <ToolCategories />
       </section>
@@ -172,11 +172,11 @@ export default function Page() {
       {/* CTA Banner */}
       <section className="px-6 pb-20 max-w-4xl mx-auto">
         <div className="relative rounded-2xl overflow-hidden p-8 md:p-12 text-center">
-          <div className="absolute inset-0 bg-brand-gradient opacity-20" />
-          <div className="absolute inset-0 bg-[#0a0a14]/60" />
+          <div className="absolute inset-0 bg-brand-gradient opacity-30" />
+          <div className="absolute inset-0 bg-[#0e0e1a]/50" />
           <div className="relative">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">Ready to create something amazing?</h2>
-            <p className="text-white/60 text-lg mb-6 max-w-lg mx-auto">
+            <p className="text-white/80 text-lg mb-6 max-w-lg mx-auto">
               Join thousands of creators using AI to bring their ideas to life.
             </p>
             <Link

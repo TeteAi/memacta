@@ -28,7 +28,7 @@ export default function Nav({
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0a0a14]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0e0e1a]/95 backdrop-blur-xl">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 max-w-full">
         {/* Left: Sidebar toggle + Brand */}
         <div className="flex items-center gap-2">
@@ -36,7 +36,7 @@ export default function Nav({
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all lg:hidden"
+            className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all lg:hidden"
             aria-label="Toggle sidebar"
           >
             {sidebarOpen ? (
@@ -66,7 +66,7 @@ export default function Nav({
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   active
                     ? "bg-white/10 text-white"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
                 {link.label}
@@ -79,7 +79,7 @@ export default function Nav({
         <div className="flex items-center gap-3">
           {session?.user ? (
             <>
-              <span className="hidden sm:inline-flex text-sm text-white/70 bg-white/10 px-3 py-1 rounded-full">
+              <span className="hidden sm:inline-flex text-sm text-white bg-white/15 px-3 py-1 rounded-full font-medium">
                 {session.user.credits} credits
               </span>
               <Link

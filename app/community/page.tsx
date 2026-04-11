@@ -46,7 +46,7 @@ export default async function CommunityPage() {
         <div className="flex gap-3">
           <Link
             href="/community/contests"
-            className="text-sm font-medium px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+            className="text-sm font-medium px-4 py-2 rounded-xl bg-white/15 text-white hover:bg-white/25 transition-colors"
           >
             Contests
           </Link>
@@ -60,13 +60,13 @@ export default async function CommunityPage() {
       </div>
 
       {featuredCards.length > 0 && cards.length > 0 && (
-        <p className="text-xs text-white/40 mb-4">
+        <p className="text-xs text-white/60 mb-4">
           Showing community posts and featured showcase content
         </p>
       )}
 
       {allCards.length === 0 ? (
-        <p className="text-white/40 text-center py-16">
+        <p className="text-white/60 text-center py-16">
           No posts yet. Be the first to share your creation!
         </p>
       ) : (

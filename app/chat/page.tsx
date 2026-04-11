@@ -7,9 +7,9 @@ export default function Page() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">AI Chat</h1>
-        <p className="text-white/50 mt-2">Ask our AI assistant for creative ideas, prompts, and tips</p>
+        <p className="text-white/70 mt-2">Ask our AI assistant for creative ideas, prompts, and tips</p>
       </div>
-      <div className="rounded-2xl bg-[#12121e] border border-white/10 p-1">
+      <div className="rounded-2xl bg-[#181828] border border-white/15 p-1">
         <Chat />
       </div>
     </main>

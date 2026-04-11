@@ -61,7 +61,7 @@ export default function PricingCards({ packages }: { packages: CreditPackage[] }
               className={`relative rounded-xl p-6 flex flex-col transition-all ${
                 pkg.popular
                   ? "gradient-border shadow-lg shadow-purple-500/10 scale-105"
-                  : "bg-[#12121e] border border-white/10 hover:border-white/20"
+                  : "bg-[#181828] border border-white/15 hover:border-white/25"
               }`}
             >
               {pkg.popular && (
@@ -76,7 +76,7 @@ export default function PricingCards({ packages }: { packages: CreditPackage[] }
               <p className="text-3xl font-black mt-4 bg-brand-gradient bg-clip-text text-transparent">
                 {formatUsd(pkg.priceUsd)}
               </p>
-              <p className="text-white/40 text-sm mt-1">{pkg.credits} credits</p>
+              <p className="text-white/60 text-sm mt-1">{pkg.credits} credits</p>
 
               <ul className="mt-6 space-y-2.5 flex-1">
                 {features.map((f) => (
@@ -95,7 +95,7 @@ export default function PricingCards({ packages }: { packages: CreditPackage[] }
                 className={`mt-6 w-full py-3 rounded-lg font-semibold text-sm transition-all ${
                   pkg.popular
                     ? "bg-brand-gradient text-white glow-btn"
-                    : "bg-white/10 text-white hover:bg-white/20"
+                    : "bg-white/15 text-white hover:bg-white/25"
                 } disabled:opacity-50`}
               >
                 {buying === pkg.id ? "Processing..." : "Get Started"}

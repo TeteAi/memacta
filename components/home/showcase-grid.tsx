@@ -13,7 +13,7 @@ export default function ShowcaseGrid({ items }: ShowcaseGridProps) {
       {items.map((item) => (
         <div
           key={item.id}
-          className="group rounded-xl overflow-hidden bg-[#12121e] border border-white/5 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10 cursor-pointer"
+          className="group rounded-xl overflow-hidden bg-[#181828] border border-white/15 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10 cursor-pointer"
           data-testid="showcase-card"
         >
           <div className="aspect-video relative bg-white/5">
@@ -41,14 +41,14 @@ export default function ShowcaseGrid({ items }: ShowcaseGridProps) {
           </div>
           <div className="p-3">
             <p className="text-sm font-semibold text-white truncate">{item.title}</p>
-            <div className="flex items-center justify-between text-xs text-white/40 mt-1.5">
+            <div className="flex items-center justify-between text-xs text-white/60 mt-1.5">
               <span className="flex items-center gap-1">
                 <span className="w-4 h-4 rounded-full bg-white/10 inline-flex items-center justify-center text-[8px]">
                   {item.creator[0]}
                 </span>
                 {item.creator}
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-medium text-white/60">
+              <span className="px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-medium text-white/70">
                 {item.tool}
               </span>
             </div>

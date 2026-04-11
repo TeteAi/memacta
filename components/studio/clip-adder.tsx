@@ -44,25 +44,25 @@ export default function ClipAdder({ onAdd }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-4 border border-white/10 rounded-xl bg-[#0e0e1a] p-5">
+    <div className="flex flex-col gap-4 border border-white/15 rounded-xl bg-[#0e0e1a] p-5">
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-white/50 font-medium">Clip prompt</span>
+        <span className="text-white/70 font-medium">Clip prompt</span>
         <input
           type="text"
           aria-label="Clip prompt"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Describe the shot..."
-          className="bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
+          className="bg-[#1e1e32] border border-white/15 rounded-xl px-4 py-3 text-white placeholder:text-white/50 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-white/50 font-medium">Model</span>
+        <span className="text-white/70 font-medium">Model</span>
         <select
           aria-label="Model"
           value={model}
           onChange={(e) => setModel(e.target.value)}
-          className="bg-[#1e1e32] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
+          className="bg-[#1e1e32] border border-white/15 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 outline-none"
         >
           {models.map((m) => (
             <option key={m.id} value={m.id}>
@@ -77,7 +77,7 @@ export default function ClipAdder({ onAdd }: Props) {
             key={a}
             type="button"
             onClick={() => setAspect(a)}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${aspect === a ? "bg-brand-gradient text-white" : "bg-white/10 text-white/60 hover:bg-white/20"}`}
+            className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${aspect === a ? "bg-brand-gradient text-white" : "bg-white/15 text-white/70 hover:bg-white/25"}`}
           >
             {a}
           </button>

@@ -10,7 +10,7 @@ export default function CreatePage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold bg-brand-gradient bg-clip-text text-transparent">Create</h1>
-        <p className="text-white/50 mt-2">Transform your ideas into stunning visuals with AI</p>
+        <p className="text-white/70 mt-2">Transform your ideas into stunning visuals with AI</p>
       </div>
 
       <div className="flex gap-2 mb-8">
@@ -20,7 +20,7 @@ export default function CreatePage() {
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
             tab === "video"
               ? "bg-brand-gradient text-white shadow-lg shadow-purple-500/20"
-              : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+              : "bg-white/15 text-white/70 hover:bg-white/25 hover:text-white"
           }`}
         >
           <span className="flex items-center gap-2">
@@ -36,7 +36,7 @@ export default function CreatePage() {
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
             tab === "image"
               ? "bg-brand-gradient text-white shadow-lg shadow-purple-500/20"
-              : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+              : "bg-white/15 text-white/70 hover:bg-white/25 hover:text-white"
           }`}
         >
           <span className="flex items-center gap-2">
@@ -48,18 +48,18 @@ export default function CreatePage() {
         </button>
       </div>
 
-      <div className="rounded-2xl bg-[#12121e] border border-white/10 p-6">
+      <div className="rounded-2xl bg-[#181828] border border-white/15 p-6">
         <GenerateForm key={tab} mediaType={tab} />
       </div>
 
       <div className="mt-8 flex items-center gap-4">
-        <Link href="/tools" className="text-sm text-white/50 hover:text-white transition-colors flex items-center gap-1">
+        <Link href="/tools" className="text-sm text-white/70 hover:text-white transition-colors flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" />
           </svg>
           Explore more tools
         </Link>
-        <Link href="/effects" className="text-sm text-white/50 hover:text-white transition-colors flex items-center gap-1">
+        <Link href="/effects" className="text-sm text-white/70 hover:text-white transition-colors flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
           </svg>

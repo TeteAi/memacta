@@ -19,7 +19,7 @@ export default async function AccountPage() {
       <main className="mx-auto max-w-4xl px-6 py-12 text-center">
         <h1 className="text-3xl font-bold mb-4">Account</h1>
         <p className="text-white/70 mb-6">Sign in to view your account</p>
-        <Link href="/api/auth/signin">
+        <Link href="/auth/signin">
           <Button>Sign In</Button>
         </Link>
       </main>

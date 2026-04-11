@@ -148,7 +148,7 @@ function PlanCTA({ planId, price, popular }: { planId: string; price: number; po
   if (planId === "free") {
     return (
       <Link
-        href="/api/auth/signin"
+        href="/auth/signin"
         className="w-full py-3 rounded-xl text-center font-semibold text-sm bg-white/10 text-white hover:bg-white/20 transition-all block"
       >
         Get Started Free

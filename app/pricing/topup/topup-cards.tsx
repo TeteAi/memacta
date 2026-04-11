@@ -25,7 +25,7 @@ export default function TopupCards({ packages }: { packages: TopupPackage[] }) {
       });
       const data = await res.json();
       if (res.status === 401) {
-        window.location.href = "/api/auth/signin";
+        window.location.href = "/auth/signin";
         return;
       }
       if (data.url) {

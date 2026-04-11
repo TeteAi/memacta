@@ -92,7 +92,7 @@ export default function Nav({
             </>
           ) : (
             <Link
-              href="/api/auth/signin"
+              href="/auth/signin"
               className="px-5 py-2 text-sm font-semibold rounded-lg bg-brand-gradient text-white hover:opacity-90 transition-all glow-btn"
             >
               Sign In

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import NavServer from "@/components/nav-server";
+import AppShellServer from "@/components/app-shell-server";
 import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
@@ -16,9 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-background text-foreground antialiased flex flex-col">
-        <NavServer />
-        <div className="flex-1">{children}</div>
-        <Footer />
+        <AppShellServer>
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </AppShellServer>
       </body>
     </html>
   );

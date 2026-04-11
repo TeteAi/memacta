@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import ModelPicker from "./model-picker";
 import PromptBox from "./prompt-box";
 import { videoModels, imageModels, getModel } from "@/lib/ai/models";
@@ -115,8 +116,29 @@ export default function GenerateForm({ mediaType }: Props) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={result.url} alt="result" className="w-full rounded-xl border border-white/15" />
             )}
-            <div className="mt-2">
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <ShareButton mediaUrl={result.url} mediaType={mediaType} caption={prompt} />
+              <a
+                href={result.url}
+                download={`memacta-${mediaType}-${Date.now()}.${mediaType === "video" ? "mp4" : "png"}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download
+              </a>
+              <Link
+                href="/library"
+                className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                </svg>
+                Save to Library
+              </Link>
             </div>
           </>
         )}

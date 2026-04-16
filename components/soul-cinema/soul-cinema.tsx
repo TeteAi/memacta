@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import CharacterPicker, { type CharacterOption } from "./character-picker";
 import StoryForm, { type StoryFormValues } from "./story-form";
@@ -21,9 +22,28 @@ const DEFAULT_FORM: StoryFormValues = {
   aspectRatio: "16:9",
 };
 
+const VALID_GENRES = ["drama", "noir", "scifi", "romance", "action"] as const;
+
 export default function SoulCinema() {
+  const searchParams = useSearchParams();
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterOption | null>(null);
   const [formValues, setFormValues] = useState<StoryFormValues>(DEFAULT_FORM);
+
+  // Deep-link: read ?story= and ?genre= on mount
+  useEffect(() => {
+    const storyParam = searchParams.get("story");
+    const genreParam = searchParams.get("genre");
+    if (storyParam || genreParam) {
+      setFormValues((prev) => ({
+        ...prev,
+        ...(storyParam ? { storyPrompt: storyParam } : {}),
+        ...(genreParam && (VALID_GENRES as readonly string[]).includes(genreParam)
+          ? { genre: genreParam as typeof VALID_GENRES[number] }
+          : {}),
+      }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [scenes, setScenes] = useState<SoulCinemaScene[]>([]);
   const [storyboardLoading, setStoryboardLoading] = useState(false);
   const [storyboardSeed, setStoryboardSeed] = useState(42);

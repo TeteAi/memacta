@@ -11,7 +11,7 @@ const links = [
   { href: "/create", label: "Create" },
   { href: "/effects", label: "Effects" },
   { href: "/studio", label: "Studio" },
-  { href: "/chat", label: "Chat" },
+  { href: "/copilot", label: "Copilot" },
   { href: "/library", label: "Library" },
   { href: "/community", label: "Community" },
   { href: "/pricing", label: "Pricing" },

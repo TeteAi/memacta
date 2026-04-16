@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import PersonDropzone from "./person-dropzone";
 import OutfitGrid, { OutfitSlot } from "./outfit-grid";
@@ -14,6 +15,8 @@ const EMPTY_OUTFIT: OutfitSlot = { preview: null, uploadedUrl: null, uploading: 
 const INITIAL_OUTFITS: OutfitSlot[] = Array.from({ length: 6 }, () => ({ ...EMPTY_OUTFIT }));
 
 export default function FashionFactory() {
+  const searchParams = useSearchParams();
+
   // Person slot
   const [personPreview, setPersonPreview] = useState<string | null>(null);
   const [personUrl, setPersonUrl] = useState<string | null>(null);
@@ -22,8 +25,17 @@ export default function FashionFactory() {
   // Outfit slots
   const [outfits, setOutfits] = useState<OutfitSlot[]>(INITIAL_OUTFITS);
 
-  // Style prompt
+  // Style prompt — seeded from ?prompt= deep-link
   const [stylePrompt, setStylePrompt] = useState("");
+
+  // Deep-link: read ?prompt= on mount
+  useEffect(() => {
+    const promptParam = searchParams.get("prompt");
+    if (promptParam) {
+      setStylePrompt(promptParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Generation state
   const [shots, setShots] = useState<ShotState[]>([]);

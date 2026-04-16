@@ -1,202 +1,263 @@
-# Feature: higgsfield-popcorn
+# Feature: copilot
 
-- **Name:** Higgsfield Popcorn
-- **Category:** P4 — Effects & Templates (short-form vertical video presets)
-- **Priority:** P1 (highest-ROI remaining gap; pairs with just-shipped Soul Cinema to cover both long-form narrative and short-form vertical)
-- **Source:** `feature-gap-analysis.md` — "Higgsfield Popcorn" listed under MISSING. Chosen over UGC Factory (structurally near-identical to shipped Fashion Factory), Mixed Media (too large — unified canvas requires timeline surgery), and Reference Extension (heavy overlap with shipped Multi Reference + Soul ID + Soul Moodboard + Soul Cast).
+- **Name:** memacta Copilot
+- **Category:** P0 — Conversational creative assistant (upgrades the existing dead `/chat` stub into a real prompt-crafting + deep-linking copilot)
+- **Priority:** P1 (highest-ROI remaining gap — takes the stubbed `/chat` mock-reply surface and turns it into a real creator-aiming assistant that deep-links users into every shipped tool)
+- **Source:** `feature-gap-analysis.md` — "Copilot" listed under MISSING completely. Chosen over Mixed Media (requires heavy timeline surgery), Reference Extension (overlaps with Multi Reference + Soul ID + Soul Moodboard + Soul Cast), UGC Factory (structurally near-identical to shipped Fashion Factory — re-skin risk), and Sora 2 Upscale (narrow single-model utility that duplicates existing Upscale). Copilot is the widest-reach remaining feature: one conversational surface that exposes all 18 models, 33+ tools, 12 Popcorn presets, Soul Cinema, and Fashion Factory via deep-linked action chips. Also the highest-visible quality upgrade because the current `/chat` returns `"memacta: I understand. (mock)"` — it's demonstrably a stub.
 
 ## User story
 
-As a creator who wants to feed a TikTok/Reels posting schedule, I open **Popcorn**, pick one of ~12 short-form presets (each is a recipe: base prompt + tone + motion style + 9:16 aspect + 3s or 5s duration), optionally upload a subject image, type a one-line subject idea, and click **Pop** once. Popcorn fires 3 vertical clips in parallel — same preset, three seeds — so I get a variation pack I can immediately share to the community or stage in the social scheduler. One clip failing does not block the others; each tile has its own retry.
+As a new creator who doesn't know which of memacta's 18 models or 33+ tools to use, I open **Copilot** (rebranded `/chat`). I type `"make a 10-second cinematic reel of a samurai in rain"`. Copilot replies with a short paragraph explaining the recommended approach AND three actionable **action chips** at the bottom of the message: `[ Open Soul Cinema ]`, `[ Use Veo 3.1 + this prompt ]`, `[ Try Popcorn "Cafe Gloom" preset ]`. Clicking any chip deep-links me into the right shipped surface with the prompt, model, and preset pre-filled.
 
-The key differentiator versus Soul Cinema: Popcorn is preset-first (pick a vibe, skip the scripting), always 9:16, always short, and always returns **3 variations** rather than a narrative sequence. It is the "scroll-bait factory" the Cinema flow is not.
+If I don't know what to ask, a **starter grid** offers 6 one-click prompts: "Make me a short-form reel", "Style a fashion lookbook", "Build a character and cast them into a scene", "Turn a still image into a 5-second video", "Write a narrative for Soul Cinema", "Recommend a model for X". Each starter injects a structured request + an intent tag so Copilot replies with pre-shaped recommendations.
+
+The key differentiator versus the current `/chat`: Copilot is **intent-aware** (not a blind LLM passthrough), returns **structured action chips** (not just plain text), and routes users into real shipped features via deep links that match the URL contract already used by `/create?model=X&prompt=Y`, `/tools/popcorn`, `/tools/fashion-factory`, `/tools/soul-cinema`, and `/effects/[id]`.
 
 ## Wireframe
 
 ```
 +--------------------------------------------------------------------------+
-|  Apps / Effects / Popcorn                                                |
+|  Copilot                                                    beta         |
+|  Your AI director - I'll pick the right model, tool, and preset.         |
 |                                                                          |
-|  [icon]  Popcorn                                                  beta   |
-|          Pop out 3 short-form vertical clips from one preset             |
+|  +------ Starter prompts (shown when empty) --------------------------+  |
+|  |  [Short-form reel]  [Fashion lookbook]   [Character + scene]     |  |
+|  |  [Image -> video]   [Soul Cinema beat]   [Which model for...?]   |  |
+|  +--------------------------------------------------------------------+  |
 |                                                                          |
-|  Step 1 - Pick a preset ----------------------------------------------   |
-|  +------+ +------+ +------+ +------+                                     |
-|  |Snack | |Cafe  | |Neon  | |Retro |   [ see all 12 -> ]                 |
-|  |Hop   | |Gloom | |Runway| |GRWM  |                                     |
-|  +------+ +------+ +------+ +------+                                     |
-|   active                                                                 |
+|  +------ Conversation ------------------------------------------------+  |
+|  |  You: make a 10s cinematic reel of a samurai in rain               |  |
+|  |                                                                     |  |
+|  |  Copilot:  For a cinematic 10-second reel with motion and mood,    |  |
+|  |            Veo 3.1 gives the best photoreal rain. If you want a   |  |
+|  |            short 3-clip pack instead, Popcorn's Cafe Gloom preset |  |
+|  |            nails the atmosphere in a vertical format.              |  |
+|  |                                                                     |  |
+|  |            +-------------------+ +----------------------+          |  |
+|  |            | Use Veo 3.1 now   | | Try Cafe Gloom in    |          |  |
+|  |            | with this prompt  | | Popcorn              |          |  |
+|  |            +-------------------+ +----------------------+          |  |
+|  |            +------------------------+                              |  |
+|  |            | Open Soul Cinema with  |                              |  |
+|  |            | narrative prefill      |                              |  |
+|  |            +------------------------+                              |  |
+|  +--------------------------------------------------------------------+  |
 |                                                                          |
-|  Step 2 - Subject (optional) -----------------------------------------   |
-|  +- drop subject image ---------------------------------------+          |
-|  |  [ cleared | uploaded thumb ]                              |          |
-|  +------------------------------------------------------------+          |
-|  +-----------------------------------------------------------+           |
-|  | "a 22-yo skateboarder with cherry-red hair"               |           |
-|  +-----------------------------------------------------------+           |
-|                                                                          |
-|  Model: kling-25-turbo    Cost: 9 credits x 3 = 27 credits               |
-|  +----------------------------------------------+                        |
-|  |              POP (generate 3)                |                        |
-|  +----------------------------------------------+                        |
-|                                                                          |
-|  Results (9:16 vertical) ---------------------------------------------   |
-|  +-----+  +-----+  +-----+                                               |
-|  |seed |  |seed |  |seed |   each tile: loading -> video -> retry|share  |
-|  | #1  |  | #2  |  | #3  |                                               |
-|  |9:16 |  |9:16 |  |9:16 |                                               |
-|  +-----+  +-----+  +-----+                                               |
-|                                                                          |
-|  [ Share pack to community ]   [ Schedule all to social ]                |
+|  +- Type a message... -------------------------+  +---------+            |
+|  |                                             |  | Send -> |            |
+|  +---------------------------------------------+  +---------+            |
 +--------------------------------------------------------------------------+
 ```
 
 ## Routes
 
-- `app/tools/popcorn/page.tsx` — dedicated route wins over `app/tools/[slug]/page.tsx` fallback. Metadata + server-rendered shell that hosts the client component.
-- `app/api/popcorn/pack/route.ts` — `POST` endpoint. Auth-gated. Accepts `{ presetId, subjectPrompt, subjectImageUrl? }`, returns `{ packId, clips: Array<{ seed, mediaUrl } | { seed, error }> }`. Internally maps to `buildPopcornBatch(...)` and fans out to the existing provider layer (mirrors the Fashion Factory / Soul Cinema pattern; no new provider code). **Alternative accepted:** the client MAY skip this route and fan out directly to `/api/generate` three times — either is acceptable. The server route is cleaner because it lets us record a single `Project` row with `clipsJson` holding all three seeds, rather than three independent `Generation` rows.
-- `app/api/popcorn/share/route.ts` — `POST`. Auth-gated. Accepts `{ clips: string[], presetId }`, creates a `Post` row with `toolUsed: "popcorn"` and `mediaType: "video"` (first clip becomes primary `mediaUrl`, other clips JSON-stringified into `description`). Returns `{ postId }`.
+- `app/copilot/page.tsx` — new canonical route. Server component that renders `<Copilot/>`. Metadata `{ title: "memacta - Copilot" }`. Full-height layout, wider than current `/chat` (max-width 4xl instead of 3xl).
+- `app/chat/page.tsx` — UPDATE (not delete) to also import and render the new `<Copilot/>` component so legacy `/chat` URLs keep working and upgrade automatically. Do NOT break tests that already hit `/chat`.
+- `app/api/copilot/suggest/route.ts` — `POST`. Accepts `{ messages: Array<{role, content}>, intent?: string }`. Returns `{ reply: string, actions: Array<CopilotAction> }`. Rule-based (keyword/intent matching against a local library — **no** external LLM call; this keeps the build deterministic and testable). The matching logic lives in a pure helper in `lib/copilot.ts` so it's fully unit-testable without spinning up Next.
+- `/api/chat` — UNCHANGED. Still returns the same mock reply. This route is **not** deleted; some legacy tests depend on it. Copilot uses its own `/api/copilot/suggest` endpoint so we don't disturb the existing wire contract.
 
-No changes to `/api/generate`. No changes to `/api/soul-cinema/*`.
+Deep-link contracts Copilot produces (all already supported by the shipped app):
+
+- `/create/video?model=veo-31&prompt=<urlencoded>` — model picker deep-link (already wired in `app/create/video/page.tsx`).
+- `/create/image?model=flux-2&prompt=<urlencoded>` — image create deep-link.
+- `/create/image-to-video?prompt=<urlencoded>` — image-to-video.
+- `/tools/popcorn?preset=cafe-gloom&subject=<urlencoded>` — Popcorn deep-link (see "Component edits" below — Popcorn must read these two query params on mount).
+- `/tools/fashion-factory?prompt=<urlencoded>` — Fashion Factory style-prompt prefill (existing `stylePrompt` state seeded from `?prompt=`).
+- `/tools/soul-cinema?story=<urlencoded>&genre=<slug>` — Soul Cinema story+genre prefill.
+- `/effects/[id]` — pass through for effect shortcuts (no params needed).
 
 ## Components
 
-All new files under `components/popcorn/`:
+All new files under `components/copilot/`:
 
-- `components/popcorn/popcorn.tsx` — client root. Holds state `{ presetId, subjectPrompt, subjectUrl, clips }` plus generation lifecycle. Wires `handleAuthRequired` from `@/lib/auth-redirect`. Fires `Promise.allSettled` fan-out to `/api/generate` (or `/api/popcorn/pack`) for each of 3 seeds.
-- `components/popcorn/preset-grid.tsx` — renders the 12 preset cards from `POPCORN_PRESETS` (see data model). Each card: gradient thumb (no real image URL — CSS gradient keyed on preset id), name, 3-word tagline, selected state uses `bg-brand-gradient` + `aria-pressed="true"`. Shows first 4 by default with a `see all` expander to reveal the rest.
-- `components/popcorn/subject-uploader.tsx` — reuses the Fashion Factory `person-dropzone` visual language. `data-testid="subject-uploader"`. Emits `onUploaded(url, previewDataUrl)`.
-- `components/popcorn/subject-input.tsx` — textarea. `data-testid="subject-prompt"`. 140-char soft limit. Shows remaining count.
-- `components/popcorn/clip-grid.tsx` — 3-column (desktop) / 1-column (mobile) responsive grid. Renders 3 `<ClipTile/>` components.
-- `components/popcorn/clip-tile.tsx` — `data-testid="clip-tile"` + `data-seed={seed}` + `data-status={status}` where status is one of `idle | running | succeeded | failed`. 9:16 aspect container. On success, renders `<video autoplay muted loop playsinline>`. On failure, renders retry button (`data-testid="retry-clip-btn"`). Single clip download button.
-- `components/popcorn/pack-actions.tsx` — "Share pack to community" (calls `/api/popcorn/share` or existing `/api/community/posts`) + "Schedule all to social" (links to `/social/schedule?urls=...`). Both disabled until at least one clip is `succeeded`.
+- `components/copilot/copilot.tsx` — client root. `"use client"`. Wraps the whole experience. Uses `Suspense` boundary around any child that calls `useSearchParams` (for `?q=...` deep links from landing pages). Holds `{ messages, input, loading, showStarter }` state. Wires `handleAuthRequired` from `@/lib/auth-redirect` on the `POST /api/copilot/suggest` call. `data-testid="copilot"` on root.
+- `components/copilot/starter-grid.tsx` — renders 6 starter prompt cards in a 2x3 grid. Each card has `data-testid="starter-card"` and `data-intent={intent}` (e.g. `short-form`, `fashion-lookbook`, `character-scene`, `image-to-video`, `soul-cinema-beat`, `recommend-model`). Clicking a card injects the structured prompt and auto-sends (mirrors ChatGPT starter cards UX). Hidden once `messages.length > 0`.
+- `components/copilot/message-bubble.tsx` — renders one user or assistant message. User bubble: `bg-brand-gradient` right-aligned. Assistant bubble: `bg-white/10` left-aligned. Below assistant bubbles renders a `<ActionChips actions={...}/>` row if `actions.length > 0`. `data-testid="message-bubble"` + `data-role={role}`.
+- `components/copilot/action-chips.tsx` — renders a wrapped row of `<Link href={action.href}>` chips, one per `CopilotAction`. Each chip is a small pill with an icon + label. `data-testid="action-chip"` + `data-action-type={action.type}` + `data-href={action.href}`. Uses `glow-btn` only on the primary action (index 0); rest are ghost-bordered.
+- `components/copilot/compose-box.tsx` — the text input + Send button at the bottom. `data-testid="compose-box"`. `data-testid="send-btn"` on the submit button. Disabled while loading or when input is empty. Enter-to-send (with Shift+Enter newline support).
+- `components/copilot/message-list.tsx` — vertical scroll container. Auto-scrolls to bottom when a new message arrives. `data-testid="message-list"`.
 
 Edits to existing files:
 
-- `components/sidebar.tsx` — add `{ label: "Popcorn", href: "/tools/popcorn" }` inside the **Effects & Templates** section, inserted as the **second** item directly after `All Effects` (sibling of `On Fire`, before `Neon Glow`). This places it where discovery traffic lands.
-- `lib/tools/p2-tools.ts` — append a new `popcorn` entry so it surfaces on `/apps`. Category `"editing"` (Popcorn is preset-driven media-out, not identity). `mediaOut: "video"`. Inputs: `[{ key: "preset", label: "Preset", type: "text" }, { key: "subject", label: "Subject prompt", type: "prompt" }]`. Name `"Popcorn"`. Description `"Pick a short-form preset, pop out 3 vertical variations in one click."`.
+- `components/sidebar.tsx` — rename the existing `{ label: "AI Chat", href: "/chat" }` QUICK_LINKS entry to `{ label: "Copilot", href: "/copilot" }`. **Do not** delete the entry or break the icon. Same position in the list.
+- `components/nav.tsx` (if it has a top-level `AI Chat` / Chat link) — same rename. Spot-check only; don't alter anything else. (Builder: use `Grep` for `"/chat"` across `components/` and `app/` and only rename the navigation surfaces, **not** the page routes themselves.)
+- `components/popcorn/popcorn.tsx` — add `?preset=<id>&subject=<text>` deep-link support. On mount (inside a `Suspense` boundary if not already wrapped), read `useSearchParams()`, and if `preset` matches a valid `POPCORN_PRESETS` id, pre-select it; if `subject` is set, pre-fill the subject prompt textarea. Do not auto-fire generation. Must be wrapped in `Suspense` per the Next 15 build rule.
+- `components/fashion/fashion-factory.tsx` — same pattern: `?prompt=` pre-fills the style prompt textarea on mount. Suspense-wrap.
+- `components/soul-cinema/soul-cinema.tsx` — `?story=` pre-fills the story textarea; `?genre=` pre-selects the matching genre chip.
+- `lib/tools/p2-tools.ts` — append a new entry `{ id: "copilot", slug: "copilot", name: "Copilot", description: "Your AI director - ask and I'll pick the model, tool, and preset.", category: "identity", mediaOut: "image", inputs: [{key:"prompt",label:"What do you want to make?",type:"prompt"}] }`. The `/tools/[slug]` fallback will render a redirect hint → `/copilot`, OR the builder may add a small `app/tools/copilot/page.tsx` that simply does `redirect("/copilot")`. **Note on category:** `"identity"|"editing"` is the hard Zod union in the existing type; keep `"identity"` and document via the card title that this is a helper.
+
+Do NOT touch: `app/api/chat/route.ts`, `components/chat/chat.tsx`, `app/api/generate/*`, `app/api/popcorn/*`, `app/api/soul-cinema/*`, any Prisma schema, any model adapter, any credit logic.
 
 ## Data model deltas
 
-**Zero Prisma migrations.** All data reuses existing columns:
+**Zero Prisma migrations.** Copilot is entirely stateless on the server — conversation history is held in client state and POSTed with each suggestion request (same pattern as the existing `/api/chat` mock). No user-scoped storage, no history persistence, no new DB table.
 
-- `Project.clipsJson` — stores `{ presetId, seeds: [n1, n2, n3], clips: [{ seed, url }] }` when user hits "Save pack as project".
-- `Post.toolUsed` — set to `"popcorn"` when user shares a pack. `Post.description` holds the preset id + extra clip URLs as JSON (pattern already used by Fashion Factory lookbook share).
-- `Generation` rows — created transparently by `/api/generate` as usual.
-
-Preset library is **pure code**, not DB, in a new file:
-
-- `lib/popcorn.ts` — exports `POPCORN_PRESETS: PopcornPreset[]`, `getPopcornPreset(id)`, `buildPopcornBatch(presetId, subjectPrompt, subjectImageUrl?, seeds?)`, and `composePopcornPrompt(preset, subjectPrompt)`. Mirrors the `lib/fashion.ts` + `lib/soul-cinema.ts` pattern. Fully unit-testable; no React, no DB.
+The `CopilotAction` shape is a pure TypeScript type exported from `lib/copilot.ts`:
 
 ```ts
-// lib/popcorn.ts shape
-export type PopcornPreset = {
-  id: string;                               // "snack-hop", "cafe-gloom", ...
-  name: string;                             // "Snack Hop"
-  tagline: string;                          // "rapid pastel pan"
-  gradientClass: string;                    // Tailwind gradient for thumb
-  basePrompt: string;                       // baked-in style directive
-  motion: string;                           // "rapid handheld pan"
-  tone: string;                             // "playful, pastel, snackable"
-  model: "kling-25-turbo" | "seedance-20";  // short-form friendly
-  durationSec: 3 | 5;
-  aspectRatio: "9:16";
+export type CopilotAction = {
+  type:
+    | "create-video"
+    | "create-image"
+    | "image-to-video"
+    | "popcorn-preset"
+    | "fashion-factory"
+    | "soul-cinema"
+    | "effect-shortcut"
+    | "tool-redirect";
+  label: string;         // "Use Veo 3.1 with this prompt"
+  href: string;          // "/create/video?model=veo-31&prompt=..."
+  icon?: "video" | "image" | "wand" | "spark" | "clapper" | "popcorn";
 };
+
+export type CopilotSuggestion = {
+  reply: string;
+  actions: CopilotAction[];  // 0 .. 4 actions; always <= 4
+  intent: string;            // inferred intent tag
+};
+
+export function buildCopilotSuggestion(
+  userMessage: string,
+  intent?: string,
+): CopilotSuggestion {
+  // Pure, deterministic. No network. Must be <= 10ms per call on a warm V8.
+}
+
+export const COPILOT_STARTERS: Array<{
+  intent: string;
+  label: string;          // short button label
+  prompt: string;         // full prompt injected into the chat
+}>;  // length === 6
 ```
 
-12 presets to implement: `snack-hop`, `cafe-gloom`, `neon-runway`, `retro-grwm`, `sunset-drive`, `mirror-glitch`, `tokyo-streetwear`, `studio-cook`, `locker-room-pump`, `pet-close-up`, `weekend-hike`, `night-in`.
+## API contracts
 
-## Provider adapter contract
+`POST /api/copilot/suggest`
 
-**No new provider adapter.** Popcorn is a composition layer over existing providers. The `buildPopcornBatch` helper produces request payloads in the exact `/api/generate` wire format already validated by the existing `Body` Zod schema in `app/api/generate/route.ts`:
+Request body (Zod-validated):
 
 ```ts
-export interface PopcornGenerateRequest {
-  prompt: string;           // = composePopcornPrompt(preset, subjectPrompt)
-  model: string;            // = preset.model
-  mediaType: "video";
-  imageUrl?: string;        // optional subject reference passthrough
-  aspectRatio: "9:16";      // always portrait
-  duration: number;         // = preset.durationSec (3 or 5)
-  seed: number;             // deterministic seeds from buildPopcornBatch
-}
-
-export function buildPopcornBatch(
-  presetId: string,
-  subjectPrompt: string,
-  subjectImageUrl?: string,
-  seeds?: [number, number, number],
-): PopcornGenerateRequest[] {
-  // length === 3, throws if preset not found or subjectPrompt empty
+{
+  messages: Array<{ role: "user" | "assistant"; content: string }>;  // min 1, max 50
+  intent?: string;  // optional intent tag from starter grid
 }
 ```
 
-Seeds default to `[17, 42, 91]` for reproducibility in tests. When called without seeds, the production client passes `[Date.now() % 1e6, Date.now() % 1e6 + 7, Date.now() % 1e6 + 13]` so variations are distinct.
+Response (200):
+
+```ts
+{
+  reply: string;          // 1-3 sentences, plaintext (no markdown)
+  actions: CopilotAction[];  // 0..4
+  intent: string;
+}
+```
+
+Error responses:
+
+- `400 {error:"invalid"}` on schema mismatch (matches existing `/api/chat` pattern).
+- `401 {error:"auth_required"}` when the anonymous quota is exhausted. **IMPORTANT:** Copilot suggestions alone do NOT burn generation credits — only the deep-linked `/api/generate` call does. So the 401 only fires if we elect to charge a small "copilot query" anon credit. Default: do NOT charge copilot for suggestions (unlimited anon queries). Document this in a comment in the route handler.
+
+Server route hands off to `buildCopilotSuggestion(lastUserMessage, intent)` from `lib/copilot.ts` and returns the result. No provider call, no external LLM, no DB write. This keeps the whole feature deterministic and testable in CI.
+
+## Design-token constraints
+
+- CTA buttons (Send, primary action chip): `bg-brand-gradient` + `glow-btn`.
+- Assistant bubbles: `bg-white/10 text-white`.
+- User bubbles: `bg-brand-gradient text-white`.
+- Cards (starter grid): `bg-[#181828] border border-white/15 hover:border-white/25`.
+- Hero title: use `text-brand-gradient` utility — **NOT** `bg-brand-gradient bg-clip-text text-transparent` (that's the known bug spelled out in the caller instructions and Higgsfield Popcorn audit). There IS a `.text-brand-gradient` utility in `app/globals.css` line 71; use it directly as a class.
+- Zero `slate-`, `zinc-`, or `gray-` base color tokens (`gray-400` etc). Use `white/10`, `white/15`, `white/60`, `white/70` or the named colors `pink-*`, `purple-*`, `cyan-*`, `orange-*` for accents only.
+- Icons: inline SVG at 16px (w-4 h-4) inside action chips.
+- Action chip variant rules:
+  - Primary (index 0): `bg-brand-gradient text-white glow-btn`.
+  - Secondary (index 1+): `border border-white/15 bg-white/5 text-white hover:bg-white/10`.
+
+## Test plan
+
+### Vitest unit tests — `tests/copilot.test.ts`
+
+Pure helper tests; no DB, no network, no React.
+
+1. `COPILOT_STARTERS.length === 6` — guards against accidental drift.
+2. Every starter has a non-empty `intent`, `label`, `prompt`; `intent` values are globally unique.
+3. `buildCopilotSuggestion("make a 10s cinematic reel of a samurai in rain")` returns `reply.length > 0`, `actions.length >= 1`, and contains at least one action with `type === "create-video"` (because the prompt contains "reel" / "video" / "cinematic").
+4. `buildCopilotSuggestion("style a fashion lookbook")` returns at least one action with `type === "fashion-factory"` and `href` starting with `/tools/fashion-factory`.
+5. `buildCopilotSuggestion("short-form tiktok")` returns at least one action with `type === "popcorn-preset"` and `href` starting with `/tools/popcorn?preset=`.
+6. `buildCopilotSuggestion("build a character")` returns at least one action with `href` starting with `/tools/soul-id` OR `/tools/soul-cast` OR `type === "tool-redirect"`.
+7. `buildCopilotSuggestion("turn this photo into a video")` returns at least one `type === "image-to-video"` action.
+8. `buildCopilotSuggestion("write a narrative for soul cinema")` returns at least one `type === "soul-cinema"` action; the `href` carries `?story=` with the prompt urlencoded.
+9. `buildCopilotSuggestion("xyz unreadable gibberish 123")` still returns a valid `CopilotSuggestion` with `actions.length >= 1` (fallback: at least one "Open Create" action).
+10. All actions returned by `buildCopilotSuggestion(...)` always have non-empty `label`, non-empty `href` starting with `/`, a valid `type`, and the `href` passes a simple URL parse (no malformed querystrings).
+11. `buildCopilotSuggestion(...).actions.length <= 4` — hard cap to keep UI tidy.
+12. `buildCopilotSuggestion("make a video", "short-form")` (explicit intent) overrides the keyword match and forces Popcorn to be the primary action (index 0).
+13. `buildCopilotSuggestion` treats the prompt case-insensitively (same result for `"REEL"` and `"reel"`).
+14. Sidebar assertion: verify via source-file grep that `components/sidebar.tsx` contains `href: "/copilot"` and does NOT contain `label: "AI Chat"` after the rename. Use `fs.readFileSync` in the unit test.
+15. `P2_TOOLS` contains exactly one entry with `slug === "copilot"`.
+
+### Playwright E2E — `e2e/copilot.spec.ts`
+
+Non-opt-in tests (8) + 1 opt-in FAL_KEY-gated round-trip for the downstream deep-link.
+
+1. **Page renders.** `await page.goto('/copilot')`. `expect(page.getByRole('heading', { name: 'Copilot' })).toBeVisible()`. `expect(page.getByTestId('copilot')).toBeVisible()`.
+2. **Starter grid has 6 cards.** `expect(page.getByTestId('starter-card')).toHaveCount(6)`.
+3. **Starter click sends a message.** Click the first `starter-card`. Wait for `message-bubble` with `data-role="user"` to appear. Then wait for `data-role="assistant"`. Verify at least one `action-chip` is visible.
+4. **Free-text send.** Fill the compose box with `"make a 10 second cinematic reel of a samurai in rain"`, click `send-btn`. Wait for user bubble, then assistant bubble. Assert at least one `action-chip` has `data-action-type="create-video"`.
+5. **Action chip navigation.** Click the first `action-chip` after the assistant reply in test 4. Expect `page.url()` to start with `/create/video?model=`. Verify `?prompt=` carries the urlencoded original message (contains `samurai`).
+6. **Fashion Factory deep-link prefill.** Click a starter card whose intent is `fashion-lookbook`. When the assistant reply renders, click the first `action-chip` → expect URL starts with `/tools/fashion-factory?prompt=`. Then navigate there, and assert the style-prompt textarea is pre-filled. (If the deep-link implementation is deferred to a follow-up, split this test into two and mark the prefill assertion `test.fixme` — do not gate merge on it.)
+7. **Popcorn deep-link prefill.** Analogous to test 6 but targets `/tools/popcorn?preset=cafe-gloom&subject=...`. After navigation, assert the preset card with `data-preset-id="cafe-gloom"` has `aria-pressed="true"` and the subject textarea is pre-filled.
+8. **Sidebar rename.** Open sidebar. Assert a link labelled `Copilot` exists with `href="/copilot"`. Assert NO link labelled `AI Chat` exists (verifies the rename, not an additive change).
+9. **Legacy /chat still loads.** `await page.goto('/chat')`. The page must return 200 (not 404). It may render either the legacy chat OR the new Copilot — either is acceptable.
+10. **Design tokens.** Use `page.evaluate` + a word-boundary regex to scan the rendered DOM of `/copilot` for `slate-` and `zinc-` class tokens. Must be zero. Use the same pattern that fixed the Popcorn audit:
+    ```ts
+    const bad = await page.evaluate(() => {
+      const all = Array.from(document.querySelectorAll('*'));
+      const rx = /\b(slate|zinc)-\d/;
+      return all.filter((el) => rx.test(el.className || '')).length;
+    });
+    expect(bad).toBe(0);
+    ```
+    Do **not** use `[class*="slate-"]` as a CSS selector — it false-positive matches `translate-x-0`.
+11. **Apps gallery shows Copilot card.** `await page.goto('/apps')`. Locate a card labelled `Copilot`. Clicking it navigates to `/copilot`.
+12. **No Prisma writes on copilot POST.** Intercept `/api/copilot/suggest`, trigger it, and assert response body has `reply`, `actions`, `intent`. We don't need to assert the DB directly — just that the endpoint works in an anonymous browser session with no cookie prep.
+13. **Opt-in: real downstream generation round-trip.** `test.skip(!process.env.FAL_KEY, 'needs FAL_KEY')` **inside the test body** (not at describe-block level — this was a regression the Popcorn round fixed). Send `"make a 5 second video of a neon city"`. Click the first action chip. On the landing page, fill any required extra fields and click Generate. Wait up to 90s for a `https://fal.media/...` URL to appear. This test is allowed to be flaky/slow.
+
+### Design-token constraints reminder (for the builder)
+
+- `text-brand-gradient` utility — **NOT** `bg-brand-gradient bg-clip-text text-transparent`.
+- `glow-btn` on primary CTAs only.
+- Zero `slate-`, `zinc-`, `gray-` base color tokens.
+- Cards: `bg-[#181828] border border-white/15`.
+- Backgrounds: `bg-[#111122]` for the app shell; `bg-[#0a0a16]` for footer-level depth.
+
+### Builder guardrails (required)
+
+1. `npx next build` (not `npm run build`) — this is the green-light gate.
+2. Do NOT run `prisma generate` in any builder script — Windows EPERM on the .dll file lock. Vercel handles it fine at deploy time.
+3. Suspense-wrap **every** client component that calls `useSearchParams` — includes `copilot.tsx` (reads `?q=`), `popcorn.tsx` (reads `?preset=&subject=`), `fashion-factory.tsx` (reads `?prompt=`), `soul-cinema.tsx` (reads `?story=&genre=`). Next 15 bails the build on un-wrapped usage.
+4. `Promise.allSettled` fan-out pattern — **not relevant for Copilot itself** (single POST), but preserve it in Popcorn/Fashion/Cinema when you add deep-link support. Do not accidentally change those files' generation logic.
+5. `handleAuthRequired` from `@/lib/auth-redirect` — wire on the `POST /api/copilot/suggest` call in `copilot.tsx` even though the route currently doesn't 401. The hook is cheap and future-proofs the feature.
+6. `test.skip(!process.env.FAL_KEY, ...)` **INSIDE each test body**, not at describe-block level. This is a repeated regression.
+7. No Prisma migration. No Stripe. No billing code changes.
+8. Playwright color-token check uses `page.evaluate` + word-boundary regex, NOT `[class*="slate-"]` which false-positive matches `translate-x-*` utilities.
+9. Build order: `lib/copilot.ts` → unit tests → `app/api/copilot/suggest/route.ts` → components → `app/copilot/page.tsx` → sidebar rename + p2-tools entry → Suspense-wrap the 4 consumer pages → e2e.
+10. Keep `/api/chat` and `app/chat/page.tsx` alive. Rename only navigation surfaces. Legacy URL must not 404.
+11. Zero new `slate-`, `zinc-`, `gray-` tokens in any new file under `components/copilot/`, `app/copilot/`, `app/api/copilot/`, or `lib/copilot.ts`. Run a final `Grep -r "slate-\|zinc-\|gray-"` over the new directories before declaring done.
 
 ## Acceptance criteria
 
-1. `npx next build` passes with no new errors or warnings.
-2. `/tools/popcorn` returns 200 and renders a page with heading `Popcorn` and `data-testid="popcorn"` on the root client component.
-3. The preset grid shows **exactly 12** preset cards, each with `data-testid="preset-card"` and a `data-preset-id` attribute matching one of the 12 ids in `POPCORN_PRESETS`.
-4. Clicking a preset card sets `aria-pressed="true"` on that card and `"false"` on the other 11; the selected preset id is reflected in a `data-selected-preset` attribute on the root `popcorn` testid container.
-5. The subject-prompt textarea enforces a **140-char soft limit** with a visible remaining counter.
-6. The **Pop** button is disabled until a preset is selected AND the subject prompt has at least one non-whitespace character. Button has `data-testid="pop-btn"`.
-7. Clicking Pop fires **exactly 3** parallel `POST /api/generate` requests (or 1 `POST /api/popcorn/pack` that fans out server-side — either is acceptable). Each request has `mediaType: "video"`, `aspectRatio: "9:16"`, `duration` matching the preset, and a distinct `seed`.
-8. The three clip tiles render immediately in `running` state (`data-status="running"`), then each transitions independently to `succeeded` (with a `<video>` child element) or `failed` (with a retry button).
-9. A single-clip failure does **not** abort the other two. Failed tile shows `data-testid="retry-clip-btn"`; clicking retry re-fires only that one seed and the tile re-enters `running`.
-10. On 401 `auth_required` from any of the 3 requests, the client calls `handleAuthRequired` once (not thrice) and bounces the browser to `/auth/signup?return=/tools/popcorn`.
-11. With at least 1 `succeeded` clip the `Share pack to community` button enables. Clicking it calls `/api/popcorn/share` (or `/api/community/posts` with `toolUsed: "popcorn"`) and on success navigates to `/community`.
-12. Sidebar **Effects & Templates** section has a `Popcorn` link as the **second** item (right after `All Effects`), with `href="/tools/popcorn"`.
-13. `/apps` grid card for `popcorn` exists, renders its category badge (`editing`) and media-out badge (`video`), and links to `/tools/popcorn`.
-14. Design tokens are consistent: cards use `bg-[#181828]`, borders use `border-white/15` (or `white/10`), CTAs use `bg-brand-gradient` + `glow-btn`. **Zero** occurrences of `slate-` or `zinc-` tokens in any new file under `components/popcorn/`, `app/tools/popcorn/`, `app/api/popcorn/`, or `lib/popcorn.ts`.
-15. **No `blob:` URLs reach `/api/generate`**. The subject-uploader must upload to `/api/upload` first and pass back the hosted URL (same pattern as `person-dropzone.tsx`).
-
-## Test cases
-
-### Vitest unit tests — `tests/popcorn.test.ts`
-
-All tests operate on pure helpers in `lib/popcorn.ts`. No DB, no network, no React.
-
-1. `POPCORN_PRESETS.length === 12` — guards against accidental preset drift.
-2. Every preset has a non-empty `id`, `name`, `tagline`, `basePrompt`, `motion`, `tone`, `gradientClass`; `aspectRatio === "9:16"`; `durationSec` is 3 or 5; `model` is one of `"kling-25-turbo"` or `"seedance-20"`.
-3. Preset ids are globally unique (`new Set(ids).size === 12`).
-4. `getPopcornPreset("snack-hop")` returns the matching preset.
-5. `getPopcornPreset("does-not-exist")` returns `undefined`.
-6. `composePopcornPrompt(preset, "a skateboarder")` includes the subject verbatim, includes `preset.basePrompt`, includes `preset.motion`, includes `preset.tone`, and does NOT include `subjectImageUrl`.
-7. `buildPopcornBatch("snack-hop", "a skater")` returns an array of length 3.
-8. Every element has `mediaType: "video"`, `aspectRatio: "9:16"`, and `duration === preset.durationSec`.
-9. The 3 elements have 3 distinct seeds (`new Set(batch.map(b => b.seed)).size === 3`).
-10. Passing `subjectImageUrl: "https://x.com/a.jpg"` sets `imageUrl` on every element; omitting it means no element has `imageUrl`.
-11. `buildPopcornBatch("snack-hop", "")` throws `Error` with message matching `/subject/i` (empty subject guard).
-12. `buildPopcornBatch("unknown-preset", "anything")` throws `Error` with message matching `/preset/i`.
-13. Explicit seeds override defaults: `buildPopcornBatch("snack-hop", "x", undefined, [1,2,3]).map(b=>b.seed)` equals `[1,2,3]`.
-14. Sidebar assertion: verify via import that the Effects & Templates section of `SIDEBAR_SECTIONS` (lift it to a module-level export if not already) contains, at index 1, `{ href: "/tools/popcorn", label: "Popcorn" }`. If lifting the constant is disruptive, use a static source-file grep inside the test that asserts the exact line exists in `components/sidebar.tsx`.
-15. `P2_TOOLS` contains exactly one entry with `slug === "popcorn"`, `category === "editing"`, `mediaOut === "video"`, and `inputs.length >= 2`.
-
-### Playwright E2E — `e2e/popcorn.spec.ts`
-
-Happy path and failure paths. Uses the dev server, `mockProvider` in the AI layer, and `test.skip(!process.env.FAL_KEY, ...)` **inside the test body** (NOT at describe-block level — this was a real regression the Soul Cinema round fixed) for the one real-fal.ai round-trip.
-
-1. **Page renders.** `await page.goto('/tools/popcorn')`. `expect(page.getByRole('heading', { name: 'Popcorn' })).toBeVisible()`. `expect(page.getByTestId('popcorn')).toBeVisible()`.
-2. **Preset grid has 12 cards.** `expect(page.getByTestId('preset-card')).toHaveCount(12)`. (If the UI collapses to 4 by default, click `see all` first.)
-3. **Preset selection toggles aria-pressed.** Click the 3rd preset card; assert it has `aria-pressed="true"` and the other cards have `aria-pressed="false"`.
-4. **Pop button gated.** Initially disabled. Select preset — still disabled (no subject). Type subject — enabled.
-5. **Happy path — 3 clips succeed (mocked provider).** Fill subject, select preset, click `pop-btn`. Wait for 3 `clip-tile` elements with `data-status="succeeded"`. Assert each has a nested `<video>` element. Assert the three `data-seed` attributes are distinct.
-6. **Partial failure + retry.** Route-intercept `/api/generate` so the second of three calls responds with `{status:"failed"}` (HTTP 502). After Pop: exactly 1 tile has `data-status="failed"`, 2 have `data-status="succeeded"`. The failed tile exposes `retry-clip-btn`. Click retry — that tile re-enters `running`, then `succeeded` (intercept reset for retry). The other two tiles remain untouched.
-7. **Auth-required bounce.** Intercept `/api/generate` to return 401 `{error:"auth_required"}`. Click Pop. Expect `page.url()` to equal `/auth/signup?return=/tools/popcorn` (wait for navigation). Guarantees `handleAuthRequired` fires at most once despite the 3-way fan-out.
-8. **Sidebar link present.** Open sidebar, expand Effects & Templates, click `Popcorn`, expect `/tools/popcorn`.
-9. **/apps shows the card.** `await page.goto('/apps')`. Click the card labelled `Popcorn`. Expect `/tools/popcorn`.
-10. **Share pack action.** After mocked happy path, click `Share pack to community`, assert final URL starts with `/community` and the POST body captured via request interception includes `toolUsed: "popcorn"`.
-11. **Design tokens.** `await expect(page.locator('[class*="slate-"], [class*="zinc-"]')).toHaveCount(0)` on `/tools/popcorn`.
-12. **9:16 clips.** Each clip-tile container has `aspect-[9/16]` (or equivalent `style.aspectRatio === "9 / 16"`) — assert via `getAttribute('class')` regex or computed style.
-13. **Real fal.ai (optional, gated).** `test.skip(!process.env.FAL_KEY, 'needs FAL_KEY')` placed **inside the test body**. Fills form, clicks Pop, waits up to 90s for at least one tile to transition to `succeeded` with a real `https://fal.media/...` URL. This test is allowed to be flaky/slow; it is opt-in via env.
-
----
-
-### Builder instructions summary
-
-1. Do NOT touch `/api/generate`, `/api/soul-cinema/*`, `lib/soul-cinema.ts`, `lib/fashion.ts`, or any existing component outside of `components/sidebar.tsx` and `lib/tools/p2-tools.ts`.
-2. Create files in this order: `lib/popcorn.ts` -> unit tests -> `app/api/popcorn/pack/route.ts` + `app/api/popcorn/share/route.ts` -> components -> `app/tools/popcorn/page.tsx` -> sidebar + p2-tools edits -> e2e.
-3. Mirror the auth pattern from `components/fashion/fashion-factory.tsx` (see `handleAuthRequired`, `Promise.allSettled`, upload-before-generate).
-4. Every new UI file must pass the design-token grep (no `slate-`, `zinc-`, `gray-` as base tokens — use `white/10`, `white/15`, `#181828`, `#111122`, `text-brand-gradient`, `bg-brand-gradient`, `glow-btn`).
-5. Remember the Windows quirk: do NOT run `prisma generate` in builder scripts — it hits a DLL file lock. `npx next build` alone is the green-light gate.
+1. `npx next build` passes with no new errors or warnings. All 18 model slugs still prerender; `/tools/popcorn`, `/tools/soul-cinema`, `/tools/fashion-factory`, `/u/[username]`, `/apps`, `/models`, `/community` still compile.
+2. `/copilot` returns 200 and renders a page with heading `Copilot` (case-sensitive) and `data-testid="copilot"` on the root client component.
+3. The starter grid shows **exactly 6** starter cards, each with `data-testid="starter-card"` and a distinct `data-intent`. Hidden once `messages.length > 0`.
+4. Typing a message and clicking Send produces a user bubble (`data-role="user"`) followed by an assistant bubble (`data-role="assistant"`) with at least one `action-chip` child.
+5. `POST /api/copilot/suggest` returns `{ reply, actions, intent }`. Response passes the Zod schema on the client side (no `any`).
+6. Every `CopilotAction.href` starts with `/` and is a valid relative URL parseable by `new URL(href, "http://x")`.
+7. Clicking an action chip navigates to the correct deep link (`/create/video?model=...&prompt=...` or the appropriate tool route).
+8. `/tools/popcorn?preset=cafe-gloom&subject=coffee+shop+mood` pre-selects the `cafe-gloom` preset (card `aria-pressed="true"`) and pre-fills the subject textarea.
+9. `/tools/fashion-factory?prompt=y2k+streetwear` pre-fills the style prompt textarea.
+10. `/tools/soul-cinema?story=samurai+in+rain&genre=noir` pre-fills the story textarea and selects the `noir` genre chip.
+11. Sidebar QUICK_LINKS has exactly one entry with `label: "Copilot"` and `href: "/copilot"`. There is NO entry with `label: "AI Chat"`.
+12. `/chat` still returns 200 (legacy URL not broken).
+13. `/apps` grid renders a card for the `copilot` entry in `P2_TOOLS` and clicking it navigates to `/copilot`.
+14. Design tokens are consistent: hero title uses `text-brand-gradient`, CTAs use `bg-brand-gradient` + `glow-btn`, cards use `bg-[#181828]` + `border-white/15`. **Zero** occurrences of `slate-`, `zinc-`, or `gray-` base tokens in any new file under `components/copilot/`, `app/copilot/`, `app/api/copilot/`, or `lib/copilot.ts`.
+15. Unit tests (15/15) pass. E2E (11/12 non-opt-in; the 12th is FAL_KEY-gated inside the test body).

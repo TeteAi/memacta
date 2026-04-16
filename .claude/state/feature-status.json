@@ -2368,9 +2368,23 @@
         "failures": [],
         "coverageNotes": "All 15 acceptance criteria verified via static analysis and tests. Unit tests (10/10): composeFashionPrompt (outfit URL in prompt, person URL NOT in prompt, fallback style, verbatim querystring, newlines JSON-encodable), buildFashionBatch (length-2 with correct shape, empty for no outfits, throws for 7+ outfits, empty for blank personUrl, filters empty outfit URLs), sidebar Identity ordering. E2E tests (6/7 pass, 1 skipped): page heading + data-testid, generate button disabled gate, sidebar Identity link, /apps page card, mocked generation succeeds + lookbook tile data-status=succeeded, partial failure tile-1 fails + retry button visible. Real fal.ai round-trip skipped (no FAL_KEY). Fixed bug: test.skip(!FAL_KEY) was placed at describe-block level causing all 7 tests to skip — moved inside the test body. Static analysis confirmed: Promise.allSettled fan-out, handleAuthRequired from @/lib/auth-redirect, no blob: URLs to /api/generate (URL passthrough), design tokens #181828 cards / white/15 borders / text-brand-gradient / glow-btn, sidebar Identity insertion between Outfit Swap and AI Influencer, dedicated app/tools/fashion-factory/page.tsx route, fashion-factory entry in p2-tools.ts with category:identity and mediaOut:image, no slate-/zinc- tokens."
       }
+    },
+    "copilot": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "testReport": {
+        "unit": { "passed": 15, "failed": 0 },
+        "e2e": { "passed": 12, "failed": 0, "skipped": 1 },
+        "notes": "15/15 unit + 12/12 non-opt-in E2E green. Test 13 (real fal.ai round-trip) skipped via FAL_KEY gate inside test body. Fixed one gap: /apps page tool cards needed data-testid=\"tool-card\" + data-slug for test 11 — added to app/apps/page.tsx. No core component changes needed."
+      },
+      "priority": "P1",
+      "source": "feature-gap-analysis.md — 'Copilot' listed under MISSING completely. Chosen over Mixed Media (requires heavy timeline surgery — deferred), Reference Extension (overlaps with shipped Multi Reference + Soul ID + Soul Moodboard + Soul Cast), UGC Factory (structurally near-identical to shipped Fashion Factory — re-skin risk flagged in caller directive), and Sora 2 Upscale (narrow single-model utility duplicating Upscale). Copilot is the widest-reach remaining feature: a single conversational surface that exposes all 18 models, 33+ tools, 12 Popcorn presets, Soul Cinema, and Fashion Factory via deep-linked action chips. Also the highest-visible quality upgrade because the current /chat returns a mock 'memacta: I understand. (mock)' — demonstrably a stub.",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-7e41411 audit: `npx next build` PASS. All 18 model slugs prerendered (/models/kling-3 ... flux-2). /tools/popcorn (6.33 kB), /tools/soul-cinema (7.2 kB), /tools/fashion-factory (5.62 kB), /tools/ai-influencer (8.9 kB), /u/[username], /apps, /community, /effects/[id] all compile. Sidebar Effects & Templates has Popcorn at index 1 (correct). P2_TOOLS has popcorn entry with category:editing mediaOut:video. lib/popcorn.ts + lib/soul-cinema.ts + lib/fashion.ts patterns intact. Zero regressions, zero slate-/zinc- tokens in components/popcorn/. No REWORK needed. Spec for Copilot deliberately scoped to zero Prisma deltas, zero Stripe touch, zero provider code. Rule-based suggestion engine keeps the build deterministic and testable without a live LLM. Leverages existing ?model= + ?prompt= deep-link contracts on /create/video, /create/image, /create/image-to-video, and extends them to /tools/popcorn (?preset=&subject=), /tools/fashion-factory (?prompt=), /tools/soul-cinema (?story=&genre=). Builder must Suspense-wrap 4 existing client components that newly read useSearchParams. /api/chat and components/chat/chat.tsx intentionally preserved to avoid breaking legacy URL + existing tests."
     }
   },
-  "currentFeature": "higgsfield-popcorn",
+  "currentFeature": "copilot",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import PresetGrid from "./preset-grid";
 import SubjectUploader from "./subject-uploader";
 import SubjectInput from "./subject-input";
 import ClipGrid from "./clip-grid";
 import PackActions from "./pack-actions";
-import { buildPopcornBatch, getPopcornPreset } from "@/lib/popcorn";
+import { buildPopcornBatch, getPopcornPreset, POPCORN_PRESETS } from "@/lib/popcorn";
 import { handleAuthRequired } from "@/lib/auth-redirect";
 import type { ClipTileState } from "./clip-tile";
 
@@ -19,8 +20,23 @@ function getProductionSeeds(): [number, number, number] {
 }
 
 export default function Popcorn() {
+  const searchParams = useSearchParams();
   const [presetId, setPresetId] = useState<string | null>(null);
   const [subjectPrompt, setSubjectPrompt] = useState("");
+
+  // Deep-link: read ?preset= and ?subject= on mount
+  useEffect(() => {
+    const presetParam = searchParams.get("preset");
+    const subjectParam = searchParams.get("subject");
+    if (presetParam) {
+      const valid = POPCORN_PRESETS.find((p) => p.id === presetParam);
+      if (valid) setPresetId(presetParam);
+    }
+    if (subjectParam) {
+      setSubjectPrompt(subjectParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [subjectPreview, setSubjectPreview] = useState<string | null>(null);
   const [subjectUrl, setSubjectUrl] = useState<string | null>(null);
   const [subjectUploading, setSubjectUploading] = useState(false);

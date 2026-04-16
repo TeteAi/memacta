@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import Copilot from "@/components/copilot/copilot";
 
-// Legacy /chat URL — renders the upgraded Copilot so existing links still work.
-// The original Chat component at components/chat/chat.tsx and /api/chat route
-// are intentionally preserved so any direct API tests don't break.
+export const metadata = {
+  title: "memacta - Copilot",
+  description:
+    "Your AI director — I'll pick the right model, tool, and preset for your creative vision.",
+};
 
-export const metadata = { title: "memacta – Copilot" };
-
-export default function ChatPage() {
+export default function CopilotPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-10 h-[calc(100vh-4rem)] flex flex-col">
       {/* Header */}

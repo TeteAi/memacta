@@ -18,6 +18,8 @@ export default function AppsPage() {
           <Link
             key={tool.slug}
             href={`/tools/${tool.slug}`}
+            data-testid="tool-card"
+            data-slug={tool.slug}
             className="rounded-xl border border-white/15 bg-[#181828] p-5 hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all group"
           >
             <div className="w-10 h-10 rounded-lg bg-brand-gradient flex items-center justify-center mb-3">

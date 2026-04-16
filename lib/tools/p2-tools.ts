@@ -173,6 +173,15 @@ export const P2_TOOLS: ToolDef[] = [
       { key: "subject", label: "Subject prompt", type: "prompt" },
     ],
   },
+  {
+    id: "copilot",
+    slug: "copilot",
+    name: "Copilot",
+    description: "Your AI director - ask and I'll pick the model, tool, and preset.",
+    category: "identity",
+    mediaOut: "image",
+    inputs: [{ key: "prompt", label: "What do you want to make?", type: "prompt" }],
+  },
 ];
 
 export function getToolBySlug(slug: string): ToolDef | undefined {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Session } from "next-auth";
+import { SessionProvider } from "next-auth/react";
 import Nav from "@/components/nav";
 import Sidebar from "@/components/sidebar";
 
@@ -15,7 +16,7 @@ export default function AppShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <>
+    <SessionProvider session={session}>
       <Nav
         session={session}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -25,6 +26,6 @@ export default function AppShell({
       <div className="lg:pl-64 flex-1 flex flex-col transition-all duration-300">
         {children}
       </div>
-    </>
+    </SessionProvider>
   );
 }

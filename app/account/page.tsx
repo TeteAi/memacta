@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ConnectAccounts from "@/components/social/connect-accounts";
 import ScheduledPosts from "@/components/social/scheduled-posts";
+import DangerZone from "@/components/account/danger-zone";
 import { userToUsername } from "@/lib/profile";
 
 function formatUsd(cents: number): string {
@@ -124,7 +125,7 @@ export default async function AccountPage() {
       </div>
 
       {purchases.length === 0 ? (
-        <p className="text-white/60 text-center py-8">No purchases yet. Visit the pricing page to get started!</p>
+        <p className="text-white/60 text-center py-8 mb-8">No purchases yet. Visit the pricing page to get started!</p>
       ) : (
         <div className="rounded-2xl border border-white/15 bg-[#181828] overflow-hidden">
           <table className="w-full text-sm">
@@ -157,6 +158,10 @@ export default async function AccountPage() {
           </table>
         </div>
       )}
+
+      <div className="mt-10">
+        <DangerZone />
+      </div>
     </main>
   );
 }

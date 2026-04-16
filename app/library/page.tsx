@@ -10,13 +10,28 @@ export const dynamic = "force-dynamic";
 export default async function LibraryPage() {
   const session = await auth();
   const userId = (session?.user as { id?: string } | undefined)?.id;
-  const where = userId ? { userId } : undefined;
 
-  const [generations, characters, projects] = await Promise.all([
-    prisma.generation.findMany({ where, orderBy: { createdAt: "desc" } }),
-    prisma.character.findMany({ where, orderBy: { createdAt: "desc" } }),
-    prisma.project.findMany({ where, orderBy: { createdAt: "desc" } }),
-  ]);
+  // When signed out we used to fall through to `where: undefined`, which
+  // returned every Generation row in the DB to the anonymous visitor —
+  // effectively exposing every user's library. Now: signed out → empty
+  // result, so the page shows the signin/"Start Creating" CTA instead
+  // of other people's work.
+  const [generations, characters, projects] = userId
+    ? await Promise.all([
+        prisma.generation.findMany({
+          where: { userId },
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.character.findMany({
+          where: { userId },
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.project.findMany({
+          where: { userId },
+          orderBy: { createdAt: "desc" },
+        }),
+      ])
+    : [[], [], []] as const;
 
   const items: LibraryItem[] = [
     ...generations.map((g) => ({

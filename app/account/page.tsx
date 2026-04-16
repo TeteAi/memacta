@@ -7,6 +7,7 @@ import ConnectAccounts from "@/components/social/connect-accounts";
 import ScheduledPosts from "@/components/social/scheduled-posts";
 import DangerZone from "@/components/account/danger-zone";
 import { userToUsername } from "@/lib/profile";
+import { isAdminEmail } from "@/lib/admin";
 
 function formatUsd(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -75,12 +76,22 @@ export default async function AccountPage() {
     <main className="mx-auto max-w-4xl px-6 py-12">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-brand-gradient">Account</h1>
-        <Link
-          href={`/u/${encodeURIComponent(profileUsername)}`}
-          className="text-sm font-medium px-4 py-2 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
-        >
-          View public profile
-        </Link>
+        <div className="flex items-center gap-2">
+          {isAdminEmail(user.email) && (
+            <Link
+              href="/admin/messages"
+              className="text-sm font-medium px-4 py-2 rounded-xl border border-brand-pink/40 text-brand-pink hover:bg-brand-pink/10 transition-colors"
+            >
+              Admin: Messages
+            </Link>
+          )}
+          <Link
+            href={`/u/${encodeURIComponent(profileUsername)}`}
+            className="text-sm font-medium px-4 py-2 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
+          >
+            View public profile
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-white/15 bg-[#181828] p-6 mb-8">

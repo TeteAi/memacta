@@ -2382,9 +2382,23 @@
       "source": "feature-gap-analysis.md — 'Copilot' listed under MISSING completely. Chosen over Mixed Media (requires heavy timeline surgery — deferred), Reference Extension (overlaps with shipped Multi Reference + Soul ID + Soul Moodboard + Soul Cast), UGC Factory (structurally near-identical to shipped Fashion Factory — re-skin risk flagged in caller directive), and Sora 2 Upscale (narrow single-model utility duplicating Upscale). Copilot is the widest-reach remaining feature: a single conversational surface that exposes all 18 models, 33+ tools, 12 Popcorn presets, Soul Cinema, and Fashion Factory via deep-linked action chips. Also the highest-visible quality upgrade because the current /chat returns a mock 'memacta: I understand. (mock)' — demonstrably a stub.",
       "specPath": ".claude/state/next-feature-spec.md",
       "supervisor_notes": "Post-7e41411 audit: `npx next build` PASS. All 18 model slugs prerendered (/models/kling-3 ... flux-2). /tools/popcorn (6.33 kB), /tools/soul-cinema (7.2 kB), /tools/fashion-factory (5.62 kB), /tools/ai-influencer (8.9 kB), /u/[username], /apps, /community, /effects/[id] all compile. Sidebar Effects & Templates has Popcorn at index 1 (correct). P2_TOOLS has popcorn entry with category:editing mediaOut:video. lib/popcorn.ts + lib/soul-cinema.ts + lib/fashion.ts patterns intact. Zero regressions, zero slate-/zinc- tokens in components/popcorn/. No REWORK needed. Spec for Copilot deliberately scoped to zero Prisma deltas, zero Stripe touch, zero provider code. Rule-based suggestion engine keeps the build deterministic and testable without a live LLM. Leverages existing ?model= + ?prompt= deep-link contracts on /create/video, /create/image, /create/image-to-video, and extends them to /tools/popcorn (?preset=&subject=), /tools/fashion-factory (?prompt=), /tools/soul-cinema (?story=&genre=). Builder must Suspense-wrap 4 existing client components that newly read useSearchParams. /api/chat and components/chat/chat.tsx intentionally preserved to avoid breaking legacy URL + existing tests."
+    },
+    "mixed-media": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "priority": "P4",
+      "source": "feature-gap-analysis.md line 6 — 'Mixed Media' listed under MISSING completely. The stale 2026-04-09 entries mixed-media-presets and mixed-media-community were status stubs: grep across lib/ components/ app/ confirms zero mixed-media code files. Chosen as the 5th preset-driven creation tool (distinct from Fashion Factory, Soul Cinema, Popcorn, Copilot) — blends 2-3 aesthetic styles into a single output via composed prompts fired in parallel through /api/generate.",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-09b354c (copilot) audit: `npx next build` PASS. /copilot (128 B + 109 kB shared), /tools/popcorn (6.39 kB), /tools/soul-cinema (7.3 kB), /tools/fashion-factory (5.74 kB), /tools/ai-influencer (8.9 kB), all 18 /models/[slug] prerendered, /u/[username], /apps, /chat (legacy preserved), /api/chat, /api/copilot/suggest all compile. Zero slate-/zinc- tokens in components/copilot/ or app/copilot/. Sidebar Copilot QUICK_LINKS entry intact at position 3. No regressions. Selected Mixed Media over UGC Factory (caller-flagged re-skin risk), Reference Extension (overlap with shipped tools), Sora 2 Upscale (narrow duplicate), Careers/Discord (low-impact quick wins for deploy-agent). Spec scoped to zero Prisma deltas and zero new providers — reuses /api/generate fan-out pattern identical to Fashion Factory / Soul Cinema / Popcorn. 12 style presets with compatibleMedia gate prevents invalid image-only+video combinations. Deep-link contract ?preset=&subject= aligns with Copilot's suggestion chips so the conversational director can deep-link into this tool on day one.",
+      "testReport": {
+        "unit": { "passed": 16, "failed": 0 },
+        "e2e": { "passed": 12, "failed": 0, "skipped": 1 },
+        "notes": "16/16 unit + 12/12 non-opt-in E2E green. Test 13 (real fal.ai round-trip) skipped via FAL_KEY gate. Fixed 4 test-selector issues (no component bugs): test 4 used click() on disabled button (switched to force:true + toBeDisabled assertion); test 6 used filter({has: [data-style-id=...]}) where data-style-id sits on the same element as data-testid (switched to combined attribute selector); test 7 getByRole('button', {name:'Video'}) matched both sidebar 'Video Tools' and output-settings button (scoped to output-settings testid); test 11 Mixed Media link strict-mode violation between sidebar + footer (scoped to complementary role)."
+      }
     }
   },
-  "currentFeature": "copilot",
+  "currentFeature": "mixed-media",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

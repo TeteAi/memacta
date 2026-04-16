@@ -116,6 +116,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
     items: [
       { label: "All Effects", href: "/effects" },
       { label: "Popcorn", href: "/tools/popcorn" },
+      { label: "Mixed Media", href: "/tools/mixed-media" },
       { label: "On Fire", href: "/effects/on-fire" },
       { label: "Neon Glow", href: "/effects/neon-glow" },
       { label: "Crystal Shatter", href: "/effects/crystal-shatter" },

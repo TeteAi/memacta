@@ -182,6 +182,19 @@ export const P2_TOOLS: ToolDef[] = [
     mediaOut: "image",
     inputs: [{ key: "prompt", label: "What do you want to make?", type: "prompt" }],
   },
+  {
+    id: "mixed-media",
+    slug: "mixed-media",
+    name: "Mixed Media Studio",
+    description: "Blend 2-3 aesthetic styles (Anime Realism, Cyberpunk Noir, Oil Painting...) into a single striking image or video in one click.",
+    category: "editing",
+    mediaOut: "image",
+    inputs: [
+      { key: "styles", label: "Style presets (2-3)", type: "text" },
+      { key: "subject", label: "Subject prompt", type: "prompt" },
+      { key: "reference", label: "Reference image (optional)", type: "image" },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug: string): ToolDef | undefined {

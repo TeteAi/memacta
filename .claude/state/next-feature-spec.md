@@ -1,263 +1,336 @@
-# Feature: copilot
+# Feature: mixed-media
 
-- **Name:** memacta Copilot
-- **Category:** P0 — Conversational creative assistant (upgrades the existing dead `/chat` stub into a real prompt-crafting + deep-linking copilot)
-- **Priority:** P1 (highest-ROI remaining gap — takes the stubbed `/chat` mock-reply surface and turns it into a real creator-aiming assistant that deep-links users into every shipped tool)
-- **Source:** `feature-gap-analysis.md` — "Copilot" listed under MISSING completely. Chosen over Mixed Media (requires heavy timeline surgery), Reference Extension (overlaps with Multi Reference + Soul ID + Soul Moodboard + Soul Cast), UGC Factory (structurally near-identical to shipped Fashion Factory — re-skin risk), and Sora 2 Upscale (narrow single-model utility that duplicates existing Upscale). Copilot is the widest-reach remaining feature: one conversational surface that exposes all 18 models, 33+ tools, 12 Popcorn presets, Soul Cinema, and Fashion Factory via deep-linked action chips. Also the highest-visible quality upgrade because the current `/chat` returns `"memacta: I understand. (mock)"` — it's demonstrably a stub.
+- **Name:** Mixed Media Studio
+- **Category:** Effects & Templates (Preset-driven creation)
+- **Priority:** P4
+- **Source:** `feature-gap-analysis.md` line 6 — "Mixed Media" listed under MISSING completely. The stale feature-status.json entries `mixed-media-presets` and `mixed-media-community` from 2026-04-09 are stubs: `grep -ri "mixed.?media" lib/ components/ app/` returns zero code files. This is the fifth tractable "preset factory" tool to complete memacta's creation matrix, complementing:
+  - **Fashion Factory** (outfit-on-person batch)
+  - **Soul Cinema** (multi-scene narrative)
+  - **Popcorn** (short-form 9:16 preset variations)
+  - **Copilot** (conversational director)
+  - **Mixed Media** (style-blend single-shot) ← this feature
+
+Chosen this round over UGC Factory (structurally near-identical to Fashion Factory — re-skin risk explicitly flagged by caller), Reference Extension (heavy overlap with shipped Soul ID + Soul Moodboard + Multi Reference + Soul Cast), Sora 2 Upscale (narrow single-model duplicate of Upscale), Careers/Discord (low-impact quick wins better handled by deploy-agent in a final sweep). Mixed Media is the widest-reach remaining creation surface and is distinct from everything shipped: it blends **multiple aesthetic styles** into a single output (e.g. "anime + photoreal", "oil-painting + 3D-render"), whereas prior preset tools pick ONE style per generation.
 
 ## User story
 
-As a new creator who doesn't know which of memacta's 18 models or 33+ tools to use, I open **Copilot** (rebranded `/chat`). I type `"make a 10-second cinematic reel of a samurai in rain"`. Copilot replies with a short paragraph explaining the recommended approach AND three actionable **action chips** at the bottom of the message: `[ Open Soul Cinema ]`, `[ Use Veo 3.1 + this prompt ]`, `[ Try Popcorn "Cafe Gloom" preset ]`. Clicking any chip deep-links me into the right shipped surface with the prompt, model, and preset pre-filled.
+**As a** creator who wants visually unique outputs that don't look like generic single-style AI,
+**I want to** pick 2-3 aesthetic style presets (e.g. "Anime Realism", "Renaissance Cyberpunk", "Pixel Dreamscape"), optionally drop a subject reference image, and type a subject prompt,
+**so that** memacta fan-outs variations in parallel to the real fal.ai pipeline and I get a shareable lookbook of distinctive mixed-aesthetic images/videos that stand out on social.
 
-If I don't know what to ask, a **starter grid** offers 6 one-click prompts: "Make me a short-form reel", "Style a fashion lookbook", "Build a character and cast them into a scene", "Turn a still image into a 5-second video", "Write a narrative for Soul Cinema", "Recommend a model for X". Each starter injects a structured request + an intent tag so Copilot replies with pre-shaped recommendations.
-
-The key differentiator versus the current `/chat`: Copilot is **intent-aware** (not a blind LLM passthrough), returns **structured action chips** (not just plain text), and routes users into real shipped features via deep links that match the URL contract already used by `/create?model=X&prompt=Y`, `/tools/popcorn`, `/tools/fashion-factory`, `/tools/soul-cinema`, and `/effects/[id]`.
-
-## Wireframe
+## Wireframe (ASCII)
 
 ```
-+--------------------------------------------------------------------------+
-|  Copilot                                                    beta         |
-|  Your AI director - I'll pick the right model, tool, and preset.         |
-|                                                                          |
-|  +------ Starter prompts (shown when empty) --------------------------+  |
-|  |  [Short-form reel]  [Fashion lookbook]   [Character + scene]     |  |
-|  |  [Image -> video]   [Soul Cinema beat]   [Which model for...?]   |  |
-|  +--------------------------------------------------------------------+  |
-|                                                                          |
-|  +------ Conversation ------------------------------------------------+  |
-|  |  You: make a 10s cinematic reel of a samurai in rain               |  |
-|  |                                                                     |  |
-|  |  Copilot:  For a cinematic 10-second reel with motion and mood,    |  |
-|  |            Veo 3.1 gives the best photoreal rain. If you want a   |  |
-|  |            short 3-clip pack instead, Popcorn's Cafe Gloom preset |  |
-|  |            nails the atmosphere in a vertical format.              |  |
-|  |                                                                     |  |
-|  |            +-------------------+ +----------------------+          |  |
-|  |            | Use Veo 3.1 now   | | Try Cafe Gloom in    |          |  |
-|  |            | with this prompt  | | Popcorn              |          |  |
-|  |            +-------------------+ +----------------------+          |  |
-|  |            +------------------------+                              |  |
-|  |            | Open Soul Cinema with  |                              |  |
-|  |            | narrative prefill      |                              |  |
-|  |            +------------------------+                              |  |
-|  +--------------------------------------------------------------------+  |
-|                                                                          |
-|  +- Type a message... -------------------------+  +---------+            |
-|  |                                             |  | Send -> |            |
-|  +---------------------------------------------+  +---------+            |
-+--------------------------------------------------------------------------+
++--------------------------------------------------------------+
+| [<- Back]  Mixed Media Studio             [Credits: 120]      |
+|                                                                |
+|   Blend aesthetic styles into one striking shot.              |
+|                                                                |
+| +- 1. Pick 2-3 styles to blend -----------------------------+ |
+| |  [Anime Realism]  [Oil Painting]  [3D Claymation]        | |
+| |  [Pixel Dream]    [Renaissance]   [Cyberpunk Noir]       | |
+| |  [Vaporwave]      [Paper Cutout]  [Sketch-to-Real]       | |
+| |  [Watercolor]     [Low-Poly]      [Chromatic Glitch]     | |
+| |    ^active ok       ^active ok      (tap to toggle)      | |
+| +----------------------------------------------------------+ |
+|                                                                |
+| +- 2. Subject --------------------------------------------+   |
+| |  Prompt: [A warrior on horseback charging through mist_]|   |
+| |  Reference (optional): [ Drop image or click to upload ]|   |
+| +---------------------------------------------------------+   |
+|                                                                |
+| +- 3. Output --------------------------------------------+     |
+| |  Media: [Image ok] [Video]    Aspect: [1:1] [16:9] [9:16]|   |
+| |  Variations per blend: [1] [2 ok] [3]                 |     |
+| +-------------------------------------------------------+     |
+|                                                                |
+|   Preview: "anime-realism x oil-painting x warrior..."        |
+|   Cost: 2 styles x 2 variations = 4 generations (12 credits)  |
+|                                                                |
+|                              [ Generate Blend Pack ]  [glow]  |
+|                                                                |
+|                                                                |
+| -- Lookbook -------------------------------------------------- |
+|                                                                |
+|  [VariantA ok] [VariantB ok] [VariantC retry] [VariantD ok]   |
+|   Anime x Oil  Anime x Oil   Oil x Claymtn    Oil x Claymtn   |
+|                                                                |
+|  Failed tile shows [ Retry ] button - clicking re-dispatches  |
+|  that single variation only (keeps the rest).                 |
++--------------------------------------------------------------+
 ```
 
-## Routes
+## Routes (Next.js app-router)
 
-- `app/copilot/page.tsx` — new canonical route. Server component that renders `<Copilot/>`. Metadata `{ title: "memacta - Copilot" }`. Full-height layout, wider than current `/chat` (max-width 4xl instead of 3xl).
-- `app/chat/page.tsx` — UPDATE (not delete) to also import and render the new `<Copilot/>` component so legacy `/chat` URLs keep working and upgrade automatically. Do NOT break tests that already hit `/chat`.
-- `app/api/copilot/suggest/route.ts` — `POST`. Accepts `{ messages: Array<{role, content}>, intent?: string }`. Returns `{ reply: string, actions: Array<CopilotAction> }`. Rule-based (keyword/intent matching against a local library — **no** external LLM call; this keeps the build deterministic and testable). The matching logic lives in a pure helper in `lib/copilot.ts` so it's fully unit-testable without spinning up Next.
-- `/api/chat` — UNCHANGED. Still returns the same mock reply. This route is **not** deleted; some legacy tests depend on it. Copilot uses its own `/api/copilot/suggest` endpoint so we don't disturb the existing wire contract.
+- `app/tools/mixed-media/page.tsx` — server entry, exports `metadata` (title: "memacta - Mixed Media Studio"). Imports the client component wrapped in `<Suspense fallback={<MixedMediaSkeleton/>}>` because the client component reads `useSearchParams` to support `/tools/mixed-media?preset=anime-realism&subject=...` deep links from Copilot.
+- `app/api/mixed-media/share/route.ts` — POST `{ items: [{ prompt, styles, url, mediaType }] }` -> persists a `Post` row with `toolUsed="mixed-media"` using existing Prisma schema. Gated by `getServerSession(authOptions)`; returns 401 with `{ error: "auth_required", redirect: "/auth/signin?callbackUrl=/tools/mixed-media" }` on anon.
 
-Deep-link contracts Copilot produces (all already supported by the shipped app):
+No new top-level route. Reuses `/api/generate` for fan-out (same pattern as Fashion Factory / Soul Cinema / Popcorn).
 
-- `/create/video?model=veo-31&prompt=<urlencoded>` — model picker deep-link (already wired in `app/create/video/page.tsx`).
-- `/create/image?model=flux-2&prompt=<urlencoded>` — image create deep-link.
-- `/create/image-to-video?prompt=<urlencoded>` — image-to-video.
-- `/tools/popcorn?preset=cafe-gloom&subject=<urlencoded>` — Popcorn deep-link (see "Component edits" below — Popcorn must read these two query params on mount).
-- `/tools/fashion-factory?prompt=<urlencoded>` — Fashion Factory style-prompt prefill (existing `stylePrompt` state seeded from `?prompt=`).
-- `/tools/soul-cinema?story=<urlencoded>&genre=<slug>` — Soul Cinema story+genre prefill.
-- `/effects/[id]` — pass through for effect shortcuts (no params needed).
+## Components (filenames under `components/mixed-media/`)
 
-## Components
-
-All new files under `components/copilot/`:
-
-- `components/copilot/copilot.tsx` — client root. `"use client"`. Wraps the whole experience. Uses `Suspense` boundary around any child that calls `useSearchParams` (for `?q=...` deep links from landing pages). Holds `{ messages, input, loading, showStarter }` state. Wires `handleAuthRequired` from `@/lib/auth-redirect` on the `POST /api/copilot/suggest` call. `data-testid="copilot"` on root.
-- `components/copilot/starter-grid.tsx` — renders 6 starter prompt cards in a 2x3 grid. Each card has `data-testid="starter-card"` and `data-intent={intent}` (e.g. `short-form`, `fashion-lookbook`, `character-scene`, `image-to-video`, `soul-cinema-beat`, `recommend-model`). Clicking a card injects the structured prompt and auto-sends (mirrors ChatGPT starter cards UX). Hidden once `messages.length > 0`.
-- `components/copilot/message-bubble.tsx` — renders one user or assistant message. User bubble: `bg-brand-gradient` right-aligned. Assistant bubble: `bg-white/10` left-aligned. Below assistant bubbles renders a `<ActionChips actions={...}/>` row if `actions.length > 0`. `data-testid="message-bubble"` + `data-role={role}`.
-- `components/copilot/action-chips.tsx` — renders a wrapped row of `<Link href={action.href}>` chips, one per `CopilotAction`. Each chip is a small pill with an icon + label. `data-testid="action-chip"` + `data-action-type={action.type}` + `data-href={action.href}`. Uses `glow-btn` only on the primary action (index 0); rest are ghost-bordered.
-- `components/copilot/compose-box.tsx` — the text input + Send button at the bottom. `data-testid="compose-box"`. `data-testid="send-btn"` on the submit button. Disabled while loading or when input is empty. Enter-to-send (with Shift+Enter newline support).
-- `components/copilot/message-list.tsx` — vertical scroll container. Auto-scrolls to bottom when a new message arrives. `data-testid="message-list"`.
-
-Edits to existing files:
-
-- `components/sidebar.tsx` — rename the existing `{ label: "AI Chat", href: "/chat" }` QUICK_LINKS entry to `{ label: "Copilot", href: "/copilot" }`. **Do not** delete the entry or break the icon. Same position in the list.
-- `components/nav.tsx` (if it has a top-level `AI Chat` / Chat link) — same rename. Spot-check only; don't alter anything else. (Builder: use `Grep` for `"/chat"` across `components/` and `app/` and only rename the navigation surfaces, **not** the page routes themselves.)
-- `components/popcorn/popcorn.tsx` — add `?preset=<id>&subject=<text>` deep-link support. On mount (inside a `Suspense` boundary if not already wrapped), read `useSearchParams()`, and if `preset` matches a valid `POPCORN_PRESETS` id, pre-select it; if `subject` is set, pre-fill the subject prompt textarea. Do not auto-fire generation. Must be wrapped in `Suspense` per the Next 15 build rule.
-- `components/fashion/fashion-factory.tsx` — same pattern: `?prompt=` pre-fills the style prompt textarea on mount. Suspense-wrap.
-- `components/soul-cinema/soul-cinema.tsx` — `?story=` pre-fills the story textarea; `?genre=` pre-selects the matching genre chip.
-- `lib/tools/p2-tools.ts` — append a new entry `{ id: "copilot", slug: "copilot", name: "Copilot", description: "Your AI director - ask and I'll pick the model, tool, and preset.", category: "identity", mediaOut: "image", inputs: [{key:"prompt",label:"What do you want to make?",type:"prompt"}] }`. The `/tools/[slug]` fallback will render a redirect hint → `/copilot`, OR the builder may add a small `app/tools/copilot/page.tsx` that simply does `redirect("/copilot")`. **Note on category:** `"identity"|"editing"` is the hard Zod union in the existing type; keep `"identity"` and document via the card title that this is a helper.
-
-Do NOT touch: `app/api/chat/route.ts`, `components/chat/chat.tsx`, `app/api/generate/*`, `app/api/popcorn/*`, `app/api/soul-cinema/*`, any Prisma schema, any model adapter, any credit logic.
+- `components/mixed-media/mixed-media-client.tsx` — main `"use client"` component. Owns state: `selectedStyleIds: string[]`, `subjectPrompt: string`, `referenceUrl: string | null`, `mediaType: "image"|"video"`, `aspectRatio: "1:1"|"16:9"|"9:16"`, `variationsPerBlend: 1|2|3`, `isGenerating: boolean`, `results: MixedMediaResult[]`. Reads `useSearchParams()` for `?preset=<id>` and `?subject=<text>` deep-link seeding.
+- `components/mixed-media/style-preset-grid.tsx` — 4x3 grid of 12 style-preset tiles. Each tile has `aria-pressed`, gradient background (matches Popcorn tile visual grammar), `data-testid="style-tile"`, `data-style-id={id}`, `data-active={true|false}`. Enforces min 2, max 3 selection.
+- `components/mixed-media/subject-panel.tsx` — prompt textarea + optional reference image uploader (via existing `/api/upload`; uploads once, stores returned URL). `data-testid="subject-panel"`.
+- `components/mixed-media/output-settings.tsx` — segmented controls for mediaType (image/video), aspectRatio (1:1/16:9/9:16), variationsPerBlend (1/2/3). `data-testid="output-settings"`.
+- `components/mixed-media/lookbook-grid.tsx` — responsive grid of `MixedMediaTile`. Each tile shows generated media or skeleton/error. `data-testid="lookbook-grid"`.
+- `components/mixed-media/mixed-media-tile.tsx` — single result tile: `data-testid="lookbook-tile"`, `data-status={"pending"|"succeeded"|"failed"}`, `data-blend-id`. Failed state shows a `[Retry]` button that re-dispatches that single variation only.
+- `components/mixed-media/generate-button.tsx` — primary CTA using `className="glow-btn"`, disabled when `selectedStyleIds.length < 2 || !subjectPrompt.trim()`. `data-testid="generate-btn"`. Shows computed credit cost as secondary text: `{blends.length * variationsPerBlend * (mediaType === "video" ? 9 : 3)} credits`.
+- `components/mixed-media/skeleton.tsx` — skeleton shown by the Suspense boundary while the client bundle hydrates.
 
 ## Data model deltas
 
-**Zero Prisma migrations.** Copilot is entirely stateless on the server — conversation history is held in client state and POSTed with each suggestion request (same pattern as the existing `/api/chat` mock). No user-scoped storage, no history persistence, no new DB table.
+**None.** Zero Prisma migrations.
 
-The `CopilotAction` shape is a pure TypeScript type exported from `lib/copilot.ts`:
+- Sharing a blend re-uses existing `Post` model with `toolUsed="mixed-media"` and `mediaType` + `mediaUrl` + `prompt` (existing fields). `styles` metadata is serialized into the existing `prompt` field as a prefix like `[anime-realism x oil-painting] warrior on horseback...`.
+- Generations flow through the existing `/api/generate` endpoint which already writes to `Generation` rows.
+- No new enum values, no new columns, no migration.
+
+## Provider adapter contract
+
+**No new adapter.** Reuses existing `/api/generate` contract:
 
 ```ts
-export type CopilotAction = {
-  type:
-    | "create-video"
-    | "create-image"
-    | "image-to-video"
-    | "popcorn-preset"
-    | "fashion-factory"
-    | "soul-cinema"
-    | "effect-shortcut"
-    | "tool-redirect";
-  label: string;         // "Use Veo 3.1 with this prompt"
-  href: string;          // "/create/video?model=veo-31&prompt=..."
-  icon?: "video" | "image" | "wand" | "spark" | "clapper" | "popcorn";
-};
-
-export type CopilotSuggestion = {
-  reply: string;
-  actions: CopilotAction[];  // 0 .. 4 actions; always <= 4
-  intent: string;            // inferred intent tag
-};
-
-export function buildCopilotSuggestion(
-  userMessage: string,
-  intent?: string,
-): CopilotSuggestion {
-  // Pure, deterministic. No network. Must be <= 10ms per call on a warm V8.
+POST /api/generate
+Body: {
+  prompt: string;          // composed by lib/mixed-media.ts composeMixedMediaPrompt()
+  model: string;           // "flux-kontext" for image, "kling-25-turbo" for video
+  mediaType: "image" | "video";
+  aspectRatio: "1:1" | "16:9" | "9:16";
+  imageUrl?: string;       // optional subject reference passthrough (NEVER a blob: URL)
+  duration?: number;       // 5 sec default for video
 }
-
-export const COPILOT_STARTERS: Array<{
-  intent: string;
-  label: string;          // short button label
-  prompt: string;         // full prompt injected into the chat
-}>;  // length === 6
+Response: { mediaUrl: string } | { error: "auth_required", redirect: string } | { error: string }
 ```
+
+Fan-out uses `Promise.allSettled(requests.map(r => fetch("/api/generate", ...)))` — identical pattern to Fashion Factory, Soul Cinema, and Popcorn. No provider code added.
+
+## Pure helper library (`lib/mixed-media.ts`)
+
+Fully unit-testable, no React, no Prisma.
+
+```ts
+export type MixedMediaStyle = {
+  id: string;            // slug, e.g. "anime-realism"
+  name: string;          // display, e.g. "Anime Realism"
+  tagline: string;       // one-liner for tile subtitle
+  gradientClass: string; // Tailwind gradient for tile background
+  promptFragment: string; // injected into composed prompt
+  compatibleMedia: ("image"|"video")[]; // some styles only work for one media type
+};
+
+export const MIXED_MEDIA_STYLES: MixedMediaStyle[] = [
+  { id: "anime-realism",     name: "Anime Realism",     tagline: "2D characters, 3D depth",
+    gradientClass: "from-pink-500 to-purple-500",
+    promptFragment: "anime character design blended with photorealistic lighting and cinematic depth",
+    compatibleMedia: ["image", "video"] },
+  { id: "oil-painting",      name: "Oil Painting",      tagline: "classical brushwork",
+    gradientClass: "from-amber-600 to-rose-500",
+    promptFragment: "rich oil-painting brushstrokes, Rembrandt-style lighting, thick impasto texture",
+    compatibleMedia: ["image"] },
+  { id: "3d-claymation",     name: "3D Claymation",     tagline: "stop-motion clay",
+    gradientClass: "from-orange-400 to-yellow-400",
+    promptFragment: "stop-motion claymation aesthetic, visible clay thumbprints, soft studio lighting",
+    compatibleMedia: ["image", "video"] },
+  { id: "pixel-dream",       name: "Pixel Dream",       tagline: "16-bit nostalgia",
+    gradientClass: "from-cyan-400 to-violet-500",
+    promptFragment: "16-bit pixel-art style with dithering, limited color palette, retro game aesthetic",
+    compatibleMedia: ["image", "video"] },
+  { id: "renaissance",       name: "Renaissance",       tagline: "museum grandeur",
+    gradientClass: "from-yellow-700 to-amber-900",
+    promptFragment: "Renaissance oil-painting composition, dramatic chiaroscuro, museum gallery aesthetic",
+    compatibleMedia: ["image"] },
+  { id: "cyberpunk-noir",    name: "Cyberpunk Noir",    tagline: "neon rain detective",
+    gradientClass: "from-fuchsia-500 to-cyan-400",
+    promptFragment: "cyberpunk noir atmosphere with neon-reflected rain, volumetric fog, detective-film framing",
+    compatibleMedia: ["image", "video"] },
+  { id: "vaporwave",         name: "Vaporwave",         tagline: "80s synth sunset",
+    gradientClass: "from-pink-400 to-cyan-300",
+    promptFragment: "vaporwave aesthetic, 80s synthwave sunset, chromatic gradient, retro computer-graphics",
+    compatibleMedia: ["image", "video"] },
+  { id: "paper-cutout",      name: "Paper Cutout",      tagline: "layered paper craft",
+    gradientClass: "from-emerald-400 to-sky-400",
+    promptFragment: "handcrafted paper cutout style, layered construction-paper depth, visible paper fibers",
+    compatibleMedia: ["image"] },
+  { id: "sketch-to-real",    name: "Sketch to Real",    tagline: "pencil becomes photo",
+    gradientClass: "from-stone-400 to-stone-600",
+    promptFragment: "hybrid pencil-sketch blending seamlessly into photorealistic rendering, graphite edge details",
+    compatibleMedia: ["image"] },
+  { id: "watercolor",        name: "Watercolor",        tagline: "soft wet-on-wet flow",
+    gradientClass: "from-teal-300 to-blue-400",
+    promptFragment: "watercolor wet-on-wet painting style, soft color bleeds, delicate washes",
+    compatibleMedia: ["image"] },
+  { id: "low-poly",          name: "Low Poly",          tagline: "geometric 3D",
+    gradientClass: "from-violet-500 to-indigo-600",
+    promptFragment: "low-polygon 3D-render aesthetic, faceted geometry, flat shaded lighting",
+    compatibleMedia: ["image", "video"] },
+  { id: "chromatic-glitch",  name: "Chromatic Glitch",  tagline: "RGB split VHS",
+    gradientClass: "from-red-500 to-blue-500",
+    promptFragment: "chromatic aberration glitch effect, RGB-channel split, VHS scanline interference",
+    compatibleMedia: ["image", "video"] },
+];
+
+export type ComposeMixedMediaInput = {
+  selectedStyleIds: string[];       // length 2 or 3
+  subjectPrompt: string;             // user's subject description
+  mediaType: "image" | "video";
+};
+
+export function composeMixedMediaPrompt(input: ComposeMixedMediaInput): string { /* ... */ }
+
+export type MixedMediaBlend = {
+  blendId: string;          // deterministic id: styles joined with "-x-"
+  styleIds: string[];       // sorted copy for stability
+  styleNames: string[];     // display names, same order
+};
+
+export function buildMixedMediaBlends(selectedStyleIds: string[]): MixedMediaBlend[] { /* ... */ }
+
+export type MixedMediaBatchInput = {
+  selectedStyleIds: string[];
+  subjectPrompt: string;
+  referenceUrl?: string;
+  mediaType: "image" | "video";
+  aspectRatio: "1:1" | "16:9" | "9:16";
+  variationsPerBlend: 1 | 2 | 3;
+  videoModel?: string;
+  imageModel?: string;
+};
+
+export type MixedMediaRequest = {
+  blendId: string;
+  variationIndex: number;
+  prompt: string;
+  model: string;
+  mediaType: "image" | "video";
+  aspectRatio: "1:1" | "16:9" | "9:16";
+  imageUrl?: string;
+  duration?: number;
+};
+
+export function buildMixedMediaBatch(input: MixedMediaBatchInput): MixedMediaRequest[] { /* ... */ }
+```
+
+**Rules baked into helpers:**
+1. `composeMixedMediaPrompt` MUST embed every selected style's `promptFragment` in order, joined with " fused with ", prefixed onto the subject prompt. Example: `"anime character design blended with photorealistic... fused with rich oil-painting brushstrokes... - subject: warrior on horseback charging through mist"`.
+2. `composeMixedMediaPrompt` MUST NOT include the raw `referenceUrl` in the prompt text — the URL goes into the request as `imageUrl` only.
+3. `buildMixedMediaBlends` throws if `selectedStyleIds.length < 2 || > 3`. A single blend combines ALL selected styles (not pairwise permutations) — so 2 styles -> 1 blend, 3 styles -> 1 blend. The `variationsPerBlend` field controls how many outputs per blend.
+4. `buildMixedMediaBatch` returns `variationsPerBlend` requests per blend. With 1 blend and `variationsPerBlend=3`, returns 3 requests; with `variationsPerBlend=0`, returns empty.
+5. Default model: `"flux-kontext"` for image, `"kling-25-turbo"` for video. Override via `videoModel`/`imageModel`.
+6. If a selected style's `compatibleMedia` does not include the chosen `mediaType`, `buildMixedMediaBatch` throws `MixedMediaIncompatibleMediaError` — the UI must validate and disable the generate button BEFORE calling it.
 
 ## API contracts
 
-`POST /api/copilot/suggest`
+### POST `/api/mixed-media/share`
 
-Request body (Zod-validated):
+**Auth:** Required via `getServerSession(authOptions)`. On anon, returns `401` with `{ error: "auth_required", redirect: "/auth/signin?callbackUrl=/tools/mixed-media" }`. Client wraps the fetch call with `handleAuthRequired` from `@/lib/auth-redirect`.
 
+**Request:**
 ```ts
 {
-  messages: Array<{ role: "user" | "assistant"; content: string }>;  // min 1, max 50
-  intent?: string;  // optional intent tag from starter grid
+  items: Array<{
+    prompt: string;          // composed prompt from composeMixedMediaPrompt
+    styleIds: string[];      // for display chip rendering on /community
+    mediaUrl: string;        // https URL returned by /api/generate
+    mediaType: "image" | "video";
+  }>;
+  isPublic: boolean;         // defaults true
 }
 ```
 
-Response (200):
-
-```ts
-{
-  reply: string;          // 1-3 sentences, plaintext (no markdown)
-  actions: CopilotAction[];  // 0..4
-  intent: string;
-}
-```
-
-Error responses:
-
-- `400 {error:"invalid"}` on schema mismatch (matches existing `/api/chat` pattern).
-- `401 {error:"auth_required"}` when the anonymous quota is exhausted. **IMPORTANT:** Copilot suggestions alone do NOT burn generation credits — only the deep-linked `/api/generate` call does. So the 401 only fires if we elect to charge a small "copilot query" anon credit. Default: do NOT charge copilot for suggestions (unlimited anon queries). Document this in a comment in the route handler.
-
-Server route hands off to `buildCopilotSuggestion(lastUserMessage, intent)` from `lib/copilot.ts` and returns the result. No provider call, no external LLM, no DB write. This keeps the whole feature deterministic and testable in CI.
-
-## Design-token constraints
-
-- CTA buttons (Send, primary action chip): `bg-brand-gradient` + `glow-btn`.
-- Assistant bubbles: `bg-white/10 text-white`.
-- User bubbles: `bg-brand-gradient text-white`.
-- Cards (starter grid): `bg-[#181828] border border-white/15 hover:border-white/25`.
-- Hero title: use `text-brand-gradient` utility — **NOT** `bg-brand-gradient bg-clip-text text-transparent` (that's the known bug spelled out in the caller instructions and Higgsfield Popcorn audit). There IS a `.text-brand-gradient` utility in `app/globals.css` line 71; use it directly as a class.
-- Zero `slate-`, `zinc-`, or `gray-` base color tokens (`gray-400` etc). Use `white/10`, `white/15`, `white/60`, `white/70` or the named colors `pink-*`, `purple-*`, `cyan-*`, `orange-*` for accents only.
-- Icons: inline SVG at 16px (w-4 h-4) inside action chips.
-- Action chip variant rules:
-  - Primary (index 0): `bg-brand-gradient text-white glow-btn`.
-  - Secondary (index 1+): `border border-white/15 bg-white/5 text-white hover:bg-white/10`.
-
-## Test plan
-
-### Vitest unit tests — `tests/copilot.test.ts`
-
-Pure helper tests; no DB, no network, no React.
-
-1. `COPILOT_STARTERS.length === 6` — guards against accidental drift.
-2. Every starter has a non-empty `intent`, `label`, `prompt`; `intent` values are globally unique.
-3. `buildCopilotSuggestion("make a 10s cinematic reel of a samurai in rain")` returns `reply.length > 0`, `actions.length >= 1`, and contains at least one action with `type === "create-video"` (because the prompt contains "reel" / "video" / "cinematic").
-4. `buildCopilotSuggestion("style a fashion lookbook")` returns at least one action with `type === "fashion-factory"` and `href` starting with `/tools/fashion-factory`.
-5. `buildCopilotSuggestion("short-form tiktok")` returns at least one action with `type === "popcorn-preset"` and `href` starting with `/tools/popcorn?preset=`.
-6. `buildCopilotSuggestion("build a character")` returns at least one action with `href` starting with `/tools/soul-id` OR `/tools/soul-cast` OR `type === "tool-redirect"`.
-7. `buildCopilotSuggestion("turn this photo into a video")` returns at least one `type === "image-to-video"` action.
-8. `buildCopilotSuggestion("write a narrative for soul cinema")` returns at least one `type === "soul-cinema"` action; the `href` carries `?story=` with the prompt urlencoded.
-9. `buildCopilotSuggestion("xyz unreadable gibberish 123")` still returns a valid `CopilotSuggestion` with `actions.length >= 1` (fallback: at least one "Open Create" action).
-10. All actions returned by `buildCopilotSuggestion(...)` always have non-empty `label`, non-empty `href` starting with `/`, a valid `type`, and the `href` passes a simple URL parse (no malformed querystrings).
-11. `buildCopilotSuggestion(...).actions.length <= 4` — hard cap to keep UI tidy.
-12. `buildCopilotSuggestion("make a video", "short-form")` (explicit intent) overrides the keyword match and forces Popcorn to be the primary action (index 0).
-13. `buildCopilotSuggestion` treats the prompt case-insensitively (same result for `"REEL"` and `"reel"`).
-14. Sidebar assertion: verify via source-file grep that `components/sidebar.tsx` contains `href: "/copilot"` and does NOT contain `label: "AI Chat"` after the rename. Use `fs.readFileSync` in the unit test.
-15. `P2_TOOLS` contains exactly one entry with `slug === "copilot"`.
-
-### Playwright E2E — `e2e/copilot.spec.ts`
-
-Non-opt-in tests (8) + 1 opt-in FAL_KEY-gated round-trip for the downstream deep-link.
-
-1. **Page renders.** `await page.goto('/copilot')`. `expect(page.getByRole('heading', { name: 'Copilot' })).toBeVisible()`. `expect(page.getByTestId('copilot')).toBeVisible()`.
-2. **Starter grid has 6 cards.** `expect(page.getByTestId('starter-card')).toHaveCount(6)`.
-3. **Starter click sends a message.** Click the first `starter-card`. Wait for `message-bubble` with `data-role="user"` to appear. Then wait for `data-role="assistant"`. Verify at least one `action-chip` is visible.
-4. **Free-text send.** Fill the compose box with `"make a 10 second cinematic reel of a samurai in rain"`, click `send-btn`. Wait for user bubble, then assistant bubble. Assert at least one `action-chip` has `data-action-type="create-video"`.
-5. **Action chip navigation.** Click the first `action-chip` after the assistant reply in test 4. Expect `page.url()` to start with `/create/video?model=`. Verify `?prompt=` carries the urlencoded original message (contains `samurai`).
-6. **Fashion Factory deep-link prefill.** Click a starter card whose intent is `fashion-lookbook`. When the assistant reply renders, click the first `action-chip` → expect URL starts with `/tools/fashion-factory?prompt=`. Then navigate there, and assert the style-prompt textarea is pre-filled. (If the deep-link implementation is deferred to a follow-up, split this test into two and mark the prefill assertion `test.fixme` — do not gate merge on it.)
-7. **Popcorn deep-link prefill.** Analogous to test 6 but targets `/tools/popcorn?preset=cafe-gloom&subject=...`. After navigation, assert the preset card with `data-preset-id="cafe-gloom"` has `aria-pressed="true"` and the subject textarea is pre-filled.
-8. **Sidebar rename.** Open sidebar. Assert a link labelled `Copilot` exists with `href="/copilot"`. Assert NO link labelled `AI Chat` exists (verifies the rename, not an additive change).
-9. **Legacy /chat still loads.** `await page.goto('/chat')`. The page must return 200 (not 404). It may render either the legacy chat OR the new Copilot — either is acceptable.
-10. **Design tokens.** Use `page.evaluate` + a word-boundary regex to scan the rendered DOM of `/copilot` for `slate-` and `zinc-` class tokens. Must be zero. Use the same pattern that fixed the Popcorn audit:
-    ```ts
-    const bad = await page.evaluate(() => {
-      const all = Array.from(document.querySelectorAll('*'));
-      const rx = /\b(slate|zinc)-\d/;
-      return all.filter((el) => rx.test(el.className || '')).length;
-    });
-    expect(bad).toBe(0);
-    ```
-    Do **not** use `[class*="slate-"]` as a CSS selector — it false-positive matches `translate-x-0`.
-11. **Apps gallery shows Copilot card.** `await page.goto('/apps')`. Locate a card labelled `Copilot`. Clicking it navigates to `/copilot`.
-12. **No Prisma writes on copilot POST.** Intercept `/api/copilot/suggest`, trigger it, and assert response body has `reply`, `actions`, `intent`. We don't need to assert the DB directly — just that the endpoint works in an anonymous browser session with no cookie prep.
-13. **Opt-in: real downstream generation round-trip.** `test.skip(!process.env.FAL_KEY, 'needs FAL_KEY')` **inside the test body** (not at describe-block level — this was a regression the Popcorn round fixed). Send `"make a 5 second video of a neon city"`. Click the first action chip. On the landing page, fill any required extra fields and click Generate. Wait up to 90s for a `https://fal.media/...` URL to appear. This test is allowed to be flaky/slow.
-
-### Design-token constraints reminder (for the builder)
-
-- `text-brand-gradient` utility — **NOT** `bg-brand-gradient bg-clip-text text-transparent`.
-- `glow-btn` on primary CTAs only.
-- Zero `slate-`, `zinc-`, `gray-` base color tokens.
-- Cards: `bg-[#181828] border border-white/15`.
-- Backgrounds: `bg-[#111122]` for the app shell; `bg-[#0a0a16]` for footer-level depth.
-
-### Builder guardrails (required)
-
-1. `npx next build` (not `npm run build`) — this is the green-light gate.
-2. Do NOT run `prisma generate` in any builder script — Windows EPERM on the .dll file lock. Vercel handles it fine at deploy time.
-3. Suspense-wrap **every** client component that calls `useSearchParams` — includes `copilot.tsx` (reads `?q=`), `popcorn.tsx` (reads `?preset=&subject=`), `fashion-factory.tsx` (reads `?prompt=`), `soul-cinema.tsx` (reads `?story=&genre=`). Next 15 bails the build on un-wrapped usage.
-4. `Promise.allSettled` fan-out pattern — **not relevant for Copilot itself** (single POST), but preserve it in Popcorn/Fashion/Cinema when you add deep-link support. Do not accidentally change those files' generation logic.
-5. `handleAuthRequired` from `@/lib/auth-redirect` — wire on the `POST /api/copilot/suggest` call in `copilot.tsx` even though the route currently doesn't 401. The hook is cheap and future-proofs the feature.
-6. `test.skip(!process.env.FAL_KEY, ...)` **INSIDE each test body**, not at describe-block level. This is a repeated regression.
-7. No Prisma migration. No Stripe. No billing code changes.
-8. Playwright color-token check uses `page.evaluate` + word-boundary regex, NOT `[class*="slate-"]` which false-positive matches `translate-x-*` utilities.
-9. Build order: `lib/copilot.ts` → unit tests → `app/api/copilot/suggest/route.ts` → components → `app/copilot/page.tsx` → sidebar rename + p2-tools entry → Suspense-wrap the 4 consumer pages → e2e.
-10. Keep `/api/chat` and `app/chat/page.tsx` alive. Rename only navigation surfaces. Legacy URL must not 404.
-11. Zero new `slate-`, `zinc-`, `gray-` tokens in any new file under `components/copilot/`, `app/copilot/`, `app/api/copilot/`, or `lib/copilot.ts`. Run a final `Grep -r "slate-\|zinc-\|gray-"` over the new directories before declaring done.
+**Response:** `{ success: true, postIds: string[] }` — one Post row per item with `toolUsed="mixed-media"`.
 
 ## Acceptance criteria
 
-1. `npx next build` passes with no new errors or warnings. All 18 model slugs still prerender; `/tools/popcorn`, `/tools/soul-cinema`, `/tools/fashion-factory`, `/u/[username]`, `/apps`, `/models`, `/community` still compile.
-2. `/copilot` returns 200 and renders a page with heading `Copilot` (case-sensitive) and `data-testid="copilot"` on the root client component.
-3. The starter grid shows **exactly 6** starter cards, each with `data-testid="starter-card"` and a distinct `data-intent`. Hidden once `messages.length > 0`.
-4. Typing a message and clicking Send produces a user bubble (`data-role="user"`) followed by an assistant bubble (`data-role="assistant"`) with at least one `action-chip` child.
-5. `POST /api/copilot/suggest` returns `{ reply, actions, intent }`. Response passes the Zod schema on the client side (no `any`).
-6. Every `CopilotAction.href` starts with `/` and is a valid relative URL parseable by `new URL(href, "http://x")`.
-7. Clicking an action chip navigates to the correct deep link (`/create/video?model=...&prompt=...` or the appropriate tool route).
-8. `/tools/popcorn?preset=cafe-gloom&subject=coffee+shop+mood` pre-selects the `cafe-gloom` preset (card `aria-pressed="true"`) and pre-fills the subject textarea.
-9. `/tools/fashion-factory?prompt=y2k+streetwear` pre-fills the style prompt textarea.
-10. `/tools/soul-cinema?story=samurai+in+rain&genre=noir` pre-fills the story textarea and selects the `noir` genre chip.
-11. Sidebar QUICK_LINKS has exactly one entry with `label: "Copilot"` and `href: "/copilot"`. There is NO entry with `label: "AI Chat"`.
-12. `/chat` still returns 200 (legacy URL not broken).
-13. `/apps` grid renders a card for the `copilot` entry in `P2_TOOLS` and clicking it navigates to `/copilot`.
-14. Design tokens are consistent: hero title uses `text-brand-gradient`, CTAs use `bg-brand-gradient` + `glow-btn`, cards use `bg-[#181828]` + `border-white/15`. **Zero** occurrences of `slate-`, `zinc-`, or `gray-` base tokens in any new file under `components/copilot/`, `app/copilot/`, `app/api/copilot/`, or `lib/copilot.ts`.
-15. Unit tests (15/15) pass. E2E (11/12 non-opt-in; the 12th is FAL_KEY-gated inside the test body).
+1. `lib/mixed-media.ts` exports `MIXED_MEDIA_STYLES` array with exactly 12 entries; every entry has non-empty `id`, `name`, `tagline`, `gradientClass`, `promptFragment`, and `compatibleMedia` array.
+2. `composeMixedMediaPrompt` returns a string that contains every selected style's `promptFragment` verbatim and the raw `subjectPrompt` text.
+3. `composeMixedMediaPrompt` NEVER includes a `referenceUrl`, `http://`, or `blob:` in its output.
+4. `buildMixedMediaBlends` throws `MixedMediaSelectionError` when `selectedStyleIds.length < 2` or `> 3`.
+5. `buildMixedMediaBatch` returns `variationsPerBlend` requests per blend (so 3 with variationsPerBlend=3).
+6. `buildMixedMediaBatch` throws `MixedMediaIncompatibleMediaError` when any selected style's `compatibleMedia` excludes the chosen `mediaType` (e.g. choosing "oil-painting" + mediaType="video").
+7. Request objects from `buildMixedMediaBatch` set `imageUrl` to `referenceUrl` only when provided; never include `imageUrl: ""`.
+8. `/tools/mixed-media` page renders with `<h1>` containing "Mixed Media" and `data-testid="mixed-media-page"` on the main element.
+9. The style grid renders exactly 12 tiles (`data-testid="style-tile"`), each with a unique `data-style-id`; clicking toggles `aria-pressed` and caps selection at 3.
+10. Generate button is disabled until at least 2 styles are selected AND `subjectPrompt.trim().length > 0`; enabled state uses `className="glow-btn"`.
+11. Fan-out uses `Promise.allSettled` — a 2-succeed-1-fail scenario renders 2 succeeded tiles + 1 failed tile with a `[Retry]` button; retry re-fires only that single variation and does not re-dispatch succeeded ones.
+12. All `fetch("/api/generate", ...)` and `fetch("/api/mixed-media/share", ...)` calls are wrapped with `handleAuthRequired` from `@/lib/auth-redirect`.
+13. Deep link `/tools/mixed-media?preset=anime-realism&subject=warrior+in+mist` pre-selects the `anime-realism` tile (single-style deep links are expanded by the UI — user must pick one more before generating) and pre-fills the subject textarea with "warrior in mist". The client component is Suspense-wrapped because it calls `useSearchParams`.
+14. Sidebar "Effects & Templates" section contains a "Mixed Media" link to `/tools/mixed-media`, inserted immediately after the existing "Popcorn" entry (so order: All Effects -> Popcorn -> Mixed Media -> On Fire -> ...).
+15. `/apps` gallery includes a Mixed Media card with `data-testid="tool-card"` and `data-slug="mixed-media"` linking to `/tools/mixed-media`.
+16. `lib/tools/p2-tools.ts` contains a `mixed-media` entry with `category: "editing"` and `mediaOut: "image"` (video is the secondary mode; default card shows image output so the P2 entry reflects that).
+17. Footer col1 `col1Links` (`components/footer.tsx`) contains an entry `{ href: "/tools/mixed-media", label: "Mixed Media" }` inserted immediately after the existing "Prompt Guide" entry.
+18. Zero `slate-` or `zinc-` tokens appear in `components/mixed-media/` or `app/tools/mixed-media/` (enforce via Playwright test using word-boundary regex through `page.evaluate`, NOT `[class*="slate-"]` which false-positives on `translate-x-*`).
+19. Style tile gradients use `bg-gradient-to-br ${style.gradientClass}`; primary heading uses `text-brand-gradient` class (NOT `bg-brand-gradient bg-clip-text text-transparent` inline); generate button uses `glow-btn` class.
+20. `npx next build` succeeds with `/tools/mixed-media` and `/api/mixed-media/share` in the route list.
+
+## Test plan
+
+### Vitest unit tests — `tests/unit/mixed-media.test.ts`
+
+1. `MIXED_MEDIA_STYLES` has exactly 12 entries.
+2. Every style has non-empty required fields (`id`, `name`, `tagline`, `gradientClass`, `promptFragment`, `compatibleMedia`).
+3. Every style `id` is unique across the array.
+4. `composeMixedMediaPrompt` with 2 styles includes both `promptFragment` strings verbatim.
+5. `composeMixedMediaPrompt` includes the subject prompt verbatim.
+6. `composeMixedMediaPrompt` does NOT include a given `referenceUrl` in output even when one is in the input (it's passed as imageUrl only, not in the prompt).
+7. `buildMixedMediaBlends(["anime-realism"])` throws `MixedMediaSelectionError`.
+8. `buildMixedMediaBlends(["a","b","c","d"])` throws `MixedMediaSelectionError`.
+9. `buildMixedMediaBlends(["anime-realism","oil-painting"])` returns array of length 1 with stable `blendId` and both styleIds in sorted order.
+10. `buildMixedMediaBatch({ selectedStyleIds: ["anime-realism","oil-painting"], subjectPrompt:"x", mediaType:"image", aspectRatio:"1:1", variationsPerBlend:2 })` returns array of length 2.
+11. `buildMixedMediaBatch` with `variationsPerBlend:3` returns 3 requests all sharing the same `blendId` but different `variationIndex`.
+12. `buildMixedMediaBatch` throws `MixedMediaIncompatibleMediaError` when mediaType="video" is chosen with a style whose `compatibleMedia` is image-only (e.g. oil-painting).
+13. `buildMixedMediaBatch` with `referenceUrl` undefined returns requests whose `imageUrl` property is undefined (NOT empty string).
+14. Default model is `"flux-kontext"` for `mediaType:"image"` and `"kling-25-turbo"` for `mediaType:"video"`.
+15. Sidebar `SIDEBAR_SECTIONS` "Effects & Templates" items contain "Mixed Media" at index 2 (right after "All Effects" at index 0 and "Popcorn" at index 1).
+16. `p2-tools.ts` contains a `mixed-media` entry with `category:"editing"` and `mediaOut:"image"` and at least 2 inputs.
+
+### Playwright E2E — `tests/e2e/mixed-media.spec.ts`
+
+Every test body opens with `test.skip(!process.env.FAL_KEY && /* test that requires real fal */, ...)` — INSIDE the test body, not at describe top level. Tests 1-11 are deterministic (no FAL), test 12 is the real fal round-trip gated by `FAL_KEY`.
+
+1. `/tools/mixed-media` page renders with heading "Mixed Media" and `data-testid="mixed-media-page"`.
+2. Grid shows 12 `data-testid="style-tile"` tiles with unique `data-style-id`.
+3. Clicking a tile toggles `aria-pressed` to "true".
+4. Attempting to select a 4th tile does NOT set aria-pressed (selection capped at 3).
+5. Generate button is disabled with 0 or 1 tiles selected; becomes enabled when 2 tiles + non-empty subject prompt are provided.
+6. Deep-link `/tools/mixed-media?preset=anime-realism&subject=warrior` pre-selects the anime-realism tile and pre-fills the subject textarea.
+7. Incompatible media warning: after selecting "oil-painting" (image-only) AND toggling to video mediaType, the generate button shows a disabled state with aria-label containing "not compatible".
+8. Mocked `/api/generate` (2 succeed, 1 fail with `variationsPerBlend:3`): lookbook renders 3 tiles — 2 `data-status="succeeded"` and 1 `data-status="failed"` with a visible `[Retry]` button.
+9. Clicking retry on the failed tile re-dispatches only that one request (verified by counting `/api/generate` calls via `page.route`), and succeeded tiles keep their `data-status="succeeded"`.
+10. Color-token guard: using `page.evaluate` with a word-boundary regex `/\bslate-\d+|\bzinc-\d+/` over all element `className` values on the page returns empty; the "translate-x-" false-positive test case must pass.
+11. Sidebar "Effects & Templates" section contains the "Mixed Media" link at the correct position.
+12. `/apps` gallery contains a tool card with `data-testid="tool-card"` and `data-slug="mixed-media"` pointing to `/tools/mixed-media`.
+13. (FAL_KEY-gated, `test.skip(!process.env.FAL_KEY)` INSIDE the test body) End-to-end happy path: select 2 compatible image styles, type "A lighthouse at storm", click Generate, poll until at least 1 tile reaches `data-status="succeeded"` with a non-empty `data-media-url` starting with `https://`.
+
+## Design-token constraints
+
+**Must use:**
+- Background near-black: `bg-[#181828]` or `bg-[#0a0a16]` for card surfaces.
+- Borders: `border-white/15` (not `border-white/10` for subtle, `border-white/20` for emphasis).
+- Brand gradient headings: `className="text-brand-gradient"` — the CSS utility in `globals.css` line 71.
+- Primary CTAs: `className="glow-btn"` — the CSS utility already used by Fashion Factory, Soul Cinema, Popcorn, Copilot.
+- Style tile active state: `aria-pressed="true"` + a `ring-2 ring-fuchsia-400` or `ring-cyan-400` outline.
+- Tile subtitles: `text-white/70` for body, `text-white/50` for secondary hints.
+
+**Must NOT use:**
+- `slate-*` tokens (any).
+- `zinc-*` tokens (any).
+- Raw `bg-brand-gradient bg-clip-text text-transparent` triple — use the `text-brand-gradient` utility.
+- `higgsfield.ai` logo, favicon, or brand marks.
+- blob: URLs in any API request body (upload to `/api/upload` first, use returned https URL).
+
+## Required builder constraints (copy verbatim from caller)
+
+- Use `npx next build` (NOT `npm run build`) for local build sanity — the project's script runs `prisma generate` first which hits a Windows .dll file-lock.
+- Suspense-wrap any client component using `useSearchParams` (the mixed-media client component MUST be Suspense-wrapped because it reads `?preset=` and `?subject=`).
+- `Promise.allSettled` fan-out pattern from fashion-factory / soul-cinema / popcorn when firing multiple generations.
+- `handleAuthRequired` from `@/lib/auth-redirect` for every protected-route fetch (`/api/generate`, `/api/mixed-media/share`).
+- `test.skip(!process.env.FAL_KEY)` INSIDE each test body that needs a real FAL round-trip, NOT at describe top level.
+- Playwright color-token check uses word-boundary regex via `page.evaluate`, NOT `[class*="slate-"]` which false-positive matches `translate-x-*`.
+- `/apps` gallery cards carry `data-testid="tool-card"` + `data-slug` (already added in a previous loop — verify the Mixed Media card inherits this).
+- Use `text-brand-gradient` utility NOT `bg-brand-gradient bg-clip-text text-transparent`.
+- Use `glow-btn` class on primary CTAs.
+- No `slate-` or `zinc-` tokens anywhere.
+- No Prisma migration — zero schema changes.
+- No Stripe / billing changes.
+- Do not break existing `/chat`, `/api/chat`, `/copilot`, `/tools/popcorn`, `/tools/soul-cinema`, `/tools/fashion-factory`, `/models/[slug]`, `/u/[username]`, `/apps`. Run `npx next build` locally before committing.

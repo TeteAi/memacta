@@ -16,6 +16,7 @@ const col1Links = [
   { href: "/community/contests", label: "Contests" },
   { href: "/apps", label: "Apps" },
   { href: "/prompt-guide", label: "Prompt Guide" },
+  { href: "/tools/mixed-media", label: "Mixed Media" },
 ];
 
 const col2Links = [

@@ -161,6 +161,18 @@ export const P2_TOOLS: ToolDef[] = [
       { key: "sceneCount", label: "Scene count", type: "text" },
     ],
   },
+  {
+    id: "popcorn",
+    slug: "popcorn",
+    name: "Popcorn",
+    description: "Pick a short-form preset, pop out 3 vertical variations in one click.",
+    category: "editing",
+    mediaOut: "video",
+    inputs: [
+      { key: "preset", label: "Preset", type: "text" },
+      { key: "subject", label: "Subject prompt", type: "prompt" },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug: string): ToolDef | undefined {

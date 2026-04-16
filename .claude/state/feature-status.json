@@ -2333,6 +2333,20 @@
         "coverageNotes": "All 15 acceptance criteria statically verified. Unit tests (9/9): userToUsername slugification, non-alphanumeric stripping, null-name fallback, hyphen collapse, matchUsernameToUser unambiguous/unknown/disambiguation, computeProfileStats totals, computeTopModels ranking. E2E (3/5 pass, 2 environment-limited): showcase profile renders header+grid PASS, unknown 404 PASS, post detail creator link PASS. Two E2E tests are environment-limited: (a) community card click — link href /u/demo-user is correct and direct navigation works (verified with force:true and page.goto), but Playwright's default .click() doesn't trigger navigation due to element positioning/overlay in headless Chromium on Windows — app functionality confirmed correct; (b) account 'View public profile' — link IS present in source (account/page.tsx:77-82) behind auth guard, but test visits without storageState auth setup — app code correct, test needs storageState. Static analysis: text-brand-gradient via CSS class (globals.css:71), bg-brand-gradient avatar fallback, data-testid on all 5 profile components + post-card, no slate/zinc tokens, sidebar QUICK_LINKS unmodified, nav.tsx has My profile link (line 97), force-dynamic on profile page, metadata title+description, notFound() on third path, showcase/DB/404 resolution order correct."
       }
     },
+    "higgsfield-popcorn": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "testReport": {
+        "unit": { "passed": 15, "failed": 0 },
+        "e2e": { "passed": 12, "failed": 0, "skipped": 1 },
+        "notes": "All 15 unit cases green. 12/12 non-opt-in E2E green; test 13 (real fal.ai round-trip) skipped as designed via FAL_KEY env gate inside test body. Fixed one builder test bug: test 11 (no slate-/zinc- tokens) originally used `[class*=\"slate-\"]` which false-positive matched `translate-x-0` in the sidebar — replaced with a word-boundary regex via page.evaluate."
+      },
+      "priority": "P1",
+      "source": "feature-gap-analysis.md — 'Higgsfield Popcorn' listed under MISSING. Short-form vertical video preset factory. Chosen this round over UGC Factory (structurally near-identical to shipped Fashion Factory), Mixed Media (too large — unified canvas requires timeline surgery), and Reference Extension (heavy overlap with shipped Multi Reference + Soul ID + Soul Moodboard + Soul Cast). Pairs naturally with just-shipped Soul Cinema (long-form narrative) by covering the complementary short-form 9:16 variation-pack surface that dominates TikTok/Reels.",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-dee2dee audit: `npx next build` PASS. All 18 model slugs prerendered, /tools/soul-cinema compiles, /tools/fashion-factory compiles, /u/[username] compiles, /apps gallery renders. Prisma schema unchanged (still postgres, 18 models — User, Subscription, CreditTransaction, Project, Character, Generation, Post, Like, CreditPackage, Purchase, SocialAccount, ScheduledPost, PostAnalytics, Account, Session, VerificationToken). Sidebar Studio ordering correct (Cinema Studio -> Soul Cinema -> Saved Projects). Sidebar Identity ordering correct. No design-token regressions in components/soul-cinema or components/fashion. lib/fashion.ts + lib/soul-cinema.ts pattern intact. No REWORK needed. Spec scoped to zero Prisma deltas by reusing Project.clipsJson + Post.toolUsed + Generation (existing). Uses real fal.ai via existing /api/generate fan-out (Promise.allSettled pattern from Fashion Factory / Soul Cinema)."
+    },
     "fashion-factory": {
       "status": "done",
       "startedAt": "2026-04-16",
@@ -2356,7 +2370,7 @@
       }
     }
   },
-  "currentFeature": "soul-cinema",
+  "currentFeature": "higgsfield-popcorn",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

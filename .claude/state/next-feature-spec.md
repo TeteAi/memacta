@@ -1,213 +1,202 @@
-# Feature: soul-cinema
+# Feature: higgsfield-popcorn
 
-- **Name:** Soul Cinema — character-driven narrative story builder
-- **Category:** P5 — Cinema Studio (complements existing /studio manual timeline)
-- **Priority:** P1 (highest remaining user-facing gap that exercises real fal.ai generation AND deepens the creator loop by chaining Character → multi-scene narrative output)
-- **Supersedes:** the stale `soul-cinema` entry in feature-status.json (dated 2026-04-09) that was never shipped — no route, no component, no tool def currently exist for it. This spec is the real build.
+- **Name:** Higgsfield Popcorn
+- **Category:** P4 — Effects & Templates (short-form vertical video presets)
+- **Priority:** P1 (highest-ROI remaining gap; pairs with just-shipped Soul Cinema to cover both long-form narrative and short-form vertical)
+- **Source:** `feature-gap-analysis.md` — "Higgsfield Popcorn" listed under MISSING. Chosen over UGC Factory (structurally near-identical to shipped Fashion Factory), Mixed Media (too large — unified canvas requires timeline surgery), and Reference Extension (heavy overlap with shipped Multi Reference + Soul ID + Soul Moodboard + Soul Cast).
 
 ## User story
 
-> As a creator who has already trained a **Soul ID** character (or has one of the seeded showcase characters), I want to type a story prompt like "Maya finds a mysterious letter and chases its author through a rainy Tokyo night" and have Soul Cinema automatically break that story into 3–6 scene beats, generate a short video clip for each scene using my chosen video model, and stitch them into a playable reel I can download, share to the community, or save as a Project to continue editing in Cinema Studio. The character's look stays consistent across every scene because we reuse the same Soul ID reference image for each generation.
+As a creator who wants to feed a TikTok/Reels posting schedule, I open **Popcorn**, pick one of ~12 short-form presets (each is a recipe: base prompt + tone + motion style + 9:16 aspect + 3s or 5s duration), optionally upload a subject image, type a one-line subject idea, and click **Pop** once. Popcorn fires 3 vertical clips in parallel — same preset, three seeds — so I get a variation pack I can immediately share to the community or stage in the social scheduler. One clip failing does not block the others; each tile has its own retry.
 
-This differs from the existing `/studio` Cinema Studio page, which is a **manual** per-clip timeline. Soul Cinema is **narrative-first**: one prompt, one character, multiple automatically-scripted scenes, one fan-out API round trip to fal.ai. The output lands in the same `Project` row so the user can then open it in `/studio/[id]` for manual refinement.
+The key differentiator versus Soul Cinema: Popcorn is preset-first (pick a vibe, skip the scripting), always 9:16, always short, and always returns **3 variations** rather than a narrative sequence. It is the "scroll-bait factory" the Cinema flow is not.
 
 ## Wireframe
 
 ```
-+------------------------------------------------------------+
-| Cinema > Soul Cinema                                        |
-|                                                             |
-|  ########  SOUL CINEMA                                      |
-|  ########  Turn a story beat into a character-driven reel.  |
-|                                                             |
-| +-- Step 1: Pick your character -----------------------+    |
-| | [avatar]  Maya        [avatar]  Leo      [+ New]    |    |
-| |   *chosen*            hover:ring-pink                |    |
-| +-------------------------------------------------------+    |
-|                                                             |
-| +-- Step 2: Tell the story ----------------------------+    |
-| | [textarea 4-row — "Maya finds a letter in the rain…"]|    |
-| | Genre:  [Drama][Noir][SciFi][Romance][Action]        |    |
-| | Tone:   [Moody][Bright][Tense][Dreamy]               |    |
-| | Scenes: (o) 3   ( ) 4   ( ) 5   ( ) 6                |    |
-| | Model:  [v Kling 3]   Aspect: [16:9|9:16]            |    |
-| +-------------------------------------------------------+    |
-|                                                             |
-| +-- Step 3: Storyboard (auto-generated from your story) +    |
-| | +--------+ +--------+ +--------+                     |    |
-| | |scene 1 | |scene 2 | |scene 3 |   [Regenerate beats]|    |
-| | |"Rain…" | |"She… " | |"Chase "|                     |    |
-| | | idle   | | idle   | | idle   |                     |    |
-| | +--------+ +--------+ +--------+                     |    |
-| |                                                        |    |
-| |      [  Generate reel — 9 credits  ]  (glow-btn)      |    |
-| +-------------------------------------------------------+    |
-|                                                             |
-| +-- Step 4: Reel (after generate) ---------------------+    |
-| | +--------+ +--------+ +--------+                     |    |
-| | |[> 1]   | |[> 2]   | |[> 3]   |  succeeded          |    |
-| | |succeed | |failed  | |succeed |  [retry 2]          |    |
-| | +--------+ +--------+ +--------+                     |    |
-| | [Save as Project]  [Share to Community]  [Download]  |    |
-| +-------------------------------------------------------+    |
-+------------------------------------------------------------+
++--------------------------------------------------------------------------+
+|  Apps / Effects / Popcorn                                                |
+|                                                                          |
+|  [icon]  Popcorn                                                  beta   |
+|          Pop out 3 short-form vertical clips from one preset             |
+|                                                                          |
+|  Step 1 - Pick a preset ----------------------------------------------   |
+|  +------+ +------+ +------+ +------+                                     |
+|  |Snack | |Cafe  | |Neon  | |Retro |   [ see all 12 -> ]                 |
+|  |Hop   | |Gloom | |Runway| |GRWM  |                                     |
+|  +------+ +------+ +------+ +------+                                     |
+|   active                                                                 |
+|                                                                          |
+|  Step 2 - Subject (optional) -----------------------------------------   |
+|  +- drop subject image ---------------------------------------+          |
+|  |  [ cleared | uploaded thumb ]                              |          |
+|  +------------------------------------------------------------+          |
+|  +-----------------------------------------------------------+           |
+|  | "a 22-yo skateboarder with cherry-red hair"               |           |
+|  +-----------------------------------------------------------+           |
+|                                                                          |
+|  Model: kling-25-turbo    Cost: 9 credits x 3 = 27 credits               |
+|  +----------------------------------------------+                        |
+|  |              POP (generate 3)                |                        |
+|  +----------------------------------------------+                        |
+|                                                                          |
+|  Results (9:16 vertical) ---------------------------------------------   |
+|  +-----+  +-----+  +-----+                                               |
+|  |seed |  |seed |  |seed |   each tile: loading -> video -> retry|share  |
+|  | #1  |  | #2  |  | #3  |                                               |
+|  |9:16 |  |9:16 |  |9:16 |                                               |
+|  +-----+  +-----+  +-----+                                               |
+|                                                                          |
+|  [ Share pack to community ]   [ Schedule all to social ]                |
++--------------------------------------------------------------------------+
 ```
 
 ## Routes
 
-Next.js app-router paths:
+- `app/tools/popcorn/page.tsx` — dedicated route wins over `app/tools/[slug]/page.tsx` fallback. Metadata + server-rendered shell that hosts the client component.
+- `app/api/popcorn/pack/route.ts` — `POST` endpoint. Auth-gated. Accepts `{ presetId, subjectPrompt, subjectImageUrl? }`, returns `{ packId, clips: Array<{ seed, mediaUrl } | { seed, error }> }`. Internally maps to `buildPopcornBatch(...)` and fans out to the existing provider layer (mirrors the Fashion Factory / Soul Cinema pattern; no new provider code). **Alternative accepted:** the client MAY skip this route and fan out directly to `/api/generate` three times — either is acceptable. The server route is cleaner because it lets us record a single `Project` row with `clipsJson` holding all three seeds, rather than three independent `Generation` rows.
+- `app/api/popcorn/share/route.ts` — `POST`. Auth-gated. Accepts `{ clips: string[], presetId }`, creates a `Post` row with `toolUsed: "popcorn"` and `mediaType: "video"` (first clip becomes primary `mediaUrl`, other clips JSON-stringified into `description`). Returns `{ postId }`.
 
-- `/tools/soul-cinema` — dedicated page (wins over the `/tools/[slug]` catch-all). This is the canonical Soul Cinema URL.
-- `/api/soul-cinema/script` — `POST` — server endpoint that turns `{ storyPrompt, sceneCount, genre, tone, character }` into an array of `{ sceneNumber, beat, prompt }` objects. Pure deterministic transform (no LLM call); uses prompt-template composition in `lib/soul-cinema.ts` so it is testable without external services.
-- `/api/soul-cinema/save` — `POST` — creates or updates a `Project` row with `clipsJson` populated from the generated scene clips. Thin wrapper over the existing `prisma.project.create` logic; used for the "Save as Project" button so the user can jump straight to `/studio/{id}` and keep editing.
-
-No changes to `/api/generate` — Soul Cinema fans out to the existing endpoint once per scene via `Promise.allSettled`, same pattern as Fashion Factory.
+No changes to `/api/generate`. No changes to `/api/soul-cinema/*`.
 
 ## Components
 
-All under `components/soul-cinema/`:
+All new files under `components/popcorn/`:
 
-- `components/soul-cinema/soul-cinema.tsx` — root client component orchestrating the 4-step flow (character pick -> story input -> storyboard -> reel). Holds state: `characterId`, `storyPrompt`, `genre`, `tone`, `sceneCount`, `model`, `aspectRatio`, `scenes[]`, `results[]`.
-- `components/soul-cinema/character-picker.tsx` — horizontal avatar strip. Loads characters from `/api/characters` (add this endpoint if missing — thin wrapper over `prisma.character.findMany({ where: { userId } })` via a server action `getUserCharacters()` in `lib/soul-cinema.ts`). Shows a 3-tile fallback of showcase characters for anonymous users, plus a "+ New" tile linking to `/tools/soul-id`.
-- `components/soul-cinema/story-form.tsx` — textarea + genre chips + tone chips + scene-count radio + model select. Emits `{ storyPrompt, genre, tone, sceneCount, model, aspectRatio }` upward via `onChange`.
-- `components/soul-cinema/storyboard-grid.tsx` — pure display component: shows the parsed scene beats from `/api/soul-cinema/script`. Has a "Regenerate beats" button that re-calls the script endpoint with a different seed so users can shuffle the auto-written beats.
-- `components/soul-cinema/reel-grid.tsx` + `components/soul-cinema/reel-tile.tsx` — per-scene tile with idle/running/succeeded/failed states. Matches the `LookbookTile` pattern from Fashion Factory (commit 23970f4). Each tile has its own retry button, status badge, and preview player (`<video>` for succeeded, spinner for running, error + retry for failed).
-- `components/soul-cinema/reel-actions.tsx` — the three action buttons after generation: "Save as Project" (POST to `/api/soul-cinema/save`), "Share to Community" (POST first-succeeded clip to `/api/community/posts` with `toolUsed: "soul-cinema"`), "Download" (client-side `<a download>` on the first succeeded URL; note: full reel-stitch download is out of scope — single-clip download is acceptable).
+- `components/popcorn/popcorn.tsx` — client root. Holds state `{ presetId, subjectPrompt, subjectUrl, clips }` plus generation lifecycle. Wires `handleAuthRequired` from `@/lib/auth-redirect`. Fires `Promise.allSettled` fan-out to `/api/generate` (or `/api/popcorn/pack`) for each of 3 seeds.
+- `components/popcorn/preset-grid.tsx` — renders the 12 preset cards from `POPCORN_PRESETS` (see data model). Each card: gradient thumb (no real image URL — CSS gradient keyed on preset id), name, 3-word tagline, selected state uses `bg-brand-gradient` + `aria-pressed="true"`. Shows first 4 by default with a `see all` expander to reveal the rest.
+- `components/popcorn/subject-uploader.tsx` — reuses the Fashion Factory `person-dropzone` visual language. `data-testid="subject-uploader"`. Emits `onUploaded(url, previewDataUrl)`.
+- `components/popcorn/subject-input.tsx` — textarea. `data-testid="subject-prompt"`. 140-char soft limit. Shows remaining count.
+- `components/popcorn/clip-grid.tsx` — 3-column (desktop) / 1-column (mobile) responsive grid. Renders 3 `<ClipTile/>` components.
+- `components/popcorn/clip-tile.tsx` — `data-testid="clip-tile"` + `data-seed={seed}` + `data-status={status}` where status is one of `idle | running | succeeded | failed`. 9:16 aspect container. On success, renders `<video autoplay muted loop playsinline>`. On failure, renders retry button (`data-testid="retry-clip-btn"`). Single clip download button.
+- `components/popcorn/pack-actions.tsx` — "Share pack to community" (calls `/api/popcorn/share` or existing `/api/community/posts`) + "Schedule all to social" (links to `/social/schedule?urls=...`). Both disabled until at least one clip is `succeeded`.
+
+Edits to existing files:
+
+- `components/sidebar.tsx` — add `{ label: "Popcorn", href: "/tools/popcorn" }` inside the **Effects & Templates** section, inserted as the **second** item directly after `All Effects` (sibling of `On Fire`, before `Neon Glow`). This places it where discovery traffic lands.
+- `lib/tools/p2-tools.ts` — append a new `popcorn` entry so it surfaces on `/apps`. Category `"editing"` (Popcorn is preset-driven media-out, not identity). `mediaOut: "video"`. Inputs: `[{ key: "preset", label: "Preset", type: "text" }, { key: "subject", label: "Subject prompt", type: "prompt" }]`. Name `"Popcorn"`. Description `"Pick a short-form preset, pop out 3 vertical variations in one click."`.
 
 ## Data model deltas
 
-**None.** Soul Cinema is pure frontend + existing `/api/generate` fan-out + existing `Project` model.
+**Zero Prisma migrations.** All data reuses existing columns:
 
-- The existing `Project.clipsJson: String` field already stores an array of `{ id, prompt, model, resultUrl, durationSec, order }` (see `ClipSchema` in `app/api/projects/route.ts`). Soul Cinema's `/api/soul-cinema/save` endpoint builds this exact shape from its `scenes[]` state and calls the same Prisma insert.
-- The existing `Character.refImageUrls: String` field (JSON-serialized array of URLs) already exists. Soul Cinema reads `JSON.parse(character.refImageUrls)[0]` as the consistency reference URL passed to `/api/generate` per scene.
-- The existing `Post.toolUsed` field already exists and will receive `"soul-cinema"` for community shares — no migration needed; consistent with how Fashion Factory uses `"fashion-factory"`.
+- `Project.clipsJson` — stores `{ presetId, seeds: [n1, n2, n3], clips: [{ seed, url }] }` when user hits "Save pack as project".
+- `Post.toolUsed` — set to `"popcorn"` when user shares a pack. `Post.description` holds the preset id + extra clip URLs as JSON (pattern already used by Fashion Factory lookbook share).
+- `Generation` rows — created transparently by `/api/generate` as usual.
 
-This keeps the feature landing cleanly on top of Prisma without any migration risk (especially important given the Windows `.dll` file-lock on `prisma generate`).
+Preset library is **pure code**, not DB, in a new file:
+
+- `lib/popcorn.ts` — exports `POPCORN_PRESETS: PopcornPreset[]`, `getPopcornPreset(id)`, `buildPopcornBatch(presetId, subjectPrompt, subjectImageUrl?, seeds?)`, and `composePopcornPrompt(preset, subjectPrompt)`. Mirrors the `lib/fashion.ts` + `lib/soul-cinema.ts` pattern. Fully unit-testable; no React, no DB.
+
+```ts
+// lib/popcorn.ts shape
+export type PopcornPreset = {
+  id: string;                               // "snack-hop", "cafe-gloom", ...
+  name: string;                             // "Snack Hop"
+  tagline: string;                          // "rapid pastel pan"
+  gradientClass: string;                    // Tailwind gradient for thumb
+  basePrompt: string;                       // baked-in style directive
+  motion: string;                           // "rapid handheld pan"
+  tone: string;                             // "playful, pastel, snackable"
+  model: "kling-25-turbo" | "seedance-20";  // short-form friendly
+  durationSec: 3 | 5;
+  aspectRatio: "9:16";
+};
+```
+
+12 presets to implement: `snack-hop`, `cafe-gloom`, `neon-runway`, `retro-grwm`, `sunset-drive`, `mirror-glitch`, `tokyo-streetwear`, `studio-cook`, `locker-room-pump`, `pet-close-up`, `weekend-hike`, `night-in`.
 
 ## Provider adapter contract
 
-No new AI provider adapter. Soul Cinema reuses the existing `videoModels()` list from `lib/ai/models.ts` via the already-wired `/api/generate` endpoint.
-
-The **new** typed contract is the pure script-transform signature that lives in `lib/soul-cinema.ts`:
+**No new provider adapter.** Popcorn is a composition layer over existing providers. The `buildPopcornBatch` helper produces request payloads in the exact `/api/generate` wire format already validated by the existing `Body` Zod schema in `app/api/generate/route.ts`:
 
 ```ts
-// lib/soul-cinema.ts
-
-export type SoulCinemaScene = {
-  sceneNumber: number;  // 1-indexed
-  beat: string;         // one-sentence description shown in storyboard
-  prompt: string;       // full composed prompt sent to /api/generate
-};
-
-export type SoulCinemaScriptInput = {
-  storyPrompt: string;           // user's raw story text, min 10 chars
-  sceneCount: 3 | 4 | 5 | 6;
-  genre: "drama" | "noir" | "scifi" | "romance" | "action";
-  tone: "moody" | "bright" | "tense" | "dreamy";
-  characterName: string;         // e.g. "Maya" — embedded in every scene prompt
-  characterRefUrl?: string;      // Soul ID reference — passed to /api/generate as imageUrl
-  seed?: number;                 // optional shuffle seed for "Regenerate beats"
-};
-
-/**
- * Pure, deterministic scene-script generator.
- * Splits the story into `sceneCount` beats using a stable template library
- * keyed by genre, then composes a per-scene prompt string that mentions the
- * character name, the genre's cinematographic style directives, and the tone.
- * Must be synchronous and free of I/O so the unit tests can assert output
- * character-by-character.
- */
-export function buildSoulCinemaScript(
-  input: SoulCinemaScriptInput
-): SoulCinemaScene[];
-
-export type SoulCinemaBatchInput = {
-  scenes: SoulCinemaScene[];
-  model: string;                 // one of videoModels().map(m => m.id)
-  aspectRatio: "16:9" | "9:16" | "1:1";
-  characterRefUrl?: string;      // passed as imageUrl on every /api/generate call
-  durationSec?: number;          // default 5
-};
-
-export type SoulCinemaGenerateRequest = {
-  prompt: string;
-  model: string;
+export interface PopcornGenerateRequest {
+  prompt: string;           // = composePopcornPrompt(preset, subjectPrompt)
+  model: string;            // = preset.model
   mediaType: "video";
-  imageUrl?: string;
-  aspectRatio: "16:9" | "9:16" | "1:1";
-  duration: number;
-};
+  imageUrl?: string;        // optional subject reference passthrough
+  aspectRatio: "9:16";      // always portrait
+  duration: number;         // = preset.durationSec (3 or 5)
+  seed: number;             // deterministic seeds from buildPopcornBatch
+}
 
-/**
- * Pure function that maps a batch of scenes into an array of /api/generate
- * request bodies. Mirror of `buildFashionBatch` from lib/fashion.ts — same
- * validation posture (throws on >6 scenes, filters empty beats).
- */
-export function buildSoulCinemaBatch(
-  input: SoulCinemaBatchInput
-): SoulCinemaGenerateRequest[];
+export function buildPopcornBatch(
+  presetId: string,
+  subjectPrompt: string,
+  subjectImageUrl?: string,
+  seeds?: [number, number, number],
+): PopcornGenerateRequest[] {
+  // length === 3, throws if preset not found or subjectPrompt empty
+}
 ```
 
-The client-side orchestrator then executes the batch with `Promise.allSettled` — one fetch per scene, per-tile state managed locally — exactly matching the Fashion Factory pattern. No new AI adapter surface.
+Seeds default to `[17, 42, 91]` for reproducibility in tests. When called without seeds, the production client passes `[Date.now() % 1e6, Date.now() % 1e6 + 7, Date.now() % 1e6 + 13]` so variations are distinct.
 
 ## Acceptance criteria
 
-1. Visiting `/tools/soul-cinema` renders the page with heading `Soul Cinema`, subtitle, and all four step sections (character picker, story form, storyboard, reel area) wrapped in the standard dark shell. `data-testid="soul-cinema-page"` on the root `<main>`.
-2. Design tokens follow the memacta palette only: `#181828` card backgrounds, `white/15` borders, `text-brand-gradient` headings, `bg-brand-gradient` primary CTAs, `glow-btn` class on the main Generate button. Zero occurrences of `slate-` or `zinc-` Tailwind tokens in any file under `components/soul-cinema/` or `app/tools/soul-cinema/`.
-3. Character picker shows at least 3 showcase characters for anonymous users (hardcoded fallbacks with `name`, `avatarUrl`, `refImageUrl`). For authenticated users, it fetches `/api/characters` (add this endpoint if missing — thin wrapper over `prisma.character.findMany({ where: { userId } })`) and prepends their own Soul ID characters. Each tile has `data-testid="character-tile"` and the selected tile gets `aria-pressed="true"`.
-4. Story form textarea has `data-testid="story-prompt"`, genre and tone chip rows each have 4–5 chips (single-select, highlighted selection uses `bg-brand-gradient`), scene count is a 4-button radio (3/4/5/6, default 3), model select uses `videoModels()` from `lib/ai/models.ts`. Aspect ratio toggles between `16:9` and `9:16` only (no `1:1` for Cinema output).
-5. Clicking "Generate storyboard" (or automatic on form change, debounced 400ms) POSTs to `/api/soul-cinema/script`. The response is rendered as 3–6 storyboard tiles, each showing `Scene N` + the one-sentence beat. Tiles have `data-testid="storyboard-tile"`.
-6. Main "Generate reel" button is disabled until: a character is selected AND story prompt is >=10 chars AND storyboard has >=3 tiles. Button label reads `Generate reel — {sceneCount * 3} credits` (video is 3 credits per scene).
-7. Clicking the enabled Generate button kicks off `Promise.allSettled` of N fetches to `/api/generate` (N = sceneCount). Each reel tile transitions idle -> running -> succeeded|failed independently. Failed tiles show a Retry button that re-fires that single scene's fetch without affecting the others.
-8. `buildSoulCinemaScript` must always produce exactly `sceneCount` scenes for valid input, each with a unique `sceneNumber` (1..N), a non-empty `beat`, and a `prompt` that contains the character name AND the genre style directive AND the tone adjective.
-9. `buildSoulCinemaBatch` must throw `Error("Soul Cinema supports at most 6 scenes")` when given 7+ scenes, must return `[]` when given empty scenes, and must pass `characterRefUrl` through as `imageUrl` on every request body when provided.
-10. "Save as Project" button POSTs to `/api/soul-cinema/save` with `{ name: "Soul Cinema — {genre} / {storyPrompt.slice(0,40)}", clips: [...] }` where each clip has `{ id, prompt, model, resultUrl, durationSec, order }`. On success, redirects to `/studio/{projectId}`. Anonymous users get `handleAuthRequired` redirect to signup.
-11. "Share to Community" button POSTs the first succeeded clip to `/api/community/posts` with `toolUsed: "soul-cinema"`, media type `video`, title derived from the story prompt. Uses `handleAuthRequired` on 401.
-12. Sidebar Studio section (in `components/sidebar.tsx`) gains a new `{ label: "Soul Cinema", href: "/tools/soul-cinema" }` entry, inserted between "Cinema Studio" and "Saved Projects". Label is exactly `Soul Cinema` (with the space).
-13. `lib/tools/p2-tools.ts` gains a `soul-cinema` entry with `category: "identity"` (to surface it next to Soul ID/Cast) and `mediaOut: "video"`, so it appears in the `/apps` gallery. Inputs: `character` (image-ref), `story` (prompt), `genre` (text), `sceneCount` (text).
-14. `npx next build` must succeed after the feature lands. No new route collisions; `/tools/soul-cinema` resolves to the dedicated page, not the catch-all. The build must show `/tools/soul-cinema` in the dynamic route listing.
-15. Anonymous users can reach Step 3 (storyboard) but get a signup redirect via `handleAuthRequired` when they hit the Generate reel button if they have exceeded `ANON_MAX_GENERATIONS` (existing `/api/generate` behavior is reused unchanged — no duplicate gate needed in Soul Cinema code).
+1. `npx next build` passes with no new errors or warnings.
+2. `/tools/popcorn` returns 200 and renders a page with heading `Popcorn` and `data-testid="popcorn"` on the root client component.
+3. The preset grid shows **exactly 12** preset cards, each with `data-testid="preset-card"` and a `data-preset-id` attribute matching one of the 12 ids in `POPCORN_PRESETS`.
+4. Clicking a preset card sets `aria-pressed="true"` on that card and `"false"` on the other 11; the selected preset id is reflected in a `data-selected-preset` attribute on the root `popcorn` testid container.
+5. The subject-prompt textarea enforces a **140-char soft limit** with a visible remaining counter.
+6. The **Pop** button is disabled until a preset is selected AND the subject prompt has at least one non-whitespace character. Button has `data-testid="pop-btn"`.
+7. Clicking Pop fires **exactly 3** parallel `POST /api/generate` requests (or 1 `POST /api/popcorn/pack` that fans out server-side — either is acceptable). Each request has `mediaType: "video"`, `aspectRatio: "9:16"`, `duration` matching the preset, and a distinct `seed`.
+8. The three clip tiles render immediately in `running` state (`data-status="running"`), then each transitions independently to `succeeded` (with a `<video>` child element) or `failed` (with a retry button).
+9. A single-clip failure does **not** abort the other two. Failed tile shows `data-testid="retry-clip-btn"`; clicking retry re-fires only that one seed and the tile re-enters `running`.
+10. On 401 `auth_required` from any of the 3 requests, the client calls `handleAuthRequired` once (not thrice) and bounces the browser to `/auth/signup?return=/tools/popcorn`.
+11. With at least 1 `succeeded` clip the `Share pack to community` button enables. Clicking it calls `/api/popcorn/share` (or `/api/community/posts` with `toolUsed: "popcorn"`) and on success navigates to `/community`.
+12. Sidebar **Effects & Templates** section has a `Popcorn` link as the **second** item (right after `All Effects`), with `href="/tools/popcorn"`.
+13. `/apps` grid card for `popcorn` exists, renders its category badge (`editing`) and media-out badge (`video`), and links to `/tools/popcorn`.
+14. Design tokens are consistent: cards use `bg-[#181828]`, borders use `border-white/15` (or `white/10`), CTAs use `bg-brand-gradient` + `glow-btn`. **Zero** occurrences of `slate-` or `zinc-` tokens in any new file under `components/popcorn/`, `app/tools/popcorn/`, `app/api/popcorn/`, or `lib/popcorn.ts`.
+15. **No `blob:` URLs reach `/api/generate`**. The subject-uploader must upload to `/api/upload` first and pass back the hosted URL (same pattern as `person-dropzone.tsx`).
 
 ## Test cases
 
-### Vitest unit tests — `tests/unit/soul-cinema.test.ts`
+### Vitest unit tests — `tests/popcorn.test.ts`
 
-1. `buildSoulCinemaScript` returns exactly `sceneCount` scenes for input with sceneCount=3.
-2. `buildSoulCinemaScript` returns exactly 6 scenes for sceneCount=6.
-3. Every scene's `prompt` contains the exact `characterName` substring.
-4. Every scene's `prompt` contains the genre-specific style keyword (e.g. "noir" -> contains `chiaroscuro` or `shadow` or similar pre-defined string; assert against the exact token in the implementation's genre library).
-5. Every scene's `prompt` contains the tone adjective (e.g. tone="moody" -> contains `moody` or synonym from the tone map).
-6. Changing `seed` between two calls with otherwise identical input produces at least one scene with a different `beat` string (shuffle actually shuffles).
-7. `buildSoulCinemaScript` with `characterRefUrl` provided does NOT embed the URL into the prompt string (the URL goes on `imageUrl`, never the prompt — same posture as `composeFashionPrompt`).
-8. `buildSoulCinemaBatch` returns an array with length equal to `scenes.length`.
-9. `buildSoulCinemaBatch` throws when passed 7+ scenes.
-10. `buildSoulCinemaBatch` returns `[]` when passed empty scenes.
-11. `buildSoulCinemaBatch` request body has `mediaType: "video"` on every entry.
-12. `buildSoulCinemaBatch` with `characterRefUrl` present puts that URL on every entry's `imageUrl` field.
-13. `buildSoulCinemaBatch` with no `characterRefUrl` omits the `imageUrl` field (strict undefined, not empty-string).
-14. Sidebar Studio section ordering: a synchronous import-and-assert that `Soul Cinema` label appears between `Cinema Studio` and `Saved Projects` (read the Studio section array from `components/sidebar.tsx`).
-15. `p2-tools.ts` has a `soul-cinema` entry with `category: "identity"`, `mediaOut: "video"`, and `inputs.length >= 3`.
+All tests operate on pure helpers in `lib/popcorn.ts`. No DB, no network, no React.
 
-### Playwright E2E — `e2e/soul-cinema.spec.ts`
+1. `POPCORN_PRESETS.length === 12` — guards against accidental preset drift.
+2. Every preset has a non-empty `id`, `name`, `tagline`, `basePrompt`, `motion`, `tone`, `gradientClass`; `aspectRatio === "9:16"`; `durationSec` is 3 or 5; `model` is one of `"kling-25-turbo"` or `"seedance-20"`.
+3. Preset ids are globally unique (`new Set(ids).size === 12`).
+4. `getPopcornPreset("snack-hop")` returns the matching preset.
+5. `getPopcornPreset("does-not-exist")` returns `undefined`.
+6. `composePopcornPrompt(preset, "a skateboarder")` includes the subject verbatim, includes `preset.basePrompt`, includes `preset.motion`, includes `preset.tone`, and does NOT include `subjectImageUrl`.
+7. `buildPopcornBatch("snack-hop", "a skater")` returns an array of length 3.
+8. Every element has `mediaType: "video"`, `aspectRatio: "9:16"`, and `duration === preset.durationSec`.
+9. The 3 elements have 3 distinct seeds (`new Set(batch.map(b => b.seed)).size === 3`).
+10. Passing `subjectImageUrl: "https://x.com/a.jpg"` sets `imageUrl` on every element; omitting it means no element has `imageUrl`.
+11. `buildPopcornBatch("snack-hop", "")` throws `Error` with message matching `/subject/i` (empty subject guard).
+12. `buildPopcornBatch("unknown-preset", "anything")` throws `Error` with message matching `/preset/i`.
+13. Explicit seeds override defaults: `buildPopcornBatch("snack-hop", "x", undefined, [1,2,3]).map(b=>b.seed)` equals `[1,2,3]`.
+14. Sidebar assertion: verify via import that the Effects & Templates section of `SIDEBAR_SECTIONS` (lift it to a module-level export if not already) contains, at index 1, `{ href: "/tools/popcorn", label: "Popcorn" }`. If lifting the constant is disruptive, use a static source-file grep inside the test that asserts the exact line exists in `components/sidebar.tsx`.
+15. `P2_TOOLS` contains exactly one entry with `slug === "popcorn"`, `category === "editing"`, `mediaOut === "video"`, and `inputs.length >= 2`.
 
-**Happy path (mocked fal.ai):**
+### Playwright E2E — `e2e/popcorn.spec.ts`
 
-1. Navigate to `/tools/soul-cinema`. Expect `data-testid="soul-cinema-page"` visible and heading `Soul Cinema`.
-2. Expect at least 3 `data-testid="character-tile"` elements rendered (showcase fallback). Click the first one — it should get `aria-pressed="true"`.
-3. Fill `data-testid="story-prompt"` with `Maya finds a mysterious letter and chases its author through a rainy Tokyo night`.
-4. Click the `Noir` genre chip and the `Moody` tone chip.
-5. After debounce, expect exactly 3 `data-testid="storyboard-tile"` elements to render.
-6. Confirm the main Generate button becomes enabled; its label includes `9 credits`.
-7. With `page.route('**/api/generate', ...)` intercepting and returning `{ status: "succeeded", url: "/mock/scene.mp4" }` for the first two calls and `{ status: "failed", error: "mock" }` for the third, click Generate. Wait for all three tiles to settle. Assert 2 tiles show `data-status="succeeded"` and 1 shows `data-status="failed"` with a visible Retry button.
-8. Click Retry on the failed tile (with the mock now returning success). The tile re-renders with `data-status="succeeded"`.
-9. Assert the three action buttons are visible: `Save as Project`, `Share to Community`, `Download`.
+Happy path and failure paths. Uses the dev server, `mockProvider` in the AI layer, and `test.skip(!process.env.FAL_KEY, ...)` **inside the test body** (NOT at describe-block level — this was a real regression the Soul Cinema round fixed) for the one real-fal.ai round-trip.
 
-**Additional E2E assertions:**
+1. **Page renders.** `await page.goto('/tools/popcorn')`. `expect(page.getByRole('heading', { name: 'Popcorn' })).toBeVisible()`. `expect(page.getByTestId('popcorn')).toBeVisible()`.
+2. **Preset grid has 12 cards.** `expect(page.getByTestId('preset-card')).toHaveCount(12)`. (If the UI collapses to 4 by default, click `see all` first.)
+3. **Preset selection toggles aria-pressed.** Click the 3rd preset card; assert it has `aria-pressed="true"` and the other cards have `aria-pressed="false"`.
+4. **Pop button gated.** Initially disabled. Select preset — still disabled (no subject). Type subject — enabled.
+5. **Happy path — 3 clips succeed (mocked provider).** Fill subject, select preset, click `pop-btn`. Wait for 3 `clip-tile` elements with `data-status="succeeded"`. Assert each has a nested `<video>` element. Assert the three `data-seed` attributes are distinct.
+6. **Partial failure + retry.** Route-intercept `/api/generate` so the second of three calls responds with `{status:"failed"}` (HTTP 502). After Pop: exactly 1 tile has `data-status="failed"`, 2 have `data-status="succeeded"`. The failed tile exposes `retry-clip-btn`. Click retry — that tile re-enters `running`, then `succeeded` (intercept reset for retry). The other two tiles remain untouched.
+7. **Auth-required bounce.** Intercept `/api/generate` to return 401 `{error:"auth_required"}`. Click Pop. Expect `page.url()` to equal `/auth/signup?return=/tools/popcorn` (wait for navigation). Guarantees `handleAuthRequired` fires at most once despite the 3-way fan-out.
+8. **Sidebar link present.** Open sidebar, expand Effects & Templates, click `Popcorn`, expect `/tools/popcorn`.
+9. **/apps shows the card.** `await page.goto('/apps')`. Click the card labelled `Popcorn`. Expect `/tools/popcorn`.
+10. **Share pack action.** After mocked happy path, click `Share pack to community`, assert final URL starts with `/community` and the POST body captured via request interception includes `toolUsed: "popcorn"`.
+11. **Design tokens.** `await expect(page.locator('[class*="slate-"], [class*="zinc-"]')).toHaveCount(0)` on `/tools/popcorn`.
+12. **9:16 clips.** Each clip-tile container has `aspect-[9/16]` (or equivalent `style.aspectRatio === "9 / 16"`) — assert via `getAttribute('class')` regex or computed style.
+13. **Real fal.ai (optional, gated).** `test.skip(!process.env.FAL_KEY, 'needs FAL_KEY')` placed **inside the test body**. Fills form, clicks Pop, waits up to 90s for at least one tile to transition to `succeeded` with a real `https://fal.media/...` URL. This test is allowed to be flaky/slow; it is opt-in via env.
 
-10. Sidebar: expand Studio section, assert a link labelled `Soul Cinema` exists pointing to `/tools/soul-cinema`.
-11. `/apps` page: assert a card with text `Soul Cinema` is visible and its href is `/tools/soul-cinema`.
-12. Unknown scene-count (e.g. navigating with `?sceneCount=99`) must not crash the page — falls back to 3.
+---
 
-**Real fal.ai round-trip (skipped in CI without FAL_KEY):**
+### Builder instructions summary
 
-13. Gated on `process.env.FAL_KEY` — uses a tiny real story ("Leo waves at the camera once"), sceneCount=3, model `kling-25-turbo`. Asserts at least one tile reaches `data-status="succeeded"` within 120s. Uses `test.skip(!process.env.FAL_KEY)` inside the test body (not the describe block) — same lesson as fashion-factory where the skip was accidentally moved up and silenced the whole suite.
+1. Do NOT touch `/api/generate`, `/api/soul-cinema/*`, `lib/soul-cinema.ts`, `lib/fashion.ts`, or any existing component outside of `components/sidebar.tsx` and `lib/tools/p2-tools.ts`.
+2. Create files in this order: `lib/popcorn.ts` -> unit tests -> `app/api/popcorn/pack/route.ts` + `app/api/popcorn/share/route.ts` -> components -> `app/tools/popcorn/page.tsx` -> sidebar + p2-tools edits -> e2e.
+3. Mirror the auth pattern from `components/fashion/fashion-factory.tsx` (see `handleAuthRequired`, `Promise.allSettled`, upload-before-generate).
+4. Every new UI file must pass the design-token grep (no `slate-`, `zinc-`, `gray-` as base tokens — use `white/10`, `white/15`, `#181828`, `#111122`, `text-brand-gradient`, `bg-brand-gradient`, `glow-btn`).
+5. Remember the Windows quirk: do NOT run `prisma generate` in builder scripts — it hits a DLL file lock. `npx next build` alone is the green-light gate.

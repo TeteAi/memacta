@@ -38,11 +38,21 @@ export default function SubmitForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description, mediaUrl, mediaType, toolUsed }),
       });
-      if (!res.ok) throw new Error("Failed to submit");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) {
+          // Not signed in — bounce them through signin and come back here.
+          window.location.href = `/auth/signin?callbackUrl=${encodeURIComponent("/community/submit")}`;
+          return;
+        }
+        setError(data?.message || data?.error || "Submission failed. Please try again.");
+        setSubmitting(false);
+        return;
+      }
       setSuccess(true);
       setTimeout(() => router.push("/community"), 1500);
     } catch {
-      setError("Submission failed. Please try again.");
+      setError("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }

@@ -47,6 +47,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
       { label: "Face Swap", href: "/tools/face-swap" },
       { label: "Video Face Swap", href: "/tools/video-face-swap" },
       { label: "Outfit Swap", href: "/tools/outfit-swap" },
+      { label: "Fashion Factory", href: "/tools/fashion-factory" },
       { label: "AI Influencer", href: "/tools/ai-influencer" },
       { label: "Photodump", href: "/tools/photodump" },
     ],

@@ -1,268 +1,167 @@
-# Feature: creator-profiles
+# Feature: fashion-factory
 
-- **Name:** Creator Profiles
-- **Category:** P6 — Library, Community & Profiles
-- **Priority:** P1 (highest-conversion missing gap)
-- **Source:** `.claude/state/feature-gap-analysis.md` ("Creator Profiles" — line 10, MISSING completely)
-- **Reference:** https://higgsfield.ai/profile
+- **Name:** Fashion Factory
+- **Category:** Identity / Styling (new sub-flow built on top of Outfit Swap)
+- **Priority:** P1 (highest remaining gap item that showcases real fal.ai generation and drives signup)
+- **Source:** `.claude/state/feature-gap-analysis.md` line 6 — "Fashion Factory" listed under MISSING completely. Higgsfield's Fashion Factory is a batch outfit-lookbook generator: upload one person + many outfit references → get back N styled shots at once. Distinct from the already-shipped slim `outfit-swap` tool (which concatenates image URLs into a prompt string and never passes them to fal). This feature posts a real `imageUrl` payload to the existing `/api/generate` route per outfit, so every shot is a genuine fal.ai call against `flux-kontext` (image-edit model with reference-image support).
 
 ## User story
 
-> As a memacta creator, I want a public profile page at `/u/[username]` that showcases every piece of content I've submitted to the community, lists my stats (total posts, likes received, models used), and lets other visitors follow the link back from any community post to my profile — so I can build an audience, share one URL on social, and funnel discovery back into memacta.
->
-> As a visitor, I want to click any creator name on the Community gallery or any post detail page and land on a profile with an avatar, bio, a grid of their work, and a "Start Creating" CTA that drives me to sign up and try the same models they used.
+As a fashion creator or brand stylist, I want to upload one photo of myself (or a model / an AI influencer) and drop in 3-6 outfit reference images, then hit "Generate Lookbook" once and receive a grid of N styled shots — each showing my person wearing one of the outfits. I want to preview the batch, download any shot, share the whole lookbook to my community feed, and fall back gracefully when a single shot fails without losing the others.
 
-## Wireframe (ASCII)
+This is the feature that makes memacta feel like a pro fashion tool rather than a single-prompt toy: batch generation, side-by-side comparison, and one-click posting of the whole set.
+
+## Wireframe
 
 ```
-+--------------------------------------------------------------------+
-| HEADER (dark shell, credit pill)                                   |
-+--------------------------------------------------------------------+
-|                                                                    |
-|   +-------+   NeonCreator                          [Share profile] |
-|   |  NC   |   @neoncreator                                         |
-|   |gradient|   Visual storyteller - Sora 2 - Kling 3.0              |
-|   +-------+   ----------------------------------------------        |
-|                                                                    |
-|   [ 24 posts ]  [ 812 likes ]  [ 5 models used ]  [Joined Apr 26]  |
-|                                                                    |
-|   --- Top Models ---------------------------------------------     |
-|   #Sora2  #Kling30  #Veo31  #NanoBananaPro                         |
-|                                                                    |
-|   --- Featured Work ------------------------------------------     |
-|   +------+ +------+ +------+ +------+                              |
-|   | vid  | | img  | | vid  | | img  |                              |
-|   |      | |      | |      | |      |                              |
-|   | 234  | | 189  | | 156  | | 99   |                              |
-|   +------+ +------+ +------+ +------+                              |
-|                                                                    |
-|   --- All posts (grid 4-col -> 1-col responsive) -------------     |
-|   +------+ +------+ +------+ +------+                              |
-|   |  ... 20 more cards, paginated with 'Load more' ...             |
-|                                                                    |
-|   --- Empty state fallback -----------------------------------     |
-|   "No work yet - be inspired by featured creators"                 |
-|   [Browse community]  [Start creating]                             |
-+--------------------------------------------------------------------+
-| FOOTER                                                             |
-+--------------------------------------------------------------------+
++------------------------------------------------------------+
+|  <- Apps / Identity                                        |
+|  Fashion Factory                    [beta pill]  [share]   |
+|  Upload one person + up to 6 outfits -> a full lookbook    |
++------------------------------------------------------------+
+|                                                            |
+|  +------------- Person --------------+                     |
+|  | [ upload zone - 1 slot ]          |                     |
+|  |   (PNG/JPG <= 10 MB, or URL)      |                     |
+|  +-----------------------------------+                     |
+|                                                            |
+|  +------------- Outfits (1-6) -------+                     |
+|  | [+][+][+][+][+][+]                |  <- tiles, each     |
+|  |  o1 o2 o3 o4 o5 o6                |     a file-drop     |
+|  +-----------------------------------+                     |
+|                                                            |
+|  Style prompt (optional):                                  |
+|  +-----------------------------------+                     |
+|  | "studio backdrop, editorial light"|                     |
+|  +-----------------------------------+                     |
+|                                                            |
+|  Model: [flux-kontext v]   Cost: 5 x N credits             |
+|                                                            |
+|           [  Generate Lookbook  ]   <- disabled until      |
+|                                        1 person + >=1 fit  |
+|                                                            |
++------------------------------------------------------------+
+|  RESULTS                                                   |
+|  +------+------+------+                                    |
+|  |  01  |  02  |  03  |   <- each tile: shot, outfit label,|
+|  |  ok  |  ok  | fail |      download, "retry" on failure  |
+|  +------+------+------+                                    |
+|  |  04  |  05  |  06  |                                    |
+|  |  ok  |  ok  | ...  |   <- "..." = still running         |
+|  +------+------+------+                                    |
+|                                                            |
+|  [ Download all (zip) ]   [ Post lookbook to community ]   |
++------------------------------------------------------------+
 ```
 
 ## Routes (Next.js app-router)
 
-| Path | Type | Purpose |
-|---|---|---|
-| `app/u/[username]/page.tsx` | Server (dynamic) | Public creator profile page |
-| `app/u/[username]/not-found.tsx` | Server | Custom 404 when username does not resolve |
-| `app/account/page.tsx` | **edit only** | Add "View public profile" link (no new file) |
+- `app/tools/fashion-factory/page.tsx` — Fashion Factory landing + workspace (client component wrapping a server shell, following the pattern of `app/tools/ai-influencer/page.tsx`). This dedicated file will take precedence over the generic `app/tools/[slug]/page.tsx` catch-all because Next.js app-router prefers the named segment.
+- No new API route needed — the client fans out N concurrent `POST /api/generate` calls (one per outfit), each with `model: "flux-kontext"`, `mediaType: "image"`, and `imageUrl: <person-image-url>`. The outfit reference is embedded in the `prompt` string as an explicit URL clause so the edit-model can pick it up.
 
-**Route choice rationale:** `/u/[username]` (single-letter prefix, like Twitter/Instagram) avoids collision with existing `/profile` semantics in NextAuth and keeps the URL shareable. Higgsfield uses `/profile` but we have a multi-tenant model, so `/u/[username]` is better.
+## Components (under `components/`)
 
-**Username derivation** (no schema change): derive from `User.name` — slugify lowercase, replace spaces with hyphens, strip non-alphanumerics. Collisions disambiguated by appending the first 6 chars of `User.id`. The page accepts both the pure slug (`neon-creator`) and the disambiguated form (`neon-creator-a1b2c3`). Showcase items use the literal `creator` string from `SHOWCASE_ITEMS` as their username.
+- `components/fashion/fashion-factory.tsx` — top-level client component. Holds all state (person, outfits[], prompt, per-shot status, per-shot resultUrl). Wires the generate button. `data-testid="fashion-factory"`.
+- `components/fashion/person-dropzone.tsx` — single-slot file/URL dropzone, mirrors the existing `tool-page.tsx` image-upload UX (click-or-paste-URL, blob preview). `data-testid="person-dropzone"`.
+- `components/fashion/outfit-grid.tsx` — 6 outfit-slot tiles, each independently swappable, with plus/preview/remove states. `data-testid="outfit-grid"`. Children carry `data-testid="outfit-slot-<index>"` (0-5).
+- `components/fashion/lookbook-grid.tsx` — results grid that renders one `LookbookTile` per outfit. `data-testid="lookbook-grid"`. Children carry `data-testid="lookbook-tile-<index>"` and expose `data-status="idle|running|succeeded|failed"`.
+- `components/fashion/lookbook-tile.tsx` — individual result tile with thumbnail, download button, and retry-on-failure button.
+- `components/fashion/lookbook-share-button.tsx` — posts the full set (or just the succeeded shots) to `/api/community/posts` as a single `toolUsed: "fashion-factory"` post; reuses the pattern from `components/social/share-button.tsx`.
 
-## Components (filenames under `components/`)
+All components must:
+- Use only the memacta design-palette tokens: `bg-brand-gradient`, `text-brand-gradient`, `bg-[#181828]`, `bg-[#1e1e32]`, `border-white/15`, `text-white/70`, `bg-[#FE2C55]` (error), `text-purple-400` (hover accents).
+- Never use `slate-*`, `zinc-*`, or `gray-<n>` tokens (repo-wide ban confirmed during 2026-04-16 audit).
+- Mark `"use client"` only where state is needed.
 
-```
-components/profile/
-  profile-header.tsx         # avatar (gradient initials), name, @handle, bio, share btn
-  profile-stats.tsx          # 4-stat row (posts, likes, models, joined)
-  profile-top-models.tsx     # chip row of tools used, ranked by post count
-  profile-grid.tsx           # responsive grid reusing PostCard
-  profile-empty.tsx          # empty state with CTA
-  profile-share-button.tsx   # client - copies profile URL to clipboard
-```
+## Data-model deltas
 
-Reuse existing:
-- `components/community/post-card.tsx` — render each post tile (already brand-styled)
-- `components/brand.tsx` BrandMark gradient for the avatar fallback initials
+**None.** The feature reuses existing models:
 
-## Data model deltas
+- `Generation` — one row per outfit shot, populated automatically by the existing `/api/generate` POST handler (lines 161-176 of `app/api/generate/route.ts`). `model` = `"flux-kontext"`, `mediaType` = `"image"`, `imageUrl` = person source URL, `prompt` = composed text that embeds the outfit reference URL.
+- `Post` — one row created when the user posts the lookbook via `/api/community/posts`. `toolUsed` = `"fashion-factory"`. No schema change: the existing `toolUsed String?` column is already aggregated by `lib/profile.ts::computeTopModels`, so Fashion Factory will surface correctly on creator profiles.
+- `CreditTransaction` — N rows (one per outfit shot) from the existing credit-deduct flow.
 
-**No Prisma migration required.** The feature is fully derivable from existing models:
-
-- `User.name`, `User.createdAt`, `User.image` — profile header
-- `Post.userId`, `Post.likes`, `Post.toolUsed`, `Post.mediaUrl`, `Post.mediaType`, `Post.title` — grid + stats
-- `SHOWCASE_ITEMS[*].creator` (string) — fallback when no real users match (e.g. "NeonCreator", "UrbanLens")
-
-**Helper module** (pure TS, no DB change) — add `lib/profile.ts`:
-
-```ts
-export function userToUsername(user: { id: string; name: string | null }): string;
-
-export function matchUsernameToUser(
-  username: string,
-  users: Array<{ id: string; name: string | null }>
-): { id: string; name: string | null } | null;
-// Returns null when no user matches (caller falls back to showcase lookup).
-
-export function computeProfileStats(
-  posts: Array<{ likes: number; toolUsed: string | null }>
-): { totalPosts: number; totalLikes: number; uniqueModels: number };
-
-export function computeTopModels(
-  posts: Array<{ toolUsed: string | null }>,
-  limit?: number
-): Array<{ name: string; count: number }>;
-```
+No Prisma migration required. This is a pure-frontend + existing-API feature.
 
 ## Provider adapter contract
 
-**Not applicable.** Creator Profiles is a pure read/display surface over existing persisted data; it does not call any AI provider. It reuses `lib/db.ts` Prisma client directly from the RSC page.
+No new provider adapter. Fashion Factory issues N independent calls against the existing `/api/generate` route, which resolves to `falProvider.generate()` with `model: "flux-kontext"`. The per-request shape is the existing `GenerationRequest`:
+
+```ts
+interface FashionShotRequest {
+  prompt: string;      // composed via composeFashionPrompt()
+  model: "flux-kontext";
+  mediaType: "image";
+  imageUrl: string;    // the person reference URL
+  aspectRatio?: "1:1"; // default square for lookbook consistency
+}
+```
+
+The prompt composition lives in a new pure helper `lib/fashion.ts::composeFashionPrompt(personUrl, outfitUrl, stylePrompt)` so it is unit-testable in isolation. The helper returns a single string of the form:
+
+```
+Outfit transfer. Keep the person's face and body identity exactly. Dress them in the outfit from this reference image: <outfitUrl>. <userStylePrompt-or-default>. Studio-quality, editorial lighting, full-body shot.
+```
+
+A second pure helper `lib/fashion.ts::buildFashionBatch(personUrl, outfitUrls[], stylePrompt)` returns an array of request payloads ready for `fetch("/api/generate", ...)`.
 
 ## Acceptance criteria
 
-1. Visiting `/u/neoncreator` (showcase creator `NeonCreator`) renders a profile page with header, stats, top models, and a grid of that creator's showcase items.
-2. Visiting `/u/<slug-of-real-user-name>` for a seeded DB user renders their real `Post` rows ordered by `createdAt desc`, and the stats row reflects true counts from Prisma.
-3. Visiting `/u/this-user-does-not-exist` returns a 404 (Next.js `notFound()`).
-4. The profile grid reuses `PostCard` and keeps brand styling (`bg-[#181828]` tile, `border-white/15`, purple hover glow, `#FE2C55` heart-red on like).
-5. Stats row shows exactly four stats: total posts, sum of likes, distinct `toolUsed` count, join date (ISO-day from `User.createdAt`; showcase users show a static "Featured creator" badge instead of a date).
-6. Top Models component shows up to 6 chips derived from distinct `Post.toolUsed` values, sorted by post count descending; hidden entirely if the creator has zero posts with `toolUsed`.
-7. Empty state renders when creator has 0 posts and includes two CTAs: "Browse community" -> `/community` and "Start creating" -> `/create`.
-8. Each `PostCard` in the grid links to `/community/[id]` for real posts, and to the showcase media URL in a new tab (`target="_blank"`, `rel="noopener noreferrer"`) for showcase-only creators.
-9. `components/community/post-card.tsx` gains a wrapping `<Link href="/u/{username}">` on the creator name line (using `encodeURIComponent`), so clicking the creator name on any existing community card navigates to that profile. The link is a sibling/inline element, not a nested `<a>` inside the existing tile link.
-10. `app/community/[id]/page.tsx` shows "By <Name>" as a clickable link to the creator profile (same username rule).
-11. `app/account/page.tsx` gains a "View public profile" link pointing at the signed-in user's derived username.
-12. `metadata` on the profile route sets `title = "<Name> on memacta"` and `description` drawn from the creator's bio fallback ("<N> creations on memacta").
-13. `npm run build` succeeds and `/u/[username]` appears in the build output (dynamic `ƒ`, since usernames are unbounded and DB-backed).
-14. Design tokens: all colors on the new page come from `bg-brand-gradient`, `#181828`, `#111122`, `#0a0a16`, `#FE2C55`, `text-white/70`, `border-white/15`. No Higgsfield-neutral greys, no Tailwind default `slate/zinc`.
-15. Sidebar `QUICK_LINKS` in `components/sidebar.tsx` is not modified (profiles are surfaced through community cards, not a top-level link — keeps sidebar uncluttered), **but** the user menu in `components/nav.tsx` must include a "My profile" entry linking to the signed-in user's profile when authenticated.
+1. `app/tools/fashion-factory/page.tsx` renders at `/tools/fashion-factory` with the fuchsia-pink-orange brand gradient header and zero `slate-`/`zinc-` tokens.
+2. The page is linked from `/apps` (either by adding a `fashion-factory` entry to `lib/tools/p2-tools.ts` with `category: "identity"`, `mediaOut: "image"`, and appropriate inputs, or by appending a manual entry to the ALL_TOOLS array in `app/apps/page.tsx`). It is also reachable from the sidebar "Identity" section, inserted between "Outfit Swap" and "AI Influencer".
+3. The user can upload exactly 1 person image (drag-drop, click-to-pick, or paste URL). The UI disables generation until a person is provided.
+4. The user can add 1 to 6 outfit images in any order; empty slots are skipped. The UI disables generation until at least 1 outfit is provided.
+5. An optional style-prompt textarea is present and, when populated, is merged into every per-outfit prompt via `composeFashionPrompt`.
+6. Clicking "Generate Lookbook" fans out N concurrent `POST /api/generate` calls (one per filled outfit), each with `model: "flux-kontext"`, `mediaType: "image"`, `imageUrl` = person URL, `prompt` = result of `composeFashionPrompt(...)`. Use `Promise.allSettled` so one rejection does not short-circuit the batch.
+7. Each result tile reflects the real status lifecycle: `idle` -> `running` (spinner) -> `succeeded` (thumbnail + download) or `failed` (error pill + retry button). One failed shot must not break the rest of the grid.
+8. Retry on a failed tile fires a new `POST /api/generate` against the same payload and updates only that tile's state.
+9. "Post lookbook to community" submits a single post to `POST /api/community/posts` with `toolUsed: "fashion-factory"`, `mediaUrl` = first succeeded shot URL, `title` = `"${N}-look fashion factory drop"`, and `description` = user's style prompt. Disabled until at least one shot has succeeded.
+10. Anonymous users get the existing `anon_generations` cookie treatment — first few shots succeed for free, subsequent shots return `401 auth_required` and the UI surfaces a single aggregated signup prompt (not N duplicate toasts).
+11. Authenticated users are charged the real credit cost — 5 credits x (# outfits) for `flux-kontext`. Partial failures are refunded per the existing `/api/generate` behaviour; the UI shows the remaining credit balance after the batch completes (using the `creditsRemaining` field the API already returns).
+12. `composeFashionPrompt` and `buildFashionBatch` are pure helpers in `lib/fashion.ts` (no React, no DB) and are fully unit-tested.
+13. All E2E tests pass in mock-provider mode (when `FAL_KEY` is unset, the mock provider returns immediately). The real-fal round-trip test (test 8) is gated with `test.skip(!process.env.FAL_KEY)`.
+14. No regression: the 18-model detail pages, `/u/<username>`, `/community`, `/apps`, and existing `/tools/<slug>` routes all continue to render.
+15. `npm run build` succeeds cleanly and the route manifest contains `/tools/fashion-factory`.
 
 ## Test cases
 
-### Vitest unit (`tests/unit/profile.test.ts`)
+### Vitest unit tests — `tests/unit/fashion.test.ts`
 
-```ts
-import { describe, it, expect } from "vitest";
-import { userToUsername, matchUsernameToUser } from "@/lib/profile";
+1. `composeFashionPrompt("person.png", "outfit.png", "editorial light")` — returned string contains the literal `outfit.png`, contains the literal `editorial light`, and does NOT contain `person.png` (the person is carried by `imageUrl`, not by prompt text).
+2. `composeFashionPrompt("p.png", "o.png", "")` — style-prompt fallback is used; result includes the default `"Studio-quality, editorial lighting"` phrase.
+3. `composeFashionPrompt("p.png", "https://cdn.x.com/o.jpg?token=abc&v=2", "noir")` — outfit URL embedded verbatim, querystring preserved, no double-escaping.
+4. `composeFashionPrompt("p.png", "o.png", "style\nwith\nnewlines")` — newlines are preserved or collapsed but the result remains JSON-encodable (`JSON.stringify` round-trips).
+5. `buildFashionBatch("p.png", ["o1.png", "o2.png"], "editorial")` — returns an array of length 2, each element has `model: "flux-kontext"`, `mediaType: "image"`, `imageUrl: "p.png"`, `aspectRatio: "1:1"`, and a prompt produced by `composeFashionPrompt`.
+6. `buildFashionBatch("p.png", [], "")` — returns an empty array (does not throw).
+7. `buildFashionBatch("p.png", new Array(7).fill("o.png"), "")` — clamps to 6 or throws a typed `"too many outfits"` error; pick one and test deterministically.
+8. `buildFashionBatch("", ["o.png"], "")` and `buildFashionBatch("p.png", [""], "")` — throw or return an empty guarded array (pick one path and assert).
 
-describe("userToUsername", () => {
-  it("slugifies display names (spaces -> hyphens, lowercased)", () => {
-    expect(userToUsername({ id: "abc123", name: "Neon Creator" })).toBe("neon-creator");
-  });
-  it("strips non-alphanumerics", () => {
-    expect(userToUsername({ id: "abc123", name: "A.I. Artist!" })).toBe("ai-artist");
-  });
-  it("falls back to id prefix when name is null", () => {
-    expect(userToUsername({ id: "abcdef123456", name: null })).toBe("user-abcdef");
-  });
-  it("collapses repeated hyphens", () => {
-    expect(userToUsername({ id: "x", name: "Foo   Bar --- Baz" })).toBe("foo-bar-baz");
-  });
-});
+### Vitest unit tests — `tests/unit/sidebar-identity.test.ts` (new, small)
 
-describe("matchUsernameToUser", () => {
-  const users = [
-    { id: "u1", name: "Neon Creator" },
-    { id: "u2abcdef", name: "Neon Creator" }, // collision
-    { id: "u3", name: "Ocean Lens" },
-  ];
-  it("returns a single unambiguous match by slug", () => {
-    expect(matchUsernameToUser("ocean-lens", users)?.id).toBe("u3");
-  });
-  it("returns null for unknown username", () => {
-    expect(matchUsernameToUser("nobody", users)).toBeNull();
-  });
-  it("disambiguates collisions with -<id-prefix> suffix", () => {
-    const match = matchUsernameToUser("neon-creator-u2abcd", users);
-    expect(match?.id).toBe("u2abcdef");
-  });
-});
-```
+9. Sidebar Identity section contains a link with `href="/tools/fashion-factory"` and the label `"Fashion Factory"`, positioned between `"Outfit Swap"` and `"AI Influencer"`.
 
-### Vitest unit (`tests/unit/profile-stats.test.ts`)
+### Playwright E2E — `tests/e2e/fashion-factory.spec.ts`
 
-```ts
-import { describe, it, expect } from "vitest";
-import { computeProfileStats, computeTopModels } from "@/lib/profile";
+1. **Happy path (mocked provider)** — visit `/tools/fashion-factory`, paste a URL into the person slot, paste 2 URLs into outfit slots 0 and 1, fill the style-prompt textarea, click "Generate Lookbook", assert both lookbook tiles reach `data-status="succeeded"` within 30s.
+2. **Generate disabled until inputs present** — visit the page, confirm the "Generate Lookbook" button is disabled with zero outfits, becomes enabled after one outfit + person are both provided, and becomes disabled again when the person slot is cleared.
+3. **Partial failure isolates** — inject a failing URL pattern (the mock-provider rejects URLs containing `"fail"`) so shot #1 fails while shot #0 succeeds; assert tile 0 shows a thumbnail and tile 1 shows a retry button.
+4. **Retry recovers** — from the partial-failure state, swap the outfit URL on tile 1 to a passing one, click retry, assert the tile re-enters `running` and then `succeeded`.
+5. **Sidebar entry** — from any page, open the sidebar, expand the Identity section, click "Fashion Factory", assert the URL is `/tools/fashion-factory` and the H1 matches.
+6. **Appears on /apps** — visit `/apps`, locate the Fashion Factory card, click it, assert navigation to `/tools/fashion-factory`.
+7. **Community post (mocked)** — after a successful batch, click "Post lookbook to community", assert a success toast and that `/community` now contains a post whose `toolUsed` badge reads "fashion-factory".
 
-const posts = [
-  { likes: 10, toolUsed: "Sora 2" },
-  { likes: 20, toolUsed: "Sora 2" },
-  { likes: 5,  toolUsed: "Kling 3.0" },
-  { likes: 0,  toolUsed: null },
-];
+### Environment-gated E2E (skipped when `FAL_KEY` unset)
 
-it("computeProfileStats sums likes, counts posts & unique tools", () => {
-  const s = computeProfileStats(posts);
-  expect(s.totalPosts).toBe(4);
-  expect(s.totalLikes).toBe(35);
-  expect(s.uniqueModels).toBe(2);
-});
+8. **Real fal.ai round-trip** — same as test 1 but with `FAL_KEY` present; assert returned URLs are on `cdn.fal.ai` or `v3.fal.media`.
 
-it("computeTopModels returns descending-ranked chips, nulls excluded", () => {
-  const top = computeTopModels(posts);
-  expect(top).toEqual([
-    { name: "Sora 2", count: 2 },
-    { name: "Kling 3.0", count: 1 },
-  ]);
-});
-```
+---
 
-### Playwright E2E happy path (`tests/e2e/creator-profiles.spec.ts`)
+**Implementation notes for the builder:**
 
-```ts
-import { test, expect } from "@playwright/test";
-
-test("showcase creator profile renders header + grid", async ({ page }) => {
-  await page.goto("/u/neoncreator");
-  await expect(page.getByRole("heading", { level: 1, name: /NeonCreator/i })).toBeVisible();
-  await expect(page.getByTestId("profile-stats")).toBeVisible();
-  // At least one PostCard tile is rendered in the grid
-  await expect(page.locator('[data-testid="profile-grid"] a').first()).toBeVisible();
-});
-
-test("community card creator-name links to profile", async ({ page }) => {
-  await page.goto("/community");
-  const firstCard = page.locator('[data-testid="post-card"]').first();
-  const creatorLink = firstCard.locator('a[href^="/u/"]');
-  await expect(creatorLink).toBeVisible();
-  await creatorLink.click();
-  await expect(page).toHaveURL(/\/u\/[a-z0-9-]+/);
-  await expect(page.getByTestId("profile-header")).toBeVisible();
-});
-
-test("unknown username returns 404", async ({ page }) => {
-  const res = await page.goto("/u/definitely-not-a-real-user-xyz");
-  expect(res?.status()).toBe(404);
-});
-
-test("community post detail links creator name to profile", async ({ page }) => {
-  await page.goto("/community");
-  const firstCard = page.locator('[data-testid="post-card"]').first();
-  const tileLink = firstCard.locator('a').first();
-  await tileLink.click();
-  // On post detail page
-  await expect(page.getByText(/^By /i)).toBeVisible();
-  const profileLink = page.locator('a[href^="/u/"]').first();
-  await expect(profileLink).toBeVisible();
-});
-
-test("account page shows 'View public profile' link when signed in", async ({ page }) => {
-  // Assumes test harness signs in via storageState or seeded credentials.
-  await page.goto("/account");
-  const profileLink = page.getByRole("link", { name: /view public profile/i });
-  await expect(profileLink).toBeVisible();
-  await expect(profileLink).toHaveAttribute("href", /\/u\//);
-});
-```
-
-### Data-testid contract (add to components)
-
-| testid | Component |
-|---|---|
-| `profile-header` | `profile-header.tsx` root |
-| `profile-stats` | `profile-stats.tsx` root |
-| `profile-top-models` | `profile-top-models.tsx` root |
-| `profile-grid` | `profile-grid.tsx` root |
-| `profile-empty` | `profile-empty.tsx` root |
-| `post-card` | `post-card.tsx` root (add if missing — tested above) |
-
-## Implementation notes for the builder
-
-- Add `data-testid="post-card"` to the existing `post-card.tsx` root div (one-line tweak; does not alter behavior).
-- When deriving the signed-in user's username on `/account`, reuse `userToUsername` with session's `user.id` + `user.name`.
-- `profile-header.tsx` avatar: if `User.image` present render it, else render a square gradient block with the first 2 uppercase initials (reuse `bg-brand-gradient`).
-- Profile grid should cap at 48 posts with a "Load more" affordance. Prefer server pagination via `?page=N` searchParam (no new API surface needed).
-- Do **not** add a new Prisma migration. Do **not** touch Stripe. Do **not** add `username` as a column — it is always derived.
-- Showcase fallback: when no DB user matches the slug, look up `SHOWCASE_ITEMS` with `userToUsername({ id: item.creator, name: item.creator })` equality — if any match, render a synthesized profile whose "posts" are those showcase items (map `SHOWCASE_ITEMS` -> `PostCardData`), stats derived from that list, `createdAt` replaced with a "Featured creator" badge.
-- Custom 404: `app/u/[username]/not-found.tsx` should say "Creator not found" with a link back to `/community`, styled with the same brand gradient headline as other error pages.
+- Base the file-upload UX on `components/tools/tool-page.tsx` — that pattern already works with the existing `/api/upload` endpoint for blob->url conversion (see commit e4e4f6f).
+- The concurrent fan-out MUST use `Promise.allSettled`, not `Promise.all`, so one rejection does not short-circuit the batch. Per-tile state lives in a `Record<number, ShotState>` keyed by outfit index.
+- The dedicated `app/tools/fashion-factory/page.tsx` takes precedence over the generic `app/tools/[slug]/page.tsx` catch-all in Next.js app-router, so you do NOT need to special-case the catch-all. Mirror the `app/tools/ai-influencer/page.tsx` precedent.
+- If you decide to also add a `fashion-factory` entry to `lib/tools/p2-tools.ts` (for the /apps grid), keep its `slug: "fashion-factory"` aligned with the dedicated route path. The generic `tool-page.tsx` is NOT compatible with this feature (it can't do batch fan-out) — the dedicated page must render instead.
+- Credit-display already listens for successful `/api/generate` responses via the `creditsRemaining` field — no extra plumbing needed. After the batch completes, take the `creditsRemaining` from the LAST successful response and surface it in the UI.
+- For the community-post title, use `"${N}-look fashion factory drop"`.
+- Do NOT edit `prisma/schema.prisma`. Do NOT add a migration. Do NOT add Stripe-dependent code.

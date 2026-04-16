@@ -132,6 +132,21 @@ export const P2_TOOLS: ToolDef[] = [
     mediaOut: "image",
     inputs: [{ key: "prompt", label: "Prompt", type: "prompt" }],
   },
+  {
+    id: "fashion-factory",
+    slug: "fashion-factory",
+    name: "Fashion Factory",
+    description: "Upload one person + up to 6 outfit references and generate a full styled lookbook in one click.",
+    category: "identity",
+    mediaOut: "image",
+    inputs: [
+      { key: "person", label: "Person", type: "image" },
+      { key: "outfit1", label: "Outfit 1", type: "image" },
+      { key: "outfit2", label: "Outfit 2", type: "image" },
+      { key: "outfit3", label: "Outfit 3", type: "image" },
+      { key: "prompt", label: "Style prompt", type: "prompt" },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug: string): ToolDef | undefined {

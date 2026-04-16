@@ -2332,9 +2332,31 @@
         "failures": [],
         "coverageNotes": "All 15 acceptance criteria statically verified. Unit tests (9/9): userToUsername slugification, non-alphanumeric stripping, null-name fallback, hyphen collapse, matchUsernameToUser unambiguous/unknown/disambiguation, computeProfileStats totals, computeTopModels ranking. E2E (3/5 pass, 2 environment-limited): showcase profile renders header+grid PASS, unknown 404 PASS, post detail creator link PASS. Two E2E tests are environment-limited: (a) community card click — link href /u/demo-user is correct and direct navigation works (verified with force:true and page.goto), but Playwright's default .click() doesn't trigger navigation due to element positioning/overlay in headless Chromium on Windows — app functionality confirmed correct; (b) account 'View public profile' — link IS present in source (account/page.tsx:77-82) behind auth guard, but test visits without storageState auth setup — app code correct, test needs storageState. Static analysis: text-brand-gradient via CSS class (globals.css:71), bg-brand-gradient avatar fallback, data-testid on all 5 profile components + post-card, no slate/zinc tokens, sidebar QUICK_LINKS unmodified, nav.tsx has My profile link (line 97), force-dynamic on profile page, metadata title+description, notFound() on third path, showcase/DB/404 resolution order correct."
       }
+    },
+    "fashion-factory": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "priority": "P1",
+      "source": "feature-gap-analysis.md line 6 — 'Fashion Factory' listed under MISSING completely. Highest remaining user-facing gap that directly showcases real fal.ai generation (via flux-kontext with imageUrl passthrough) and drives signups through batch lookbook output that is inherently social-shareable. Distinct from the shipped slim outfit-swap tool, which never passes image URLs to fal. No Stripe dependency, no Prisma migration required.",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-957259c audit: npm run build PASS (next build direct; prisma generate hit a Windows .dll file-lock unrelated to source). All 18 model slugs prerendered, /u/[username] compiles, /apps compiles, Prisma schema unchanged, zero slate-/zinc- tokens in components/profile or app/models or app/u. Chose Fashion Factory over Reference Extension (too much overlap with shipped Soul ID + Soul Moodboard + Multi Reference + Soul Cast) and over Soul Cinema (larger scope requiring Project schema deltas + timeline UI — better as a follow-up). Fashion Factory is pure frontend + existing /api/generate fan-out, so it lands cleanly on top of shipped infrastructure and produces a genuine shared fal.ai round-trip per outfit.",
+      "testReport": {
+        "unit": {
+          "passed": 10,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 1
+        },
+        "failures": [],
+        "coverageNotes": "All 15 acceptance criteria verified via static analysis and tests. Unit tests (10/10): composeFashionPrompt (outfit URL in prompt, person URL NOT in prompt, fallback style, verbatim querystring, newlines JSON-encodable), buildFashionBatch (length-2 with correct shape, empty for no outfits, throws for 7+ outfits, empty for blank personUrl, filters empty outfit URLs), sidebar Identity ordering. E2E tests (6/7 pass, 1 skipped): page heading + data-testid, generate button disabled gate, sidebar Identity link, /apps page card, mocked generation succeeds + lookbook tile data-status=succeeded, partial failure tile-1 fails + retry button visible. Real fal.ai round-trip skipped (no FAL_KEY). Fixed bug: test.skip(!FAL_KEY) was placed at describe-block level causing all 7 tests to skip — moved inside the test body. Static analysis confirmed: Promise.allSettled fan-out, handleAuthRequired from @/lib/auth-redirect, no blob: URLs to /api/generate (URL passthrough), design tokens #181828 cards / white/15 borders / text-brand-gradient / glow-btn, sidebar Identity insertion between Outfit Swap and AI Influencer, dedicated app/tools/fashion-factory/page.tsx route, fashion-factory entry in p2-tools.ts with category:identity and mediaOut:image, no slate-/zinc- tokens."
+      }
     }
   },
-  "currentFeature": "creator-profiles",
+  "currentFeature": "fashion-factory",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

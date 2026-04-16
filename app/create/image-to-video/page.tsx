@@ -11,6 +11,9 @@ export default function ImageToVideoPage() {
   const [prompt, setPrompt] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // URL returned by /api/upload after we push the selected file server-side.
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">(
     (getModel(initial)?.defaultAspect ?? "16:9") as "16:9" | "9:16" | "1:1"
   );
@@ -19,14 +22,35 @@ export default function ImageToVideoPage() {
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  function handleFileSelect(file: File) {
-    const url = URL.createObjectURL(file);
-    setImagePreview(url);
-    setImageUrl(""); // clear URL since file is used
+  async function handleFileSelect(file: File) {
+    // Show a local preview immediately, then upload in the background.
+    const preview = URL.createObjectURL(file);
+    setImagePreview(preview);
+    setImageUrl("");
+    setUploadedUrl(null);
+    setUploading(true);
+    setResult(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) {
+        setResult({ error: data.error || "Upload failed" });
+        setImagePreview(null);
+        return;
+      }
+      setUploadedUrl(data.url);
+    } catch (e) {
+      setResult({ error: (e as Error).message });
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function onGenerate() {
-    const srcImage = imagePreview || imageUrl;
+    // Prefer the hosted URL (uploaded file or user-pasted URL) — never send a blob: preview.
+    const srcImage = uploadedUrl || imageUrl;
     if (!srcImage) return;
     setLoading(true);
     setResult(null);
@@ -53,7 +77,8 @@ export default function ImageToVideoPage() {
     }
   }
 
-  const hasImage = !!(imagePreview || imageUrl);
+  const hasImage = !!(uploadedUrl || imageUrl);
+  const canSubmit = hasImage && !uploading && !loading;
   const aspects: ("16:9" | "9:16" | "1:1")[] = ["16:9", "9:16", "1:1"];
 
   return (
@@ -114,11 +139,15 @@ export default function ImageToVideoPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imagePreview} alt="Selected" className="w-32 h-32 rounded-lg object-cover border border-white/20" />
                 <div className="flex-1">
-                  <p className="text-white text-sm font-medium mb-1">Image selected</p>
-                  <p className="text-white/50 text-xs mb-3">Click to change image</p>
+                  <p className="text-white text-sm font-medium mb-1">
+                    {uploading ? "Uploading…" : uploadedUrl ? "Image ready" : "Image selected"}
+                  </p>
+                  <p className="text-white/50 text-xs mb-3">
+                    {uploading ? "This takes a few seconds" : "Click to change image"}
+                  </p>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setImagePreview(null); }}
+                    onClick={(e) => { e.stopPropagation(); setImagePreview(null); setUploadedUrl(null); }}
                     className="text-xs text-red-400 hover:text-red-300 transition-colors"
                   >
                     Remove image
@@ -249,10 +278,16 @@ export default function ImageToVideoPage() {
         <button
           type="button"
           onClick={onGenerate}
-          disabled={loading || !hasImage}
+          disabled={!canSubmit}
           className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-sm hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {loading ? "Animating Image..." : hasImage ? "Animate Image" : "Upload an Image First"}
+          {loading
+            ? "Animating Image..."
+            : uploading
+            ? "Uploading Image..."
+            : hasImage
+            ? "Animate Image"
+            : "Upload an Image First"}
         </button>
 
         {/* Loading */}

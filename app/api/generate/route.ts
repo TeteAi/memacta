@@ -18,6 +18,9 @@ const Body = z.object({
   mediaType: z.enum(["video", "image"]),
   imageUrl: z.string().url().optional(),
   aspectRatio: z.enum(["16:9", "9:16", "1:1"]).optional(),
+  // Incoming from the video form as a string ("5", "10", …). Coerce to a number.
+  duration: z.coerce.number().int().min(1).max(60).optional(),
+  seed: z.number().int().optional(),
 });
 
 export async function POST(req: Request) {
@@ -32,6 +35,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
   const body = parsed.data;
+
+  // Translate the wire-format `duration` field into the provider's `durationSec`.
+  // Keep the untouched body for persistence (prompt/model/mediaType/imageUrl) and
+  // build a separate `providerReq` for the generator.
+  const providerReq = {
+    prompt: body.prompt,
+    model: body.model,
+    mediaType: body.mediaType,
+    imageUrl: body.imageUrl,
+    aspectRatio: body.aspectRatio,
+    durationSec: body.duration,
+    seed: body.seed,
+  };
 
   // Auth check
   const session = await auth();
@@ -54,7 +70,7 @@ export async function POST(req: Request) {
     }
 
     // Allow the generation and increment the count
-    const result = await getProvider(body.model).generate(body);
+    const result = await getProvider(body.model).generate(providerReq);
     const newCount = incrementAnonGenerationCount(anonCount);
 
     const response = NextResponse.json(result);
@@ -113,7 +129,34 @@ export async function POST(req: Request) {
     // non-fatal
   }
 
-  const result = await getProvider(body.model).generate(body);
+  const result = await getProvider(body.model).generate(providerReq);
+
+  // If generation itself failed, refund the credits so users aren't charged for nothing.
+  if (result.status === "failed") {
+    const refunded = await prisma.user.update({
+      where: { id: userId },
+      data: { credits: { increment: creditCost } },
+      select: { credits: true },
+    });
+    try {
+      await prisma.creditTransaction.create({
+        data: {
+          userId,
+          amount: creditCost,
+          balance: refunded.credits,
+          type: "refund",
+          description: `Refund — ${body.model} generation failed`,
+          modelId: body.model,
+        },
+      });
+    } catch {
+      // non-fatal
+    }
+    return NextResponse.json(
+      { ...result, creditsRemaining: refunded.credits },
+      { status: 502 }
+    );
+  }
 
   // Persist generation record
   try {

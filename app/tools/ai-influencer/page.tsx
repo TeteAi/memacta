@@ -170,6 +170,8 @@ interface FormState {
   personality: string[];
   // appearance
   referencePreview: string | null;
+  referenceUploadedUrl: string | null;
+  referenceUploading: boolean;
   generateFromScratch: boolean;
   hairStyle: string;
   hairColor: string;
@@ -201,6 +203,8 @@ export default function AIInfluencerPage() {
     ethnicity: "",
     personality: [],
     referencePreview: null,
+    referenceUploadedUrl: null,
+    referenceUploading: false,
     generateFromScratch: true,
     hairStyle: "",
     hairColor: "",
@@ -235,10 +239,41 @@ export default function AIInfluencerPage() {
     );
   }
 
-  function handleFileSelect(file: File) {
-    const url = URL.createObjectURL(file);
-    set("referencePreview", url);
-    set("generateFromScratch", false);
+  async function handleFileSelect(file: File) {
+    // Show a local preview immediately; upload to the server in the background.
+    const preview = URL.createObjectURL(file);
+    setForm((prev) => ({
+      ...prev,
+      referencePreview: preview,
+      referenceUploadedUrl: null,
+      referenceUploading: true,
+      generateFromScratch: false,
+    }));
+    setError(null);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: data });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Upload failed");
+        setForm((prev) => ({
+          ...prev,
+          referencePreview: null,
+          referenceUploading: false,
+          generateFromScratch: true,
+        }));
+        return;
+      }
+      setForm((prev) => ({
+        ...prev,
+        referenceUploadedUrl: json.url,
+        referenceUploading: false,
+      }));
+    } catch (e) {
+      setError((e as Error).message);
+      setForm((prev) => ({ ...prev, referenceUploading: false }));
+    }
   }
 
   async function onGenerate() {
@@ -259,7 +294,7 @@ export default function AIInfluencerPage() {
             mediaType: "image",
             aspectRatio: form.aspectRatio,
             imageUrl: !form.generateFromScratch
-              ? form.referencePreview ?? undefined
+              ? form.referenceUploadedUrl ?? undefined
               : undefined,
           }),
         }).then((r) => r.json())
@@ -283,7 +318,9 @@ export default function AIInfluencerPage() {
     }
   }
 
-  const canGenerate = !loading;
+  // Guard against submitting while a reference image is still uploading —
+  // the provider would otherwise receive `undefined` and generate from scratch.
+  const canGenerate = !loading && !form.referenceUploading;
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
@@ -497,14 +534,27 @@ export default function AIInfluencerPage() {
                     className="w-24 h-24 rounded-lg object-cover border border-white/20"
                   />
                   <div className="flex-1">
-                    <p className="text-white text-sm font-medium mb-1">Reference uploaded</p>
-                    <p className="text-white/50 text-xs mb-2">Click to change</p>
+                    <p className="text-white text-sm font-medium mb-1">
+                      {form.referenceUploading
+                        ? "Uploading…"
+                        : form.referenceUploadedUrl
+                        ? "Reference ready"
+                        : "Reference uploaded"}
+                    </p>
+                    <p className="text-white/50 text-xs mb-2">
+                      {form.referenceUploading ? "Takes a few seconds" : "Click to change"}
+                    </p>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        set("referencePreview", null);
-                        set("generateFromScratch", true);
+                        setForm((prev) => ({
+                          ...prev,
+                          referencePreview: null,
+                          referenceUploadedUrl: null,
+                          referenceUploading: false,
+                          generateFromScratch: true,
+                        }));
                       }}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors"
                     >

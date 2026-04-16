@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { videoModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
+import { handleAuthRequired } from "@/lib/auth-redirect";
 
 export default function ImageToVideoPage() {
   const initial = videoModels()[0]?.id ?? "";
@@ -35,6 +36,7 @@ export default function ImageToVideoPage() {
       form.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: form });
       const data = await res.json();
+      if (handleAuthRequired(res, data)) return;
       if (!res.ok) {
         setResult({ error: data.error || "Upload failed" });
         setImagePreview(null);
@@ -68,6 +70,7 @@ export default function ImageToVideoPage() {
         }),
       });
       const data = await res.json();
+      if (handleAuthRequired(res, data)) return;
       if (!res.ok) setResult({ error: data.error || "Generation failed" });
       else setResult(data);
     } catch (e) {

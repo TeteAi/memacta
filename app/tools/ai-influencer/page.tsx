@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { imageModels } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
+import { handleAuthRequired } from "@/lib/auth-redirect";
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -255,6 +256,7 @@ export default function AIInfluencerPage() {
       data.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: data });
       const json = await res.json();
+      if (handleAuthRequired(res, json)) return;
       if (!res.ok) {
         setError(json.error || "Upload failed");
         setForm((prev) => ({
@@ -297,17 +299,22 @@ export default function AIInfluencerPage() {
               ? form.referenceUploadedUrl ?? undefined
               : undefined,
           }),
-        }).then((r) => r.json())
+        }).then(async (r) => ({ res: r, body: await r.json() }))
       );
 
       const responses = await Promise.all(requests);
+
+      // If any response hit the anon-gen limit, bounce to signup (one redirect wins).
+      const gated = responses.find((r) => handleAuthRequired(r.res, r.body));
+      if (gated) return;
+
       const urls: string[] = responses
-        .filter((d) => d.url)
-        .map((d: { url: string }) => d.url);
+        .filter((r) => r.body.url)
+        .map((r) => r.body.url as string);
 
       if (urls.length === 0) {
-        const firstError = responses.find((d) => d.error);
-        setError(firstError?.error || "Generation failed");
+        const firstError = responses.find((r) => r.body.error);
+        setError(firstError?.body.error || "Generation failed");
       } else {
         setResults(urls);
       }

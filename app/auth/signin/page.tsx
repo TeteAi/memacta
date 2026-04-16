@@ -24,8 +24,15 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/create";
   const error = searchParams.get("error");
+  const reason = searchParams.get("reason");
+  // Users bounced from the anon-gen limit land here — prefer the signup form
+  // so they can convert in one step.
+  const initialMode =
+    searchParams.get("mode") === "signup" || reason === "anon-limit"
+      ? "signup"
+      : "signin";
 
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -176,6 +183,25 @@ export default function SignInPage() {
                 : "Start creating AI content for free"}
             </p>
           </div>
+
+          {/* Anon-limit callout — shown when the freemium gate redirected here */}
+          {reason === "anon-limit" && !formError && (
+            <div className="mb-6 rounded-xl bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-500/30 px-4 py-3.5">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-fuchsia-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white text-sm font-semibold mb-0.5">You&apos;ve used your free generation</p>
+                  <p className="text-white/60 text-xs leading-relaxed">
+                    Sign up now to get <span className="text-fuchsia-300 font-semibold">3 free credits</span> and keep creating.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Error */}
           {(error || formError) && (

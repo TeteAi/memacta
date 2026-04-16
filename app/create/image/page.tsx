@@ -5,6 +5,7 @@ import Link from "next/link";
 import ModelPicker from "@/components/create/model-picker";
 import { imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
+import { handleAuthRequired } from "@/lib/auth-redirect";
 
 const STYLE_PRESETS = [
   { label: "Photorealistic", value: "photorealistic, high detail, 8k" },
@@ -65,6 +66,7 @@ export default function ImageGenerationPage() {
         }),
       });
       const data = await res.json();
+      if (handleAuthRequired(res, data)) return;
       if (!res.ok) setResult({ error: data.error || "Generation failed" });
       else setResult(data);
     } catch (e) {

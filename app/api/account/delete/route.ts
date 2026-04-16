@@ -44,6 +44,19 @@ export async function DELETE() {
         data: { userId: null },
       });
 
+      // Contact messages — scrub PII (name + email) but keep the body so
+      // we still have the bug report context for triage. ContactMessage
+      // has no foreign key on userId (just an optional string column),
+      // so the cascade on user.delete() doesn't touch these.
+      await tx.contactMessage.updateMany({
+        where: { userId },
+        data: {
+          userId: null,
+          name: "[deleted]",
+          email: "[deleted]",
+        },
+      });
+
       // The User row — cascades to Account, Session, Subscription,
       // CreditTransaction, SocialAccount, ScheduledPost via the schema.
       await tx.user.delete({ where: { id: userId } });

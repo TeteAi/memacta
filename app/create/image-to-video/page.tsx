@@ -1,22 +1,32 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { videoModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
 import { handleAuthRequired } from "@/lib/auth-redirect";
 
-export default function ImageToVideoPage() {
-  const initial = videoModels()[0]?.id ?? "";
-  const [model, setModel] = useState(initial);
-  const [prompt, setPrompt] = useState("");
+function ImageToVideoInner() {
+  const searchParams = useSearchParams();
+  const modelParam = searchParams.get("model") ?? "";
+  const promptParam = searchParams.get("prompt") ?? "";
+
+  const models = videoModels();
+  const resolvedInitial =
+    modelParam && models.some((m) => m.id === modelParam)
+      ? modelParam
+      : models[0]?.id ?? "";
+
+  const [model, setModel] = useState(resolvedInitial);
+  const [prompt, setPrompt] = useState(promptParam);
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   // URL returned by /api/upload after we push the selected file server-side.
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">(
-    (getModel(initial)?.defaultAspect ?? "16:9") as "16:9" | "9:16" | "1:1"
+    (getModel(resolvedInitial)?.defaultAspect ?? "16:9") as "16:9" | "9:16" | "1:1"
   );
   const [motionStrength, setMotionStrength] = useState("medium");
   const [result, setResult] = useState<{ url?: string; error?: string } | null>(null);
@@ -329,5 +339,13 @@ export default function ImageToVideoPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function ImageToVideoPage() {
+  return (
+    <Suspense fallback={null}>
+      <ImageToVideoInner />
+    </Suspense>
   );
 }

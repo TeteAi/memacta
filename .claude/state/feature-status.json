@@ -2289,10 +2289,31 @@
         }
       },
       "supervisor_notes": "Social media posting: OAuth stubs, share modal, scheduled posts, 4 platform support"
+    },
+    "model-intro-pages": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "priority": "P1",
+      "source": "feature-gap-analysis.md — 8 missing model intro pages (Sora 2, Veo 3.1, Kling 3.0, WAN 2.6, Seedance 2.0, Nano Banana Pro, Nano Banana 2, Flux 2) consolidated into one data-driven route /models/[slug] covering all 18 models",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Synthesized feature — supersedes the individual model-* adapter entries for the marketing/landing surface gap. Showcases the real fal.ai integration (commit 6cfae60) and drives signups via /create?model= deep links. No Prisma migration required; Stripe deferred per user instruction.",
+      "testReport": {
+        "unit": {
+          "passed": 6,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 5,
+          "failed": 0
+        },
+        "failures": [],
+        "coverageNotes": "All 10 acceptance criteria verified. Unit tests cover MODEL_DETAILS completeness (all 18 models), FAL_ENDPOINTS parity, 3 sample prompts per model, 3+ strengths per model, relatedModelIds resolve, and falEndpoint matches. E2E tests cover: 18-card index split video/image, Sora 2 detail page + CTA model preselection, sample prompt deep link + textarea pre-fill, unknown slug 404, sidebar Models quick link. Static analysis confirmed design tokens, generateStaticParams for all 18 slugs, notFound() on missing slug, and create page searchParams handling for model+prompt."
+      }
     }
   },
-  "currentFeature": null,
-  "lastUpdated": "2026-04-10",
+  "currentFeature": "model-intro-pages",
+  "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",
     "buildStatus": "PASS",

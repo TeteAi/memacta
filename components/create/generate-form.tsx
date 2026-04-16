@@ -7,7 +7,11 @@ import PromptBox from "./prompt-box";
 import { videoModels, imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
 
-type Props = { mediaType: "video" | "image" };
+type Props = {
+  mediaType: "video" | "image";
+  initialModel?: string;
+  initialPrompt?: string;
+};
 
 type Aspect = "16:9" | "9:16" | "1:1";
 
@@ -18,14 +22,20 @@ type Result = {
   error?: string;
 };
 
-export default function GenerateForm({ mediaType }: Props) {
-  const initialModel =
-    (mediaType === "video" ? videoModels() : imageModels())[0]?.id ?? "";
-  const [model, setModel] = useState(initialModel);
-  const [prompt, setPrompt] = useState("");
+export default function GenerateForm({ mediaType, initialModel: initialModelProp, initialPrompt }: Props) {
+  const models = mediaType === "video" ? videoModels() : imageModels();
+  const defaultModelId = models[0]?.id ?? "";
+  // Use initialModelProp if it matches a model of the correct mediaType, otherwise fall back to default
+  const resolvedInitialModel =
+    initialModelProp && models.some((m) => m.id === initialModelProp)
+      ? initialModelProp
+      : defaultModelId;
+
+  const [model, setModel] = useState(resolvedInitialModel);
+  const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [imageUrl, setImageUrl] = useState("");
   const [aspectRatio, setAspectRatio] = useState<Aspect>(
-    (getModel(initialModel)?.defaultAspect ?? "16:9") as Aspect
+    (getModel(resolvedInitialModel)?.defaultAspect ?? "16:9") as Aspect
   );
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);

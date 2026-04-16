@@ -1,19 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import ModelPicker from "@/components/create/model-picker";
 import PromptBox from "@/components/create/prompt-box";
 import { videoModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
 import { handleAuthRequired } from "@/lib/auth-redirect";
 
-export default function TextToVideoPage() {
-  const initial = videoModels()[0]?.id ?? "";
-  const [model, setModel] = useState(initial);
-  const [prompt, setPrompt] = useState("");
+function TextToVideoInner() {
+  const searchParams = useSearchParams();
+  const modelParam = searchParams.get("model") ?? "";
+  const promptParam = searchParams.get("prompt") ?? "";
+
+  const models = videoModels();
+  const resolvedInitial =
+    modelParam && models.some((m) => m.id === modelParam)
+      ? modelParam
+      : models[0]?.id ?? "";
+
+  const [model, setModel] = useState(resolvedInitial);
+  const [prompt, setPrompt] = useState(promptParam);
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">(
-    (getModel(initial)?.defaultAspect ?? "16:9") as "16:9" | "9:16" | "1:1"
+    (getModel(resolvedInitial)?.defaultAspect ?? "16:9") as "16:9" | "9:16" | "1:1"
   );
   const [duration, setDuration] = useState("5");
   const [result, setResult] = useState<{ url?: string; error?: string } | null>(null);
@@ -171,5 +181,13 @@ export default function TextToVideoPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function TextToVideoPage() {
+  return (
+    <Suspense fallback={null}>
+      <TextToVideoInner />
+    </Suspense>
   );
 }

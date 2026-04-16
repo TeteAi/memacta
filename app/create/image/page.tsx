@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import ModelPicker from "@/components/create/model-picker";
 import { imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
@@ -18,10 +19,19 @@ const STYLE_PRESETS = [
   { label: "Portrait", value: "portrait photography, shallow DOF, studio" },
 ];
 
-export default function ImageGenerationPage() {
-  const initial = imageModels()[0]?.id ?? "";
-  const [model, setModel] = useState(initial);
-  const [prompt, setPrompt] = useState("");
+function ImageGenerationInner() {
+  const searchParams = useSearchParams();
+  const modelParam = searchParams.get("model") ?? "";
+  const promptParam = searchParams.get("prompt") ?? "";
+
+  const models = imageModels();
+  const resolvedInitial =
+    modelParam && models.some((m) => m.id === modelParam)
+      ? modelParam
+      : models[0]?.id ?? "";
+
+  const [model, setModel] = useState(resolvedInitial);
+  const [prompt, setPrompt] = useState(promptParam);
   const [negativePrompt, setNegativePrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState<"1:1" | "16:9" | "9:16" | "4:3" | "3:4">("1:1");
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -237,5 +247,13 @@ export default function ImageGenerationPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function ImageGenerationPage() {
+  return (
+    <Suspense fallback={null}>
+      <ImageGenerationInner />
+    </Suspense>
   );
 }

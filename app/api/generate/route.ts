@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getCreditCost } from "@/lib/credits";
 import { checkDailyCap } from "@/lib/daily-cap";
+import { moderatePrompt, moderationMessage } from "@/lib/moderation";
 import {
   ANON_COOKIE_NAME,
   ANON_MAX_GENERATIONS,
@@ -36,6 +37,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
   const body = parsed.data;
+
+  // Prompt moderation — runs BEFORE auth/credits so we don't even authenticate
+  // a user whose prompt is going to be rejected. Saves a DB roundtrip on every
+  // blocked request and gives the client a fast, clear reason to rephrase.
+  const moderation = moderatePrompt(body.prompt);
+  if (!moderation.allowed) {
+    return NextResponse.json(
+      {
+        error: "prompt_blocked",
+        reason: moderation.reason,
+        message: moderationMessage(moderation.reason),
+      },
+      { status: 400 }
+    );
+  }
 
   // Translate the wire-format `duration` field into the provider's `durationSec`.
   // Keep the untouched body for persistence (prompt/model/mediaType/imageUrl) and

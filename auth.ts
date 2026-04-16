@@ -92,20 +92,24 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
   },
   events: {
-    // Give signup bonus when a new user is created via OAuth
+    // Give signup bonus when a new user is created via OAuth.
+    // NOTE: the schema default for User.credits is 100 — we intentionally
+    // write the same value here so the CreditTransaction log stays consistent
+    // with the balance. Bumping either requires bumping both.
     async createUser({ user }) {
       if (user.id) {
+        const SIGNUP_BONUS = 100;
         await prisma.user.update({
           where: { id: user.id },
-          data: { credits: 3 },
+          data: { credits: SIGNUP_BONUS },
         });
         await prisma.creditTransaction.create({
           data: {
             userId: user.id,
-            amount: 3,
-            balance: 3,
+            amount: SIGNUP_BONUS,
+            balance: SIGNUP_BONUS,
             type: "signup",
-            description: "Welcome bonus — 3 free credits",
+            description: `Welcome bonus — ${SIGNUP_BONUS} free credits`,
           },
         });
       }

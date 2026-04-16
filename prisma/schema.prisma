@@ -220,3 +220,20 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+// Inbound messages from /contact. Stored in the DB until we wire Resend /
+// SendGrid so the owner can triage bug reports without hunting through
+// Vercel logs. `userId` is optional — most contacts come from signed-out
+// visitors via the landing page.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String   @default("new") // new | read | handled | spam
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+}

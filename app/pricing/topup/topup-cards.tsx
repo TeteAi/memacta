@@ -31,7 +31,7 @@ export default function TopupCards({ packages }: { packages: TopupPackage[] }) {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setMessage(data.error ?? "Something went wrong");
+        setMessage(data.message ?? data.error ?? "Something went wrong");
       }
     } catch {
       setMessage("Network error. Please try again.");

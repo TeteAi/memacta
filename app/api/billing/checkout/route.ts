@@ -34,14 +34,39 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "package not found" }, { status: 404 });
   }
 
-  // Stub mode: no real Stripe integration
-  // When STRIPE_SECRET_KEY is set, create a Stripe Checkout Session instead
+  // Real Stripe integration not yet wired. When STRIPE_SECRET_KEY is set we'd
+  // create a Checkout Session here.
   if (process.env.STRIPE_SECRET_KEY) {
-    // Future: create Stripe checkout session and return URL
-    return NextResponse.json({ error: "Stripe integration not yet configured" }, { status: 501 });
+    return NextResponse.json(
+      {
+        error: "billing_not_configured",
+        message: "Billing is launching soon. Check back in a few days.",
+      },
+      { status: 501 }
+    );
   }
 
-  // Stub: directly add credits and record purchase
+  // Outside of production / the free-credits stub used to live here and would
+  // credit the caller without any payment. That's a farming vector on a
+  // public beta, so we only allow it in non-production and only for admins
+  // listed in ADMIN_EMAILS. Everyone else sees the same "coming soon"
+  // message the Stripe branch returns above — keeps behaviour predictable
+  // for testers without leaking the free-credits path.
+  const isProd = process.env.NODE_ENV === "production";
+  const { isAdminEmail } = await import("@/lib/admin");
+  const allowedToStub = !isProd || isAdminEmail(session?.user?.email ?? null);
+
+  if (!allowedToStub) {
+    return NextResponse.json(
+      {
+        error: "billing_coming_soon",
+        message: "Credit purchases are launching soon. You still get daily free credits in the meantime.",
+      },
+      { status: 503 }
+    );
+  }
+
+  // Stub: directly add credits and record purchase (admin/dev only).
   const updatedUser = await prisma.user.update({
     where: { id: userId },
     data: { credits: { increment: pkg.credits } },

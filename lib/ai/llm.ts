@@ -1,5 +1,3 @@
-import { fal } from "@fal-ai/client";
-
 /**
  * Thin wrapper over fal.ai's `fal-ai/any-llm` endpoint — gives Copilot a real
  * conversational reply without introducing a new API key. If FAL_KEY is unset
@@ -9,26 +7,32 @@ import { fal } from "@fal-ai/client";
 
 export type LlmMessage = { role: "user" | "assistant" | "system"; content: string };
 
-const FAL_LLM_ENDPOINT = "fal-ai/any-llm";
-const DEFAULT_MODEL = "anthropic/claude-3.5-sonnet";
+// fal.ai documented sync endpoint. POST payload is `{ model, prompt, system_prompt }`,
+// response is `{ output: string, reasoning: boolean, partial: boolean, error: null | string }`.
+// Ref: https://fal.ai/models/fal-ai/any-llm/api
+const FAL_LLM_URL = "https://fal.run/fal-ai/any-llm";
 
-// any-llm accepts a flat `prompt` plus optional `system_prompt` + `model`.
-// We linearize the chat history into a single prompt so one call suffices.
+// Gemini Flash is fal.ai's default any-llm model — widely supported, fast,
+// generous free tier. Claude / GPT models are also available but have
+// heavier per-call costs. Keep this swappable via env in case the user
+// wants a different default.
+const DEFAULT_MODEL = process.env.COPILOT_LLM_MODEL ?? "google/gemini-flash-1.5";
+
+const COPILOT_SYSTEM = [
+  "You are Copilot — memacta's in-app AI director.",
+  "You help creators pick the right model, tool, or preset for their idea.",
+  "Be warm, concrete, and short (2-4 sentences). Never say you're a bot.",
+  "Real tools you can suggest: Fashion Factory, Soul Cinema, Popcorn, Mixed Media,",
+  "Soul ID, AI Influencer, image-to-video, /create/video, /create/image.",
+  "Real models: kling-3, kling-25-turbo, sora-2, veo-3, wan-26, seedance-pro,",
+  "nano-banana-pro, flux-2, flux-kontext, soul-v2. Only recommend from this list.",
+  "Action chips are added automatically — do NOT output URLs, markdown links, or JSON.",
+  "If the user is fuzzy, ask ONE short follow-up question.",
+].join(" ");
+
 function linearize(messages: LlmMessage[]): { prompt: string; system: string } {
-  const system =
-    messages.find((m) => m.role === "system")?.content ??
-    [
-      "You are Copilot — memacta's in-app AI director.",
-      "You help creators pick the right model, tool, or preset for their idea.",
-      "Be warm, concrete, and short (2-4 sentences max). Never say you're a bot.",
-      "Do NOT invent tool names. The real tools are: Fashion Factory, Soul Cinema,",
-      "Popcorn, Mixed Media, Soul ID, AI Influencer, image-to-video, /create/video,",
-      "/create/image, and the 18 models (kling-3, kling-25-turbo, sora-2, veo-3,",
-      "wan-26, seedance-pro, nano-banana-pro, flux-2, flux-kontext, soul-v2, etc.).",
-      "If the user asks for a model, suggest ONE. If they're fuzzy, ask one short",
-      "follow-up question. Action chips are added automatically — do NOT output",
-      "URLs, markdown links, or JSON yourself.",
-    ].join(" ");
+  const overrideSystem = messages.find((m) => m.role === "system")?.content;
+  const system = overrideSystem && overrideSystem.length > 0 ? overrideSystem : COPILOT_SYSTEM;
 
   const history = messages
     .filter((m) => m.role !== "system")
@@ -48,33 +52,43 @@ export async function callLlm(
   const { prompt, system } = linearize(messages);
   if (!prompt.trim()) return null;
 
-  fal.config({ credentials: key });
-
-  // Hard timeout — Copilot should never hang on the LLM round-trip. If it
-  // takes too long we return null and let the rule-based reply ship instead.
-  const timeoutMs = opts?.timeoutMs ?? 12000;
-  const timer = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
+  const controller = new AbortController();
+  const timeoutMs = opts?.timeoutMs ?? 15000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const run = fal
-      .subscribe(FAL_LLM_ENDPOINT, {
-        input: {
-          prompt,
-          system_prompt: system,
-          model: opts?.model ?? DEFAULT_MODEL,
-        },
-        logs: false,
-      })
-      .then((result) => {
-        const data = result.data as { output?: unknown } | undefined;
-        if (!data) return null;
-        const out = data.output;
-        return typeof out === "string" && out.trim().length > 0 ? out.trim() : null;
-      })
-      .catch(() => null);
+    const res = await fetch(FAL_LLM_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "content-type": "application/json",
+        authorization: `Key ${key}`,
+      },
+      body: JSON.stringify({
+        model: opts?.model ?? DEFAULT_MODEL,
+        prompt,
+        system_prompt: system,
+      }),
+    });
 
-    return (await Promise.race([run, timer])) ?? null;
-  } catch {
+    if (!res.ok) {
+      // Surface the fal error body to the server logs for diagnosis but don't
+      // leak it to users — callers treat null as "fall back to rule engine".
+      const text = await res.text().catch(() => "");
+      // eslint-disable-next-line no-console
+      console.warn(`[copilot-llm] fal.ai ${res.status}`, text.slice(0, 200));
+      return null;
+    }
+
+    const data = (await res.json().catch(() => null)) as { output?: unknown; error?: unknown } | null;
+    if (!data || typeof data.output !== "string") return null;
+    const out = data.output.trim();
+    return out.length > 0 ? out : null;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("[copilot-llm] fetch failed", err instanceof Error ? err.message : err);
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }

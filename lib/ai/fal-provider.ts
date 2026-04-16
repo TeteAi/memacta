@@ -1,6 +1,52 @@
 import { fal } from "@fal-ai/client";
 import type { AIProvider, GenerationRequest, GenerationResult } from "./provider";
 
+/**
+ * Human-friendly error mapping for fal upstream failures.
+ *
+ * We translate HTTP status codes + known error strings into a message the
+ * user can actually act on. Everything else bubbles up as a generic
+ * "Generation failed" so we don't leak stack traces into the UI.
+ */
+export function friendlyFalError(status: number | null, rawMessage: string): string {
+  const msg = rawMessage.toLowerCase();
+
+  // Auth / plan — some models require higher fal tiers than inference-only keys.
+  if (status === 403 || /forbidden|not.*authoriz/.test(msg)) {
+    if (/queue/.test(msg)) {
+      return "Video generation needs fal.ai queue access — check your plan at fal.ai/dashboard/billing.";
+    }
+    return "This model isn't available on your current fal.ai plan. Try a different model.";
+  }
+
+  // Rate limits — retriable with backoff.
+  if (status === 429 || /rate.?limit|too many requests/.test(msg)) {
+    return "We're generating a lot right now. Please try again in 30 seconds.";
+  }
+
+  // Upstream service down — our side, users just need to wait.
+  if (status !== null && status >= 500) {
+    return "AI service is temporarily down. Please try again in a minute.";
+  }
+
+  // Billing — the top-level fal account is out of credits.
+  if (/exhausted balance|insufficient.*balance|payment required/.test(msg)) {
+    return "Service is over capacity right now. We're topping up — try again shortly.";
+  }
+
+  // Invalid prompt / content rejected at fal's edge (they have their own moderation).
+  if (status === 400 || /invalid.*prompt|content.*policy|safety/.test(msg)) {
+    return "That prompt was rejected upstream. Try rephrasing or pick a different model.";
+  }
+
+  // Network-level failures (fetch threw before getting a response).
+  if (/fetch failed|econnrefused|enotfound|network/.test(msg)) {
+    return "Couldn't reach the AI service. Check your connection and try again.";
+  }
+
+  return "Generation failed. Please try again.";
+}
+
 // Map our internal model IDs -> fal.ai endpoint slugs.
 // Kept intentionally conservative — each entry is a known-available fal endpoint.
 // Models not yet on fal fall back to a solid general-purpose endpoint.
@@ -128,6 +174,11 @@ export const falProvider: AIProvider = {
     // Videos → keep fal.subscribe since they can run >60s and need the queue.
     // If the queue 403s we surface the friendlier message below.
     if (req.mediaType === "image") {
+      // Hard timeout: fal.run's sync endpoint has a 60s ceiling, but Vercel
+      // serverless functions can be shorter. Abort after 55s so we surface a
+      // clean timeout error rather than have the platform kill us.
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55_000);
       try {
         const res = await fetch(`https://fal.run/${endpoint}`, {
           method: "POST",
@@ -136,17 +187,16 @@ export const falProvider: AIProvider = {
             authorization: `Key ${key}`,
           },
           body: JSON.stringify(input),
+          signal: controller.signal,
         });
         if (!res.ok) {
           const text = await res.text().catch(() => "");
           // eslint-disable-next-line no-console
-          console.warn(`[fal-provider] ${endpoint} ${res.status}`, text.slice(0, 300));
+          console.warn(`[fal-provider] image ${endpoint} ${res.status}`, text.slice(0, 300));
           return {
             id: crypto.randomUUID(),
             status: "failed",
-            error: res.status === 403
-              ? "This model isn't available on your current fal.ai plan. Try a different model."
-              : `Provider error ${res.status}`,
+            error: friendlyFalError(res.status, text),
             createdAt: new Date().toISOString(),
           };
         }
@@ -156,7 +206,7 @@ export const falProvider: AIProvider = {
           return {
             id: crypto.randomUUID(),
             status: "failed",
-            error: "Model returned no media URL",
+            error: "The model returned no image. Try a different model or prompt.",
             createdAt: new Date().toISOString(),
           };
         }
@@ -168,12 +218,19 @@ export const falProvider: AIProvider = {
         };
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Generation failed";
+        const isAbort = e instanceof Error && e.name === "AbortError";
+        // eslint-disable-next-line no-console
+        console.warn(`[fal-provider] image ${endpoint} threw:`, msg);
         return {
           id: crypto.randomUUID(),
           status: "failed",
-          error: msg,
+          error: isAbort
+            ? "Generation took too long and was cancelled. Try a smaller image or different model."
+            : friendlyFalError(null, msg),
           createdAt: new Date().toISOString(),
         };
+      } finally {
+        clearTimeout(timeout);
       }
     }
 
@@ -189,7 +246,7 @@ export const falProvider: AIProvider = {
         return {
           id: (result.requestId as string) ?? crypto.randomUUID(),
           status: "failed",
-          error: "Model returned no media URL",
+          error: "The model returned no video. Try a different model or prompt.",
           createdAt: new Date().toISOString(),
         };
       }
@@ -202,14 +259,17 @@ export const falProvider: AIProvider = {
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Generation failed";
+      // fal.subscribe errors sometimes expose a status on the error object.
+      const status =
+        e && typeof e === "object" && "status" in e && typeof e.status === "number"
+          ? e.status
+          : null;
       // eslint-disable-next-line no-console
-      console.warn(`[fal-provider] subscribe failed for ${endpoint}:`, msg);
+      console.warn(`[fal-provider] video ${endpoint} subscribe threw:`, { status, msg });
       return {
         id: crypto.randomUUID(),
         status: "failed",
-        error: /forbidden/i.test(msg)
-          ? "Video generation needs fal.ai queue access — check your plan at fal.ai/dashboard/billing."
-          : msg,
+        error: friendlyFalError(status, msg),
         createdAt: new Date().toISOString(),
       };
     }

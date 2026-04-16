@@ -44,6 +44,16 @@ export async function POST(req: Request) {
   // blocked request and gives the client a fast, clear reason to rephrase.
   const moderation = moderatePrompt(body.prompt);
   if (!moderation.allowed) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      JSON.stringify({
+        event: "generate.moderation_blocked",
+        reason: moderation.reason,
+        // Truncate — we want aggregate visibility into abuse, not a full
+        // prompt log that could contain PII.
+        promptPreview: body.prompt.slice(0, 80),
+      })
+    );
     return NextResponse.json(
       {
         error: "prompt_blocked",
@@ -168,10 +178,25 @@ export async function POST(req: Request) {
     // non-fatal
   }
 
+  const startedAt = Date.now();
   const result = await getProvider(body.model).generate(providerReq);
+  const elapsedMs = Date.now() - startedAt;
 
   // If generation itself failed, refund the credits so users aren't charged for nothing.
   if (result.status === "failed") {
+    // Structured log so Vercel's log search picks it up cleanly. Gives us the
+    // shape we need to triage user reports: which model, how long, why.
+    // eslint-disable-next-line no-console
+    console.warn(
+      JSON.stringify({
+        event: "generate.failed",
+        model: body.model,
+        mediaType: body.mediaType,
+        elapsedMs,
+        error: result.error,
+        userId,
+      })
+    );
     const refunded = await prisma.user.update({
       where: { id: userId },
       data: { credits: { increment: creditCost } },
@@ -191,8 +216,15 @@ export async function POST(req: Request) {
     } catch {
       // non-fatal
     }
+    // Map the provider's error into the shape the UI consumes. `message` is
+    // what tool forms show in their red banner (via the `message || error`
+    // pattern). `error` stays as a stable machine-readable code fallback.
     return NextResponse.json(
-      { ...result, creditsRemaining: refunded.credits },
+      {
+        ...result,
+        message: result.error ?? "Generation failed. Please try again.",
+        creditsRemaining: refunded.credits,
+      },
       { status: 502 }
     );
   }

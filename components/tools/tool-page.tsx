@@ -42,7 +42,7 @@ export function ToolPage({ tool }: { tool: ToolDef }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data?.error || "Generation failed. Please try again.");
+        setError(data?.message || data?.error || "Generation failed. Please try again.");
       } else {
         setResult(data?.url ?? data?.result ?? null);
       }

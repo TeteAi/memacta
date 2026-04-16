@@ -93,7 +93,7 @@ export default function FashionFactory() {
       } else {
         setShots((prev) => {
           const next = [...prev];
-          next[index] = { status: "failed", error: json.error as string || "Generation failed" };
+          next[index] = { status: "failed", error: (json.message as string) || (json.error as string) || "Generation failed" };
           return next;
         });
       }

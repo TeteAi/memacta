@@ -127,7 +127,7 @@ export default function MixedMediaClient() {
             blendId: req.blendId,
             variationIndex: req.variationIndex,
             status: "failed",
-            error: (json.error as string) || "Generation failed",
+            error: (json.message as string) || (json.error as string) || "Generation failed",
             mediaType: req.mediaType,
             styleNames,
           };

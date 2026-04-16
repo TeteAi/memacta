@@ -314,7 +314,7 @@ export default function AIInfluencerPage() {
 
       if (urls.length === 0) {
         const firstError = responses.find((r) => r.body.error);
-        setError(firstError?.body.error || "Generation failed");
+        setError(firstError?.body.message || firstError?.body.error || "Generation failed");
       } else {
         setResults(urls);
       }

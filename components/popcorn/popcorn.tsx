@@ -99,7 +99,7 @@ export default function Popcorn() {
           next[index] = {
             seed: payload.seed,
             status: "failed",
-            error: (json.error as string) || "Generation failed",
+            error: (json.message as string) || (json.error as string) || "Generation failed",
           };
           return next;
         });

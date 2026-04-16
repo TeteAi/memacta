@@ -143,7 +143,7 @@ export default function SoulCinema() {
           const next = [...prev];
           next[index] = {
             status: "failed",
-            error: (json.error as string) || "Generation failed",
+            error: (json.message as string) || (json.error as string) || "Generation failed",
           };
           return next;
         });

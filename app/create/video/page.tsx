@@ -46,7 +46,7 @@ function TextToVideoInner() {
       });
       const data = await res.json();
       if (handleAuthRequired(res, data)) return;
-      if (!res.ok) setResult({ error: data.error || "Generation failed" });
+      if (!res.ok) setResult({ error: data.message || data.error || "Generation failed" });
       else setResult(data);
     } catch (e) {
       setResult({ error: (e as Error).message });

@@ -66,7 +66,10 @@ export default function GenerateForm({ mediaType, initialModel: initialModelProp
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "failed");
+        // Prefer the human-friendly `message` field when the server includes
+        // one (e.g. daily_cap_reached, insufficient_credits), fall back to the
+        // raw error code otherwise.
+        setError(data.message || data.error || "failed");
       } else {
         setResult(data);
       }

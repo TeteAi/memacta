@@ -4,6 +4,7 @@ import { getProvider } from "@/lib/ai";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getCreditCost } from "@/lib/credits";
+import { checkDailyCap } from "@/lib/daily-cap";
 import {
   ANON_COOKIE_NAME,
   ANON_MAX_GENERATIONS,
@@ -103,6 +104,22 @@ export async function POST(req: Request) {
         balance: user.credits,
       },
       { status: 402 }
+    );
+  }
+
+  // Rolling 24h daily cap — prevents a single tester from torching the fal
+  // bill in an hour. Net of refunds, so failed generations don't count.
+  const capCheck = await checkDailyCap(userId, creditCost);
+  if (!capCheck.ok) {
+    return NextResponse.json(
+      {
+        error: "daily_cap_reached",
+        message: "You've hit today's generation cap. Comes back in a few hours.",
+        cap: capCheck.status.cap,
+        usedToday: capCheck.status.usedToday,
+        resetAt: capCheck.status.resetAt.toISOString(),
+      },
+      { status: 429 }
     );
   }
 

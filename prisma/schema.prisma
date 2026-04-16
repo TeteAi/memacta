@@ -13,7 +13,7 @@ model User {
   email         String    @unique
   name          String?
   password      String?
-  credits       Int       @default(3)
+  credits       Int       @default(100)
   emailVerified DateTime?
   image         String?
   createdAt     DateTime  @default(now())

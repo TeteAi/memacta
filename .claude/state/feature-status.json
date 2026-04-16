@@ -1858,17 +1858,17 @@
     },
     "soul-cinema": {
       "status": "done",
-      "startedAt": "2026-04-09",
-      "completedAt": "2026-04-09",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "priority": "P1",
+      "source": "feature-gap-analysis.md line 6 — 'Soul Cinema' listed under MISSING completely. Previous 'done' entry from 2026-04-09 was a stale stub: grep confirmed no route, no components/soul-cinema directory, no p2-tools entry, and no sidebar link exist. User-listed preferred candidate this round because it uses real fal.ai generation (fan-out to existing /api/generate like Fashion Factory) and deepens the creator loop by chaining Character selection to multi-scene narrative output. Chosen over Reference Extension (too much overlap with shipped Soul ID + Soul Moodboard + Multi Reference + Soul Cast + Fashion Factory) and UGC Factory (structurally near-identical to just-shipped Fashion Factory).",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-23970f4 audit: npx next build PASS (skipped prisma generate per Windows .dll file-lock workaround). All 18 model slugs prerendered, /tools/fashion-factory compiles, /u/[username] compiles, /apps gallery renders, Prisma schema unchanged. Zero slate-/zinc- tokens in components/fashion. Sidebar Identity ordering correct: Soul ID -> Soul Moodboard -> Character/Face/Video Face/Outfit Swap -> Fashion Factory -> AI Influencer -> Photodump -> Soul Cast. No regressions found. Soul Cinema spec deliberately scoped to zero Prisma deltas by reusing Project.clipsJson (existing shape) + Character.refImageUrls (existing) + Post.toolUsed (existing). Pattern mirrors Fashion Factory's Promise.allSettled fan-out so builder has a clean precedent.",
       "testReport": {
-        "unit": {
-          "passed": 51,
-          "failed": 0
-        },
-        "e2e": {
-          "passed": 18,
-          "failed": 0
-        }
+        "unit": { "passed": 15, "failed": 0 },
+        "e2e": { "passed": 12, "failed": 0, "skipped": 1 },
+        "failures": [],
+        "coverageNotes": "All 15 acceptance criteria verified. Unit (15/15): buildSoulCinemaScript sceneCount=3, sceneCount=6, characterName in every prompt, noir genre keyword (chiaroscuro/shadow), tone adjective (moody), seed shuffle produces different beats, characterRefUrl NOT in prompt, buildSoulCinemaBatch length equals scenes, throws on 7+ scenes, empty for no scenes, mediaType:video on every entry, characterRefUrl as imageUrl, no imageUrl without refUrl, sidebar Studio ordering Cinema Studio->Soul Cinema->Saved Projects, p2-tools soul-cinema entry category:identity/mediaOut:video/inputs>=3. E2E (12/13 run + 1 skipped FAL_KEY gate): page heading+testid, 3 character tiles+aria-pressed, story prompt fill, genre/tone chips, storyboard debounce, generate-btn 9 credits, Promise.allSettled 2-succeed/1-fail+retry-visible, retry re-renders succeeded, action buttons, sidebar link, /apps card, unknown sceneCount fallback. Static: Promise.allSettled fan-out confirmed, handleAuthRequired wired on /api/generate+/api/soul-cinema/save+/api/community/posts, no blob: URLs, save route Prisma project.create+clipsJson, share uses toolUsed:soul-cinema, design tokens #181828/white/15/text-brand-gradient/glow-btn, zero slate-/zinc-, sidebar Studio ordering correct, dedicated page at app/tools/soul-cinema/page.tsx, test.skip(FAL_KEY) inside test body not describe block."
       }
     },
     "cinematic-video-generator": {
@@ -2356,7 +2356,7 @@
       }
     }
   },
-  "currentFeature": "fashion-factory",
+  "currentFeature": "soul-cinema",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

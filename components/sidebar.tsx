@@ -135,6 +135,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
     ),
     items: [
       { label: "Cinema Studio", href: "/studio" },
+      { label: "Soul Cinema", href: "/tools/soul-cinema" },
       { label: "Saved Projects", href: "/studio/projects" },
     ],
   },

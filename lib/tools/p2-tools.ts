@@ -147,6 +147,20 @@ export const P2_TOOLS: ToolDef[] = [
       { key: "prompt", label: "Style prompt", type: "prompt" },
     ],
   },
+  {
+    id: "soul-cinema",
+    slug: "soul-cinema",
+    name: "Soul Cinema",
+    description: "Turn a story beat into a character-driven reel. Pick a Soul ID character, describe your story, and auto-generate a multi-scene narrative video.",
+    category: "identity",
+    mediaOut: "video",
+    inputs: [
+      { key: "character", label: "Character", type: "image" },
+      { key: "story", label: "Story", type: "prompt" },
+      { key: "genre", label: "Genre", type: "text" },
+      { key: "sceneCount", label: "Scene count", type: "text" },
+    ],
+  },
 ];
 
 export function getToolBySlug(slug: string): ToolDef | undefined {

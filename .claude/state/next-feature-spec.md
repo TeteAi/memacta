@@ -1,167 +1,213 @@
-# Feature: fashion-factory
+# Feature: soul-cinema
 
-- **Name:** Fashion Factory
-- **Category:** Identity / Styling (new sub-flow built on top of Outfit Swap)
-- **Priority:** P1 (highest remaining gap item that showcases real fal.ai generation and drives signup)
-- **Source:** `.claude/state/feature-gap-analysis.md` line 6 — "Fashion Factory" listed under MISSING completely. Higgsfield's Fashion Factory is a batch outfit-lookbook generator: upload one person + many outfit references → get back N styled shots at once. Distinct from the already-shipped slim `outfit-swap` tool (which concatenates image URLs into a prompt string and never passes them to fal). This feature posts a real `imageUrl` payload to the existing `/api/generate` route per outfit, so every shot is a genuine fal.ai call against `flux-kontext` (image-edit model with reference-image support).
+- **Name:** Soul Cinema — character-driven narrative story builder
+- **Category:** P5 — Cinema Studio (complements existing /studio manual timeline)
+- **Priority:** P1 (highest remaining user-facing gap that exercises real fal.ai generation AND deepens the creator loop by chaining Character → multi-scene narrative output)
+- **Supersedes:** the stale `soul-cinema` entry in feature-status.json (dated 2026-04-09) that was never shipped — no route, no component, no tool def currently exist for it. This spec is the real build.
 
 ## User story
 
-As a fashion creator or brand stylist, I want to upload one photo of myself (or a model / an AI influencer) and drop in 3-6 outfit reference images, then hit "Generate Lookbook" once and receive a grid of N styled shots — each showing my person wearing one of the outfits. I want to preview the batch, download any shot, share the whole lookbook to my community feed, and fall back gracefully when a single shot fails without losing the others.
+> As a creator who has already trained a **Soul ID** character (or has one of the seeded showcase characters), I want to type a story prompt like "Maya finds a mysterious letter and chases its author through a rainy Tokyo night" and have Soul Cinema automatically break that story into 3–6 scene beats, generate a short video clip for each scene using my chosen video model, and stitch them into a playable reel I can download, share to the community, or save as a Project to continue editing in Cinema Studio. The character's look stays consistent across every scene because we reuse the same Soul ID reference image for each generation.
 
-This is the feature that makes memacta feel like a pro fashion tool rather than a single-prompt toy: batch generation, side-by-side comparison, and one-click posting of the whole set.
+This differs from the existing `/studio` Cinema Studio page, which is a **manual** per-clip timeline. Soul Cinema is **narrative-first**: one prompt, one character, multiple automatically-scripted scenes, one fan-out API round trip to fal.ai. The output lands in the same `Project` row so the user can then open it in `/studio/[id]` for manual refinement.
 
 ## Wireframe
 
 ```
 +------------------------------------------------------------+
-|  <- Apps / Identity                                        |
-|  Fashion Factory                    [beta pill]  [share]   |
-|  Upload one person + up to 6 outfits -> a full lookbook    |
-+------------------------------------------------------------+
-|                                                            |
-|  +------------- Person --------------+                     |
-|  | [ upload zone - 1 slot ]          |                     |
-|  |   (PNG/JPG <= 10 MB, or URL)      |                     |
-|  +-----------------------------------+                     |
-|                                                            |
-|  +------------- Outfits (1-6) -------+                     |
-|  | [+][+][+][+][+][+]                |  <- tiles, each     |
-|  |  o1 o2 o3 o4 o5 o6                |     a file-drop     |
-|  +-----------------------------------+                     |
-|                                                            |
-|  Style prompt (optional):                                  |
-|  +-----------------------------------+                     |
-|  | "studio backdrop, editorial light"|                     |
-|  +-----------------------------------+                     |
-|                                                            |
-|  Model: [flux-kontext v]   Cost: 5 x N credits             |
-|                                                            |
-|           [  Generate Lookbook  ]   <- disabled until      |
-|                                        1 person + >=1 fit  |
-|                                                            |
-+------------------------------------------------------------+
-|  RESULTS                                                   |
-|  +------+------+------+                                    |
-|  |  01  |  02  |  03  |   <- each tile: shot, outfit label,|
-|  |  ok  |  ok  | fail |      download, "retry" on failure  |
-|  +------+------+------+                                    |
-|  |  04  |  05  |  06  |                                    |
-|  |  ok  |  ok  | ...  |   <- "..." = still running         |
-|  +------+------+------+                                    |
-|                                                            |
-|  [ Download all (zip) ]   [ Post lookbook to community ]   |
+| Cinema > Soul Cinema                                        |
+|                                                             |
+|  ########  SOUL CINEMA                                      |
+|  ########  Turn a story beat into a character-driven reel.  |
+|                                                             |
+| +-- Step 1: Pick your character -----------------------+    |
+| | [avatar]  Maya        [avatar]  Leo      [+ New]    |    |
+| |   *chosen*            hover:ring-pink                |    |
+| +-------------------------------------------------------+    |
+|                                                             |
+| +-- Step 2: Tell the story ----------------------------+    |
+| | [textarea 4-row — "Maya finds a letter in the rain…"]|    |
+| | Genre:  [Drama][Noir][SciFi][Romance][Action]        |    |
+| | Tone:   [Moody][Bright][Tense][Dreamy]               |    |
+| | Scenes: (o) 3   ( ) 4   ( ) 5   ( ) 6                |    |
+| | Model:  [v Kling 3]   Aspect: [16:9|9:16]            |    |
+| +-------------------------------------------------------+    |
+|                                                             |
+| +-- Step 3: Storyboard (auto-generated from your story) +    |
+| | +--------+ +--------+ +--------+                     |    |
+| | |scene 1 | |scene 2 | |scene 3 |   [Regenerate beats]|    |
+| | |"Rain…" | |"She… " | |"Chase "|                     |    |
+| | | idle   | | idle   | | idle   |                     |    |
+| | +--------+ +--------+ +--------+                     |    |
+| |                                                        |    |
+| |      [  Generate reel — 9 credits  ]  (glow-btn)      |    |
+| +-------------------------------------------------------+    |
+|                                                             |
+| +-- Step 4: Reel (after generate) ---------------------+    |
+| | +--------+ +--------+ +--------+                     |    |
+| | |[> 1]   | |[> 2]   | |[> 3]   |  succeeded          |    |
+| | |succeed | |failed  | |succeed |  [retry 2]          |    |
+| | +--------+ +--------+ +--------+                     |    |
+| | [Save as Project]  [Share to Community]  [Download]  |    |
+| +-------------------------------------------------------+    |
 +------------------------------------------------------------+
 ```
 
-## Routes (Next.js app-router)
+## Routes
 
-- `app/tools/fashion-factory/page.tsx` — Fashion Factory landing + workspace (client component wrapping a server shell, following the pattern of `app/tools/ai-influencer/page.tsx`). This dedicated file will take precedence over the generic `app/tools/[slug]/page.tsx` catch-all because Next.js app-router prefers the named segment.
-- No new API route needed — the client fans out N concurrent `POST /api/generate` calls (one per outfit), each with `model: "flux-kontext"`, `mediaType: "image"`, and `imageUrl: <person-image-url>`. The outfit reference is embedded in the `prompt` string as an explicit URL clause so the edit-model can pick it up.
+Next.js app-router paths:
 
-## Components (under `components/`)
+- `/tools/soul-cinema` — dedicated page (wins over the `/tools/[slug]` catch-all). This is the canonical Soul Cinema URL.
+- `/api/soul-cinema/script` — `POST` — server endpoint that turns `{ storyPrompt, sceneCount, genre, tone, character }` into an array of `{ sceneNumber, beat, prompt }` objects. Pure deterministic transform (no LLM call); uses prompt-template composition in `lib/soul-cinema.ts` so it is testable without external services.
+- `/api/soul-cinema/save` — `POST` — creates or updates a `Project` row with `clipsJson` populated from the generated scene clips. Thin wrapper over the existing `prisma.project.create` logic; used for the "Save as Project" button so the user can jump straight to `/studio/{id}` and keep editing.
 
-- `components/fashion/fashion-factory.tsx` — top-level client component. Holds all state (person, outfits[], prompt, per-shot status, per-shot resultUrl). Wires the generate button. `data-testid="fashion-factory"`.
-- `components/fashion/person-dropzone.tsx` — single-slot file/URL dropzone, mirrors the existing `tool-page.tsx` image-upload UX (click-or-paste-URL, blob preview). `data-testid="person-dropzone"`.
-- `components/fashion/outfit-grid.tsx` — 6 outfit-slot tiles, each independently swappable, with plus/preview/remove states. `data-testid="outfit-grid"`. Children carry `data-testid="outfit-slot-<index>"` (0-5).
-- `components/fashion/lookbook-grid.tsx` — results grid that renders one `LookbookTile` per outfit. `data-testid="lookbook-grid"`. Children carry `data-testid="lookbook-tile-<index>"` and expose `data-status="idle|running|succeeded|failed"`.
-- `components/fashion/lookbook-tile.tsx` — individual result tile with thumbnail, download button, and retry-on-failure button.
-- `components/fashion/lookbook-share-button.tsx` — posts the full set (or just the succeeded shots) to `/api/community/posts` as a single `toolUsed: "fashion-factory"` post; reuses the pattern from `components/social/share-button.tsx`.
+No changes to `/api/generate` — Soul Cinema fans out to the existing endpoint once per scene via `Promise.allSettled`, same pattern as Fashion Factory.
 
-All components must:
-- Use only the memacta design-palette tokens: `bg-brand-gradient`, `text-brand-gradient`, `bg-[#181828]`, `bg-[#1e1e32]`, `border-white/15`, `text-white/70`, `bg-[#FE2C55]` (error), `text-purple-400` (hover accents).
-- Never use `slate-*`, `zinc-*`, or `gray-<n>` tokens (repo-wide ban confirmed during 2026-04-16 audit).
-- Mark `"use client"` only where state is needed.
+## Components
 
-## Data-model deltas
+All under `components/soul-cinema/`:
 
-**None.** The feature reuses existing models:
+- `components/soul-cinema/soul-cinema.tsx` — root client component orchestrating the 4-step flow (character pick -> story input -> storyboard -> reel). Holds state: `characterId`, `storyPrompt`, `genre`, `tone`, `sceneCount`, `model`, `aspectRatio`, `scenes[]`, `results[]`.
+- `components/soul-cinema/character-picker.tsx` — horizontal avatar strip. Loads characters from `/api/characters` (add this endpoint if missing — thin wrapper over `prisma.character.findMany({ where: { userId } })` via a server action `getUserCharacters()` in `lib/soul-cinema.ts`). Shows a 3-tile fallback of showcase characters for anonymous users, plus a "+ New" tile linking to `/tools/soul-id`.
+- `components/soul-cinema/story-form.tsx` — textarea + genre chips + tone chips + scene-count radio + model select. Emits `{ storyPrompt, genre, tone, sceneCount, model, aspectRatio }` upward via `onChange`.
+- `components/soul-cinema/storyboard-grid.tsx` — pure display component: shows the parsed scene beats from `/api/soul-cinema/script`. Has a "Regenerate beats" button that re-calls the script endpoint with a different seed so users can shuffle the auto-written beats.
+- `components/soul-cinema/reel-grid.tsx` + `components/soul-cinema/reel-tile.tsx` — per-scene tile with idle/running/succeeded/failed states. Matches the `LookbookTile` pattern from Fashion Factory (commit 23970f4). Each tile has its own retry button, status badge, and preview player (`<video>` for succeeded, spinner for running, error + retry for failed).
+- `components/soul-cinema/reel-actions.tsx` — the three action buttons after generation: "Save as Project" (POST to `/api/soul-cinema/save`), "Share to Community" (POST first-succeeded clip to `/api/community/posts` with `toolUsed: "soul-cinema"`), "Download" (client-side `<a download>` on the first succeeded URL; note: full reel-stitch download is out of scope — single-clip download is acceptable).
 
-- `Generation` — one row per outfit shot, populated automatically by the existing `/api/generate` POST handler (lines 161-176 of `app/api/generate/route.ts`). `model` = `"flux-kontext"`, `mediaType` = `"image"`, `imageUrl` = person source URL, `prompt` = composed text that embeds the outfit reference URL.
-- `Post` — one row created when the user posts the lookbook via `/api/community/posts`. `toolUsed` = `"fashion-factory"`. No schema change: the existing `toolUsed String?` column is already aggregated by `lib/profile.ts::computeTopModels`, so Fashion Factory will surface correctly on creator profiles.
-- `CreditTransaction` — N rows (one per outfit shot) from the existing credit-deduct flow.
+## Data model deltas
 
-No Prisma migration required. This is a pure-frontend + existing-API feature.
+**None.** Soul Cinema is pure frontend + existing `/api/generate` fan-out + existing `Project` model.
+
+- The existing `Project.clipsJson: String` field already stores an array of `{ id, prompt, model, resultUrl, durationSec, order }` (see `ClipSchema` in `app/api/projects/route.ts`). Soul Cinema's `/api/soul-cinema/save` endpoint builds this exact shape from its `scenes[]` state and calls the same Prisma insert.
+- The existing `Character.refImageUrls: String` field (JSON-serialized array of URLs) already exists. Soul Cinema reads `JSON.parse(character.refImageUrls)[0]` as the consistency reference URL passed to `/api/generate` per scene.
+- The existing `Post.toolUsed` field already exists and will receive `"soul-cinema"` for community shares — no migration needed; consistent with how Fashion Factory uses `"fashion-factory"`.
+
+This keeps the feature landing cleanly on top of Prisma without any migration risk (especially important given the Windows `.dll` file-lock on `prisma generate`).
 
 ## Provider adapter contract
 
-No new provider adapter. Fashion Factory issues N independent calls against the existing `/api/generate` route, which resolves to `falProvider.generate()` with `model: "flux-kontext"`. The per-request shape is the existing `GenerationRequest`:
+No new AI provider adapter. Soul Cinema reuses the existing `videoModels()` list from `lib/ai/models.ts` via the already-wired `/api/generate` endpoint.
+
+The **new** typed contract is the pure script-transform signature that lives in `lib/soul-cinema.ts`:
 
 ```ts
-interface FashionShotRequest {
-  prompt: string;      // composed via composeFashionPrompt()
-  model: "flux-kontext";
-  mediaType: "image";
-  imageUrl: string;    // the person reference URL
-  aspectRatio?: "1:1"; // default square for lookbook consistency
-}
+// lib/soul-cinema.ts
+
+export type SoulCinemaScene = {
+  sceneNumber: number;  // 1-indexed
+  beat: string;         // one-sentence description shown in storyboard
+  prompt: string;       // full composed prompt sent to /api/generate
+};
+
+export type SoulCinemaScriptInput = {
+  storyPrompt: string;           // user's raw story text, min 10 chars
+  sceneCount: 3 | 4 | 5 | 6;
+  genre: "drama" | "noir" | "scifi" | "romance" | "action";
+  tone: "moody" | "bright" | "tense" | "dreamy";
+  characterName: string;         // e.g. "Maya" — embedded in every scene prompt
+  characterRefUrl?: string;      // Soul ID reference — passed to /api/generate as imageUrl
+  seed?: number;                 // optional shuffle seed for "Regenerate beats"
+};
+
+/**
+ * Pure, deterministic scene-script generator.
+ * Splits the story into `sceneCount` beats using a stable template library
+ * keyed by genre, then composes a per-scene prompt string that mentions the
+ * character name, the genre's cinematographic style directives, and the tone.
+ * Must be synchronous and free of I/O so the unit tests can assert output
+ * character-by-character.
+ */
+export function buildSoulCinemaScript(
+  input: SoulCinemaScriptInput
+): SoulCinemaScene[];
+
+export type SoulCinemaBatchInput = {
+  scenes: SoulCinemaScene[];
+  model: string;                 // one of videoModels().map(m => m.id)
+  aspectRatio: "16:9" | "9:16" | "1:1";
+  characterRefUrl?: string;      // passed as imageUrl on every /api/generate call
+  durationSec?: number;          // default 5
+};
+
+export type SoulCinemaGenerateRequest = {
+  prompt: string;
+  model: string;
+  mediaType: "video";
+  imageUrl?: string;
+  aspectRatio: "16:9" | "9:16" | "1:1";
+  duration: number;
+};
+
+/**
+ * Pure function that maps a batch of scenes into an array of /api/generate
+ * request bodies. Mirror of `buildFashionBatch` from lib/fashion.ts — same
+ * validation posture (throws on >6 scenes, filters empty beats).
+ */
+export function buildSoulCinemaBatch(
+  input: SoulCinemaBatchInput
+): SoulCinemaGenerateRequest[];
 ```
 
-The prompt composition lives in a new pure helper `lib/fashion.ts::composeFashionPrompt(personUrl, outfitUrl, stylePrompt)` so it is unit-testable in isolation. The helper returns a single string of the form:
-
-```
-Outfit transfer. Keep the person's face and body identity exactly. Dress them in the outfit from this reference image: <outfitUrl>. <userStylePrompt-or-default>. Studio-quality, editorial lighting, full-body shot.
-```
-
-A second pure helper `lib/fashion.ts::buildFashionBatch(personUrl, outfitUrls[], stylePrompt)` returns an array of request payloads ready for `fetch("/api/generate", ...)`.
+The client-side orchestrator then executes the batch with `Promise.allSettled` — one fetch per scene, per-tile state managed locally — exactly matching the Fashion Factory pattern. No new AI adapter surface.
 
 ## Acceptance criteria
 
-1. `app/tools/fashion-factory/page.tsx` renders at `/tools/fashion-factory` with the fuchsia-pink-orange brand gradient header and zero `slate-`/`zinc-` tokens.
-2. The page is linked from `/apps` (either by adding a `fashion-factory` entry to `lib/tools/p2-tools.ts` with `category: "identity"`, `mediaOut: "image"`, and appropriate inputs, or by appending a manual entry to the ALL_TOOLS array in `app/apps/page.tsx`). It is also reachable from the sidebar "Identity" section, inserted between "Outfit Swap" and "AI Influencer".
-3. The user can upload exactly 1 person image (drag-drop, click-to-pick, or paste URL). The UI disables generation until a person is provided.
-4. The user can add 1 to 6 outfit images in any order; empty slots are skipped. The UI disables generation until at least 1 outfit is provided.
-5. An optional style-prompt textarea is present and, when populated, is merged into every per-outfit prompt via `composeFashionPrompt`.
-6. Clicking "Generate Lookbook" fans out N concurrent `POST /api/generate` calls (one per filled outfit), each with `model: "flux-kontext"`, `mediaType: "image"`, `imageUrl` = person URL, `prompt` = result of `composeFashionPrompt(...)`. Use `Promise.allSettled` so one rejection does not short-circuit the batch.
-7. Each result tile reflects the real status lifecycle: `idle` -> `running` (spinner) -> `succeeded` (thumbnail + download) or `failed` (error pill + retry button). One failed shot must not break the rest of the grid.
-8. Retry on a failed tile fires a new `POST /api/generate` against the same payload and updates only that tile's state.
-9. "Post lookbook to community" submits a single post to `POST /api/community/posts` with `toolUsed: "fashion-factory"`, `mediaUrl` = first succeeded shot URL, `title` = `"${N}-look fashion factory drop"`, and `description` = user's style prompt. Disabled until at least one shot has succeeded.
-10. Anonymous users get the existing `anon_generations` cookie treatment — first few shots succeed for free, subsequent shots return `401 auth_required` and the UI surfaces a single aggregated signup prompt (not N duplicate toasts).
-11. Authenticated users are charged the real credit cost — 5 credits x (# outfits) for `flux-kontext`. Partial failures are refunded per the existing `/api/generate` behaviour; the UI shows the remaining credit balance after the batch completes (using the `creditsRemaining` field the API already returns).
-12. `composeFashionPrompt` and `buildFashionBatch` are pure helpers in `lib/fashion.ts` (no React, no DB) and are fully unit-tested.
-13. All E2E tests pass in mock-provider mode (when `FAL_KEY` is unset, the mock provider returns immediately). The real-fal round-trip test (test 8) is gated with `test.skip(!process.env.FAL_KEY)`.
-14. No regression: the 18-model detail pages, `/u/<username>`, `/community`, `/apps`, and existing `/tools/<slug>` routes all continue to render.
-15. `npm run build` succeeds cleanly and the route manifest contains `/tools/fashion-factory`.
+1. Visiting `/tools/soul-cinema` renders the page with heading `Soul Cinema`, subtitle, and all four step sections (character picker, story form, storyboard, reel area) wrapped in the standard dark shell. `data-testid="soul-cinema-page"` on the root `<main>`.
+2. Design tokens follow the memacta palette only: `#181828` card backgrounds, `white/15` borders, `text-brand-gradient` headings, `bg-brand-gradient` primary CTAs, `glow-btn` class on the main Generate button. Zero occurrences of `slate-` or `zinc-` Tailwind tokens in any file under `components/soul-cinema/` or `app/tools/soul-cinema/`.
+3. Character picker shows at least 3 showcase characters for anonymous users (hardcoded fallbacks with `name`, `avatarUrl`, `refImageUrl`). For authenticated users, it fetches `/api/characters` (add this endpoint if missing — thin wrapper over `prisma.character.findMany({ where: { userId } })`) and prepends their own Soul ID characters. Each tile has `data-testid="character-tile"` and the selected tile gets `aria-pressed="true"`.
+4. Story form textarea has `data-testid="story-prompt"`, genre and tone chip rows each have 4–5 chips (single-select, highlighted selection uses `bg-brand-gradient`), scene count is a 4-button radio (3/4/5/6, default 3), model select uses `videoModels()` from `lib/ai/models.ts`. Aspect ratio toggles between `16:9` and `9:16` only (no `1:1` for Cinema output).
+5. Clicking "Generate storyboard" (or automatic on form change, debounced 400ms) POSTs to `/api/soul-cinema/script`. The response is rendered as 3–6 storyboard tiles, each showing `Scene N` + the one-sentence beat. Tiles have `data-testid="storyboard-tile"`.
+6. Main "Generate reel" button is disabled until: a character is selected AND story prompt is >=10 chars AND storyboard has >=3 tiles. Button label reads `Generate reel — {sceneCount * 3} credits` (video is 3 credits per scene).
+7. Clicking the enabled Generate button kicks off `Promise.allSettled` of N fetches to `/api/generate` (N = sceneCount). Each reel tile transitions idle -> running -> succeeded|failed independently. Failed tiles show a Retry button that re-fires that single scene's fetch without affecting the others.
+8. `buildSoulCinemaScript` must always produce exactly `sceneCount` scenes for valid input, each with a unique `sceneNumber` (1..N), a non-empty `beat`, and a `prompt` that contains the character name AND the genre style directive AND the tone adjective.
+9. `buildSoulCinemaBatch` must throw `Error("Soul Cinema supports at most 6 scenes")` when given 7+ scenes, must return `[]` when given empty scenes, and must pass `characterRefUrl` through as `imageUrl` on every request body when provided.
+10. "Save as Project" button POSTs to `/api/soul-cinema/save` with `{ name: "Soul Cinema — {genre} / {storyPrompt.slice(0,40)}", clips: [...] }` where each clip has `{ id, prompt, model, resultUrl, durationSec, order }`. On success, redirects to `/studio/{projectId}`. Anonymous users get `handleAuthRequired` redirect to signup.
+11. "Share to Community" button POSTs the first succeeded clip to `/api/community/posts` with `toolUsed: "soul-cinema"`, media type `video`, title derived from the story prompt. Uses `handleAuthRequired` on 401.
+12. Sidebar Studio section (in `components/sidebar.tsx`) gains a new `{ label: "Soul Cinema", href: "/tools/soul-cinema" }` entry, inserted between "Cinema Studio" and "Saved Projects". Label is exactly `Soul Cinema` (with the space).
+13. `lib/tools/p2-tools.ts` gains a `soul-cinema` entry with `category: "identity"` (to surface it next to Soul ID/Cast) and `mediaOut: "video"`, so it appears in the `/apps` gallery. Inputs: `character` (image-ref), `story` (prompt), `genre` (text), `sceneCount` (text).
+14. `npx next build` must succeed after the feature lands. No new route collisions; `/tools/soul-cinema` resolves to the dedicated page, not the catch-all. The build must show `/tools/soul-cinema` in the dynamic route listing.
+15. Anonymous users can reach Step 3 (storyboard) but get a signup redirect via `handleAuthRequired` when they hit the Generate reel button if they have exceeded `ANON_MAX_GENERATIONS` (existing `/api/generate` behavior is reused unchanged — no duplicate gate needed in Soul Cinema code).
 
 ## Test cases
 
-### Vitest unit tests — `tests/unit/fashion.test.ts`
+### Vitest unit tests — `tests/unit/soul-cinema.test.ts`
 
-1. `composeFashionPrompt("person.png", "outfit.png", "editorial light")` — returned string contains the literal `outfit.png`, contains the literal `editorial light`, and does NOT contain `person.png` (the person is carried by `imageUrl`, not by prompt text).
-2. `composeFashionPrompt("p.png", "o.png", "")` — style-prompt fallback is used; result includes the default `"Studio-quality, editorial lighting"` phrase.
-3. `composeFashionPrompt("p.png", "https://cdn.x.com/o.jpg?token=abc&v=2", "noir")` — outfit URL embedded verbatim, querystring preserved, no double-escaping.
-4. `composeFashionPrompt("p.png", "o.png", "style\nwith\nnewlines")` — newlines are preserved or collapsed but the result remains JSON-encodable (`JSON.stringify` round-trips).
-5. `buildFashionBatch("p.png", ["o1.png", "o2.png"], "editorial")` — returns an array of length 2, each element has `model: "flux-kontext"`, `mediaType: "image"`, `imageUrl: "p.png"`, `aspectRatio: "1:1"`, and a prompt produced by `composeFashionPrompt`.
-6. `buildFashionBatch("p.png", [], "")` — returns an empty array (does not throw).
-7. `buildFashionBatch("p.png", new Array(7).fill("o.png"), "")` — clamps to 6 or throws a typed `"too many outfits"` error; pick one and test deterministically.
-8. `buildFashionBatch("", ["o.png"], "")` and `buildFashionBatch("p.png", [""], "")` — throw or return an empty guarded array (pick one path and assert).
+1. `buildSoulCinemaScript` returns exactly `sceneCount` scenes for input with sceneCount=3.
+2. `buildSoulCinemaScript` returns exactly 6 scenes for sceneCount=6.
+3. Every scene's `prompt` contains the exact `characterName` substring.
+4. Every scene's `prompt` contains the genre-specific style keyword (e.g. "noir" -> contains `chiaroscuro` or `shadow` or similar pre-defined string; assert against the exact token in the implementation's genre library).
+5. Every scene's `prompt` contains the tone adjective (e.g. tone="moody" -> contains `moody` or synonym from the tone map).
+6. Changing `seed` between two calls with otherwise identical input produces at least one scene with a different `beat` string (shuffle actually shuffles).
+7. `buildSoulCinemaScript` with `characterRefUrl` provided does NOT embed the URL into the prompt string (the URL goes on `imageUrl`, never the prompt — same posture as `composeFashionPrompt`).
+8. `buildSoulCinemaBatch` returns an array with length equal to `scenes.length`.
+9. `buildSoulCinemaBatch` throws when passed 7+ scenes.
+10. `buildSoulCinemaBatch` returns `[]` when passed empty scenes.
+11. `buildSoulCinemaBatch` request body has `mediaType: "video"` on every entry.
+12. `buildSoulCinemaBatch` with `characterRefUrl` present puts that URL on every entry's `imageUrl` field.
+13. `buildSoulCinemaBatch` with no `characterRefUrl` omits the `imageUrl` field (strict undefined, not empty-string).
+14. Sidebar Studio section ordering: a synchronous import-and-assert that `Soul Cinema` label appears between `Cinema Studio` and `Saved Projects` (read the Studio section array from `components/sidebar.tsx`).
+15. `p2-tools.ts` has a `soul-cinema` entry with `category: "identity"`, `mediaOut: "video"`, and `inputs.length >= 3`.
 
-### Vitest unit tests — `tests/unit/sidebar-identity.test.ts` (new, small)
+### Playwright E2E — `e2e/soul-cinema.spec.ts`
 
-9. Sidebar Identity section contains a link with `href="/tools/fashion-factory"` and the label `"Fashion Factory"`, positioned between `"Outfit Swap"` and `"AI Influencer"`.
+**Happy path (mocked fal.ai):**
 
-### Playwright E2E — `tests/e2e/fashion-factory.spec.ts`
+1. Navigate to `/tools/soul-cinema`. Expect `data-testid="soul-cinema-page"` visible and heading `Soul Cinema`.
+2. Expect at least 3 `data-testid="character-tile"` elements rendered (showcase fallback). Click the first one — it should get `aria-pressed="true"`.
+3. Fill `data-testid="story-prompt"` with `Maya finds a mysterious letter and chases its author through a rainy Tokyo night`.
+4. Click the `Noir` genre chip and the `Moody` tone chip.
+5. After debounce, expect exactly 3 `data-testid="storyboard-tile"` elements to render.
+6. Confirm the main Generate button becomes enabled; its label includes `9 credits`.
+7. With `page.route('**/api/generate', ...)` intercepting and returning `{ status: "succeeded", url: "/mock/scene.mp4" }` for the first two calls and `{ status: "failed", error: "mock" }` for the third, click Generate. Wait for all three tiles to settle. Assert 2 tiles show `data-status="succeeded"` and 1 shows `data-status="failed"` with a visible Retry button.
+8. Click Retry on the failed tile (with the mock now returning success). The tile re-renders with `data-status="succeeded"`.
+9. Assert the three action buttons are visible: `Save as Project`, `Share to Community`, `Download`.
 
-1. **Happy path (mocked provider)** — visit `/tools/fashion-factory`, paste a URL into the person slot, paste 2 URLs into outfit slots 0 and 1, fill the style-prompt textarea, click "Generate Lookbook", assert both lookbook tiles reach `data-status="succeeded"` within 30s.
-2. **Generate disabled until inputs present** — visit the page, confirm the "Generate Lookbook" button is disabled with zero outfits, becomes enabled after one outfit + person are both provided, and becomes disabled again when the person slot is cleared.
-3. **Partial failure isolates** — inject a failing URL pattern (the mock-provider rejects URLs containing `"fail"`) so shot #1 fails while shot #0 succeeds; assert tile 0 shows a thumbnail and tile 1 shows a retry button.
-4. **Retry recovers** — from the partial-failure state, swap the outfit URL on tile 1 to a passing one, click retry, assert the tile re-enters `running` and then `succeeded`.
-5. **Sidebar entry** — from any page, open the sidebar, expand the Identity section, click "Fashion Factory", assert the URL is `/tools/fashion-factory` and the H1 matches.
-6. **Appears on /apps** — visit `/apps`, locate the Fashion Factory card, click it, assert navigation to `/tools/fashion-factory`.
-7. **Community post (mocked)** — after a successful batch, click "Post lookbook to community", assert a success toast and that `/community` now contains a post whose `toolUsed` badge reads "fashion-factory".
+**Additional E2E assertions:**
 
-### Environment-gated E2E (skipped when `FAL_KEY` unset)
+10. Sidebar: expand Studio section, assert a link labelled `Soul Cinema` exists pointing to `/tools/soul-cinema`.
+11. `/apps` page: assert a card with text `Soul Cinema` is visible and its href is `/tools/soul-cinema`.
+12. Unknown scene-count (e.g. navigating with `?sceneCount=99`) must not crash the page — falls back to 3.
 
-8. **Real fal.ai round-trip** — same as test 1 but with `FAL_KEY` present; assert returned URLs are on `cdn.fal.ai` or `v3.fal.media`.
+**Real fal.ai round-trip (skipped in CI without FAL_KEY):**
 
----
-
-**Implementation notes for the builder:**
-
-- Base the file-upload UX on `components/tools/tool-page.tsx` — that pattern already works with the existing `/api/upload` endpoint for blob->url conversion (see commit e4e4f6f).
-- The concurrent fan-out MUST use `Promise.allSettled`, not `Promise.all`, so one rejection does not short-circuit the batch. Per-tile state lives in a `Record<number, ShotState>` keyed by outfit index.
-- The dedicated `app/tools/fashion-factory/page.tsx` takes precedence over the generic `app/tools/[slug]/page.tsx` catch-all in Next.js app-router, so you do NOT need to special-case the catch-all. Mirror the `app/tools/ai-influencer/page.tsx` precedent.
-- If you decide to also add a `fashion-factory` entry to `lib/tools/p2-tools.ts` (for the /apps grid), keep its `slug: "fashion-factory"` aligned with the dedicated route path. The generic `tool-page.tsx` is NOT compatible with this feature (it can't do batch fan-out) — the dedicated page must render instead.
-- Credit-display already listens for successful `/api/generate` responses via the `creditsRemaining` field — no extra plumbing needed. After the batch completes, take the `creditsRemaining` from the LAST successful response and surface it in the UI.
-- For the community-post title, use `"${N}-look fashion factory drop"`.
-- Do NOT edit `prisma/schema.prisma`. Do NOT add a migration. Do NOT add Stripe-dependent code.
+13. Gated on `process.env.FAL_KEY` — uses a tiny real story ("Leo waves at the camera once"), sceneCount=3, model `kling-25-turbo`. Asserts at least one tile reaches `data-status="succeeded"` within 120s. Uses `test.skip(!process.env.FAL_KEY)` inside the test body (not the describe block) — same lesson as fashion-factory where the skip was accidentally moved up and silenced the whole suite.

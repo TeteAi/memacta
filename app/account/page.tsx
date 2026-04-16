@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ConnectAccounts from "@/components/social/connect-accounts";
 import ScheduledPosts from "@/components/social/scheduled-posts";
+import { userToUsername } from "@/lib/profile";
 
 function formatUsd(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -35,6 +36,8 @@ export default async function AccountPage() {
       createdAt: true,
     },
   });
+
+  const profileUsername = userToUsername({ id: userId, name: user?.name ?? null });
 
   const purchases = await prisma.purchase.findMany({
     where: { userId },
@@ -69,9 +72,15 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-8 text-brand-gradient">
-        Account
-      </h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-brand-gradient">Account</h1>
+        <Link
+          href={`/u/${encodeURIComponent(profileUsername)}`}
+          className="text-sm font-medium px-4 py-2 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors"
+        >
+          View public profile
+        </Link>
+      </div>
 
       <div className="rounded-2xl border border-white/15 bg-[#181828] p-6 mb-8">
         <div className="grid gap-4 sm:grid-cols-2">

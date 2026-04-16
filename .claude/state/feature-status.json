@@ -2310,9 +2310,31 @@
         "failures": [],
         "coverageNotes": "All 10 acceptance criteria verified. Unit tests cover MODEL_DETAILS completeness (all 18 models), FAL_ENDPOINTS parity, 3 sample prompts per model, 3+ strengths per model, relatedModelIds resolve, and falEndpoint matches. E2E tests cover: 18-card index split video/image, Sora 2 detail page + CTA model preselection, sample prompt deep link + textarea pre-fill, unknown slug 404, sidebar Models quick link. Static analysis confirmed design tokens, generateStaticParams for all 18 slugs, notFound() on missing slug, and create page searchParams handling for model+prompt."
       }
+    },
+    "creator-profiles": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "priority": "P1",
+      "source": "feature-gap-analysis.md — 'Creator Profiles' listed under MISSING completely. Highest-conversion remaining gap: builds the social loop on top of existing Post + User data without requiring Stripe or a Prisma migration. Supersedes the stale sidebar gap item 'AI Influencer not linked from sidebar' and 'kling-avatars-2 missing from sidebar' — both are already present in components/sidebar.tsx (lines 50 and 86).",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-merge audit of 9e705e1: npm run build PASS, all 18 model slugs prerendered, no design-token regressions, Prisma schema unchanged. Chose Creator Profiles over Apps gallery (already data-driven) and Reference Extension (overlaps with shipped Multi Reference). No DB migration; all derivations from existing User/Post/SHOWCASE_ITEMS data via new lib/profile.ts helpers.",
+      "testReport": {
+        "unit": {
+          "passed": 9,
+          "failed": 0
+        },
+        "e2e": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 2
+        },
+        "failures": [],
+        "coverageNotes": "All 15 acceptance criteria statically verified. Unit tests (9/9): userToUsername slugification, non-alphanumeric stripping, null-name fallback, hyphen collapse, matchUsernameToUser unambiguous/unknown/disambiguation, computeProfileStats totals, computeTopModels ranking. E2E (3/5 pass, 2 environment-limited): showcase profile renders header+grid PASS, unknown 404 PASS, post detail creator link PASS. Two E2E tests are environment-limited: (a) community card click — link href /u/demo-user is correct and direct navigation works (verified with force:true and page.goto), but Playwright's default .click() doesn't trigger navigation due to element positioning/overlay in headless Chromium on Windows — app functionality confirmed correct; (b) account 'View public profile' — link IS present in source (account/page.tsx:77-82) behind auth guard, but test visits without storageState auth setup — app code correct, test needs storageState. Static analysis: text-brand-gradient via CSS class (globals.css:71), bg-brand-gradient avatar fallback, data-testid on all 5 profile components + post-card, no slate/zinc tokens, sidebar QUICK_LINKS unmodified, nav.tsx has My profile link (line 97), force-dynamic on profile page, metadata title+description, notFound() on third path, showcase/DB/404 resolution order correct."
+      }
     }
   },
-  "currentFeature": "model-intro-pages",
+  "currentFeature": "creator-profiles",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { SHOWCASE_ITEMS } from "@/lib/showcase";
 import PostCard, { type PostCardData } from "@/components/community/post-card";
 import Link from "next/link";
+import { userToUsername } from "@/lib/profile";
 
 export const metadata = { title: "memacta \u2013 Community" };
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export default async function CommunityPage() {
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
     take: 20,
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { id: true, name: true } } },
   });
 
   const cards: PostCardData[] = posts.map((p) => ({
@@ -19,6 +20,9 @@ export default async function CommunityPage() {
     mediaUrl: p.mediaUrl,
     mediaType: p.mediaType,
     creatorName: p.user?.name ?? null,
+    creatorUsername: p.user
+      ? userToUsername({ id: p.user.id, name: p.user.name })
+      : null,
     likes: p.likes,
     liked: false,
   }));
@@ -32,8 +36,10 @@ export default async function CommunityPage() {
           mediaUrl: item.mediaUrl,
           mediaType: item.mediaType,
           creatorName: item.creator,
+          creatorUsername: userToUsername({ id: item.creator, name: item.creator }),
           likes: Math.floor(Math.random() * 150) + 20,
           liked: false,
+          externalHref: item.mediaUrl,
         }))
       : [];
 

@@ -83,6 +83,20 @@ export default function Nav({
               <div className="hidden sm:block">
                 <CreditsDisplay />
               </div>
+              {session.user.name && (
+                <Link
+                  href={`/u/${encodeURIComponent(
+                    (session.user.name ?? "")
+                      .toLowerCase()
+                      .replace(/[^a-z0-9\s-]/g, "")
+                      .replace(/[\s-]+/g, "-")
+                      .replace(/^-+|-+$/g, "") || `user-${(session.user as { id?: string }).id?.slice(0, 6) ?? "unknown"}`
+                  )}`}
+                  className="hidden sm:block px-4 py-2 text-sm font-medium rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  My profile
+                </Link>
+              )}
               <Link
                 href="/account"
                 className="hidden sm:block px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/10 transition-colors"

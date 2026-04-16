@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getCreditCost } from "@/lib/credits";
 import { checkDailyCap } from "@/lib/daily-cap";
+import { isAdminEmail } from "@/lib/admin";
 import { moderatePrompt, moderationMessage } from "@/lib/moderation";
 import {
   ANON_COOKIE_NAME,
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
   // Auth check
   const session = await auth();
   const userId = (session?.user as { id?: string } | undefined)?.id;
+  const userEmail = session?.user?.email ?? null;
 
   if (!userId) {
     // Anonymous user — check cookie-based generation count
@@ -125,18 +127,22 @@ export async function POST(req: Request) {
 
   // Rolling 24h daily cap — prevents a single tester from torching the fal
   // bill in an hour. Net of refunds, so failed generations don't count.
-  const capCheck = await checkDailyCap(userId, creditCost);
-  if (!capCheck.ok) {
-    return NextResponse.json(
-      {
-        error: "daily_cap_reached",
-        message: "You've hit today's generation cap. Comes back in a few hours.",
-        cap: capCheck.status.cap,
-        usedToday: capCheck.status.usedToday,
-        resetAt: capCheck.status.resetAt.toISOString(),
-      },
-      { status: 429 }
-    );
+  // Admins (owner allowlist) skip the cap so we can smoke-test freely; every
+  // other safeguard (moderation, credit deduction, ledger) still applies.
+  if (!isAdminEmail(userEmail)) {
+    const capCheck = await checkDailyCap(userId, creditCost);
+    if (!capCheck.ok) {
+      return NextResponse.json(
+        {
+          error: "daily_cap_reached",
+          message: "You've hit today's generation cap. Comes back in a few hours.",
+          cap: capCheck.status.cap,
+          usedToday: capCheck.status.usedToday,
+          resetAt: capCheck.status.resetAt.toISOString(),
+        },
+        { status: 429 }
+      );
+    }
   }
 
   // Deduct credits and run generation concurrently (deduct first to prevent double-spend)

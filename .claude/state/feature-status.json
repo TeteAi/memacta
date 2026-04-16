@@ -2396,9 +2396,23 @@
         "e2e": { "passed": 12, "failed": 0, "skipped": 1 },
         "notes": "16/16 unit + 12/12 non-opt-in E2E green. Test 13 (real fal.ai round-trip) skipped via FAL_KEY gate. Fixed 4 test-selector issues (no component bugs): test 4 used click() on disabled button (switched to force:true + toBeDisabled assertion); test 6 used filter({has: [data-style-id=...]}) where data-style-id sits on the same element as data-testid (switched to combined attribute selector); test 7 getByRole('button', {name:'Video'}) matched both sidebar 'Video Tools' and output-settings button (scoped to output-settings testid); test 11 Mixed Media link strict-mode violation between sidebar + footer (scoped to complementary role)."
       }
+    },
+    "polish-pass-8": {
+      "status": "done",
+      "startedAt": "2026-04-16",
+      "completedAt": "2026-04-16",
+      "testReport": {
+        "unit": { "passed": 8, "failed": 0 },
+        "e2e": { "passed": 10, "failed": 0 },
+        "notes": "8/8 unit + 10/10 E2E green first run — no test-selector fixes needed. Covers Prompt Builder category toggle + chip selection + deep-link URL construction, Careers page smoke + open-role cards, Footer Discord link aria-label/href."
+      },
+      "priority": "P2",
+      "source": "Loop 8 polish pass. After honest audit of the 5 remaining gap items, UGC Factory (caller-flagged re-skin), Reference Extension (overlap with Multi Reference + Soul ID + Soul Moodboard + Soul Cast), and Sora 2 Upscale (narrow Upscale duplicate) were all rejected as low-value. Batched the three real remaining items — Careers page, Discord footer link, Prompt Guide upgrade — into a single polish pass. Prompt Guide currently at app/prompt-guide/page.tsx is a 2-section static page (6 tips + 4 example prompts). Upgrading it to an interactive chip-based prompt builder that deep-links into /create/video ?prompt=... and /copilot ?prompt=... gives the site a third conversion surface and turns a dead static page into a working tool.",
+      "specPath": ".claude/state/next-feature-spec.md",
+      "supervisor_notes": "Post-0175fa5 audit: `npx next build` PASS. All 18 model slugs prerendered. /tools/mixed-media (6.11 kB), /tools/popcorn (6.39 kB), /tools/soul-cinema (7.3 kB), /tools/fashion-factory (5.74 kB), /tools/ai-influencer (8.9 kB), /copilot (128 B + 109 kB), /u/[username], /apps, /chat (legacy preserved) all compile. Sidebar Effects & Templates has Popcorn at index 1 and Mixed Media at index 2 (correct). Sidebar Studio ordering Cinema Studio -> Soul Cinema -> Saved Projects (correct). Sidebar Identity ordering intact. No design-token regressions — grep across components/ and app/ shows 9 matches for /(slate-|zinc-)/ but ALL are translate-x-*, translate-y-*, or -translate-* utility false positives (confirmed by content inspection). Prisma schema unchanged. No REWORK needed. Spec for polish-pass-8 is deliberately zero-risk: no Prisma deltas, no Stripe, no new providers, no new API routes, no network calls at all. Pure frontend prompt builder + two static pages + footer tweak. Builder must NOT modify components/sidebar.tsx QUICK_LINKS, /apps, /copilot, /chat, or lib/copilot.ts. Prompt Builder writes to URL via <Link> href rather than reading useSearchParams, so no new Suspense wrap is needed. Example cards in /prompt-guide get a 'Try it' deep-link chip into /create/*. /careers is hard-coded stub roles with mailto links. Discord is a plain anchor to https://discord.gg/memacta placeholder."
     }
   },
-  "currentFeature": "mixed-media",
+  "currentFeature": "polish-pass-8",
   "lastUpdated": "2026-04-16",
   "supervisorFinalAudit": {
     "date": "2026-04-10",

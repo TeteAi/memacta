@@ -1,3 +1,6 @@
+import Link from "next/link";
+import PromptBuilder from "@/components/prompt-builder/prompt-builder";
+
 export const metadata = { title: "memacta – Prompt Guide" };
 
 const TIPS = [
@@ -19,10 +22,13 @@ const EXAMPLES = [
 export default function PromptGuidePage() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-10">
-      <div className="mb-10">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold text-brand-gradient">Prompt Guide</h1>
         <p className="text-white/70 mt-2">Master the art of AI prompting to create stunning visuals</p>
       </div>
+
+      {/* Interactive Prompt Builder */}
+      <PromptBuilder />
 
       <section className="mb-12">
         <h2 className="text-xl font-bold text-white mb-6">Tips for Better Prompts</h2>
@@ -41,10 +47,16 @@ export default function PromptGuidePage() {
         <div className="space-y-4">
           {EXAMPLES.map((ex, i) => (
             <div key={i} className="rounded-xl bg-[#181828] border border-white/15 p-5">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-between gap-2 mb-3">
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ex.type === "Video" ? "bg-pink-500/20 text-pink-400" : "bg-cyan-500/20 text-cyan-400"}`}>
                   {ex.type}
                 </span>
+                <Link
+                  href={`${ex.type === "Video" ? "/create/video" : "/create/image"}?prompt=${encodeURIComponent(ex.prompt)}`}
+                  className="text-xs px-3 py-1 rounded-full bg-brand-gradient text-white font-medium hover:opacity-90 transition-opacity"
+                >
+                  Try it &rarr;
+                </Link>
               </div>
               <p className="text-white/90 text-sm font-mono leading-relaxed">{ex.prompt}</p>
             </div>

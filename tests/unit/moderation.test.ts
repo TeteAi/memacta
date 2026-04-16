@@ -35,6 +35,12 @@ describe("moderatePrompt", () => {
     expect(r.reason).toBe("violence");
   });
 
+  it("categorises school shooting as violence, not minors", () => {
+    const r = moderatePrompt("school shooting scene cinematic");
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toBe("violence");
+  });
+
   it("does not false-positive on substring matches", () => {
     // "cp" is a blocklisted word but mustn't match inside "skyscraper" or "concept"
     const r = moderatePrompt("a skyscraper concept with purple lighting");

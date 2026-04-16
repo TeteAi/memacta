@@ -119,6 +119,65 @@ export const falProvider: AIProvider = {
     const endpoint = resolveEndpoint(req.model, req.mediaType, req.imageUrl);
     const input = buildInput(req);
 
+    // Images → direct sync POST to fal.run. This uses the "inference" API
+    // surface which all FAL_KEYs have access to. fal.subscribe uses the
+    // separate "queue" API (queue.fal.run) which inference-only keys 403 on
+    // with a generic "Forbidden" — exactly what we saw in prod. The sync
+    // endpoint has a 60s timeout, which is plenty for images (5-30s typical).
+    //
+    // Videos → keep fal.subscribe since they can run >60s and need the queue.
+    // If the queue 403s we surface the friendlier message below.
+    if (req.mediaType === "image") {
+      try {
+        const res = await fetch(`https://fal.run/${endpoint}`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Key ${key}`,
+          },
+          body: JSON.stringify(input),
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          // eslint-disable-next-line no-console
+          console.warn(`[fal-provider] ${endpoint} ${res.status}`, text.slice(0, 300));
+          return {
+            id: crypto.randomUUID(),
+            status: "failed",
+            error: res.status === 403
+              ? "This model isn't available on your current fal.ai plan. Try a different model."
+              : `Provider error ${res.status}`,
+            createdAt: new Date().toISOString(),
+          };
+        }
+        const data = (await res.json().catch(() => null)) as unknown;
+        const url = extractMediaUrl(data);
+        if (!url) {
+          return {
+            id: crypto.randomUUID(),
+            status: "failed",
+            error: "Model returned no media URL",
+            createdAt: new Date().toISOString(),
+          };
+        }
+        return {
+          id: crypto.randomUUID(),
+          status: "succeeded",
+          url,
+          createdAt: new Date().toISOString(),
+        };
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Generation failed";
+        return {
+          id: crypto.randomUUID(),
+          status: "failed",
+          error: msg,
+          createdAt: new Date().toISOString(),
+        };
+      }
+    }
+
+    // Video path — queue mode via fal.subscribe.
     try {
       const result = await fal.subscribe(endpoint, {
         input,
@@ -143,10 +202,14 @@ export const falProvider: AIProvider = {
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Generation failed";
+      // eslint-disable-next-line no-console
+      console.warn(`[fal-provider] subscribe failed for ${endpoint}:`, msg);
       return {
         id: crypto.randomUUID(),
         status: "failed",
-        error: msg,
+        error: /forbidden/i.test(msg)
+          ? "Video generation needs fal.ai queue access — check your plan at fal.ai/dashboard/billing."
+          : msg,
         createdAt: new Date().toISOString(),
       };
     }

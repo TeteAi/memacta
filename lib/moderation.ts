@@ -107,10 +107,13 @@ export function moderatePrompt(prompt: string): ModerationResult {
 }
 
 function categorize(term: string): ModerationResult["reason"] {
-  if (/child|kid|loli|shota|underage|preteen|minor|school/.test(term)) return "minors";
-  if (/deepfake|revenge porn|undress|nudify/.test(term)) return "nsfw_deepfake";
+  // Order matters — check violence first so "school shooting" doesn't fall
+  // into the "school..." minors branch, and self-harm before the generic
+  // blocked_phrase.
   if (/shoot|bomb|terror|behead/.test(term)) return "violence";
   if (/suicide|self-harm/.test(term)) return "self_harm";
+  if (/deepfake|revenge porn|undress|nudify/.test(term)) return "nsfw_deepfake";
+  if (/child|kid|loli|shota|underage|preteen|minor|schoolgirl|schoolboy/.test(term)) return "minors";
   return "blocked_phrase";
 }
 

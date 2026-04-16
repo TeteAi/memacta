@@ -5,6 +5,7 @@ import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import Nav from "@/components/nav";
 import Sidebar from "@/components/sidebar";
+import ClaimPending from "@/components/create/claim-pending";
 
 export default function AppShell({
   session,
@@ -17,6 +18,7 @@ export default function AppShell({
 
   return (
     <SessionProvider session={session}>
+      <ClaimPending />
       <Nav
         session={session}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}

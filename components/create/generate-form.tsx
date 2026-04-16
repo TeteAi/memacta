@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import ModelPicker from "./model-picker";
 import PromptBox from "./prompt-box";
 import { videoModels, imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
 import { downloadWithWatermark } from "@/lib/watermark";
+import { stashPendingGeneration } from "@/lib/pending-generations";
 
 type Props = {
   mediaType: "video" | "image";
@@ -41,6 +43,7 @@ export default function GenerateForm({ mediaType, initialModel: initialModelProp
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { status: sessionStatus } = useSession();
 
   const handleModelChange = (id: string) => {
     setModel(id);
@@ -73,6 +76,18 @@ export default function GenerateForm({ mediaType, initialModel: initialModelProp
         setError(data.message || data.error || "failed");
       } else {
         setResult(data);
+        // Anon users don't get a Generation row written server-side, so
+        // stash the result client-side. If they sign up, <ClaimPending />
+        // will claim it into their real library on the next page load.
+        if (sessionStatus !== "authenticated" && data?.url) {
+          stashPendingGeneration({
+            model,
+            mediaType,
+            prompt,
+            imageUrl: mediaType === "video" && imageUrl ? imageUrl : null,
+            resultUrl: data.url,
+          });
+        }
       }
     } catch (e) {
       setError((e as Error).message);

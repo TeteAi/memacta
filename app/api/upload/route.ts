@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { fal } from "@fal-ai/client";
 import { auth } from "@/auth";
 
-const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
+// Tightened from 20 MB → 4 MB so the data-URI fallback path still fits under
+// Vercel's 4.5 MB serverless body limit when the URL is forwarded to
+// /api/generate. Users with larger images see a clear 413 rather than a
+// cryptic downstream failure.
+const MAX_BYTES = 4 * 1024 * 1024;
 const ALLOWED = new Set([
   "image/jpeg",
   "image/png",
@@ -63,12 +67,32 @@ export async function POST(req: Request) {
     );
   }
 
+  // Strategy: try fal.storage first (hosted URL, smallest downstream payload).
+  // If it 403s / fails for any reason (inference-only keys don't get storage
+  // scope by default), fall back to a base64 data URI — fal.ai inference
+  // endpoints accept data URIs natively as `image_url`.
   try {
     fal.config({ credentials: key });
     const url = await fal.storage.upload(file);
     return NextResponse.json({ url, size: file.size, type: file.type });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Upload failed";
-    return NextResponse.json({ error: msg }, { status: 500 });
+  } catch (storageErr) {
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const dataUri = `data:${file.type};base64,${buffer.toString("base64")}`;
+      return NextResponse.json({
+        url: dataUri,
+        size: file.size,
+        type: file.type,
+        fallback: "data-uri",
+      });
+    } catch (fallbackErr) {
+      const msg =
+        fallbackErr instanceof Error
+          ? fallbackErr.message
+          : storageErr instanceof Error
+          ? storageErr.message
+          : "Upload failed";
+      return NextResponse.json({ error: msg }, { status: 500 });
+    }
   }
 }

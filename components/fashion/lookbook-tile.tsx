@@ -1,5 +1,7 @@
 "use client";
 
+import { downloadWithWatermark } from "@/lib/watermark";
+
 export type ShotStatus = "idle" | "running" | "succeeded" | "failed";
 
 export interface ShotState {
@@ -69,11 +71,13 @@ export default function LookbookTile({
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {shot.status === "succeeded" && shot.url && (
-            <a
-              href={shot.url}
-              download={`memacta-look-${index + 1}-${Date.now()}.png`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() =>
+                downloadWithWatermark(shot.url!, {
+                  filename: `memacta-look-${index + 1}-${Date.now()}`,
+                })
+              }
               data-testid={`download-${index}`}
               className="inline-flex items-center gap-1 text-[11px] text-white/60 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-lg px-2 py-1"
             >
@@ -81,7 +85,7 @@ export default function LookbookTile({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
               DL
-            </a>
+            </button>
           )}
 
           {shot.status === "failed" && (

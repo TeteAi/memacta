@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import type { ToolDef } from "@/lib/tools/p2-tools";
 import ShareButton from "@/components/social/share-button";
+import { downloadWithWatermark } from "@/lib/watermark";
 
 export function ToolPage({ tool }: { tool: ToolDef }) {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -198,20 +199,39 @@ export function ToolPage({ tool }: { tool: ToolDef }) {
               caption={values[tool.inputs.find(i => i.type === "prompt")?.key ?? ""] ?? tool.name}
             />
 
-            {/* Download */}
+            {/* Download — images go through the watermarker so downloads
+                carry the memacta brand; videos download raw (no client-side
+                video watermarking yet). */}
             {(result.startsWith("http") || result.startsWith("/")) && (
-              <a
-                href={result}
-                download={`memacta-${tool.slug}-${Date.now()}.${tool.mediaOut === "video" ? "mp4" : "png"}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-                Download
-              </a>
+              tool.mediaOut === "video" ? (
+                <a
+                  href={result}
+                  download={`memacta-${tool.slug}-${Date.now()}.mp4`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadWithWatermark(result, {
+                      filename: `memacta-${tool.slug}-${Date.now()}`,
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download
+                </button>
+              )
             )}
 
             {/* Save to Library */}

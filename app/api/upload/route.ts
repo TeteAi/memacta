@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fal } from "@fal-ai/client";
 import { auth } from "@/auth";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 // Tightened from 20 MB → 4 MB so the data-URI fallback path still fits under
 // Vercel's 4.5 MB serverless body limit when the URL is forwarded to
@@ -31,6 +32,30 @@ export async function POST(req: Request) {
   const userId = (session?.user as { id?: string } | undefined)?.id;
   if (!userId) {
     return NextResponse.json({ error: "auth_required" }, { status: 401 });
+  }
+
+  // Cap uploads at 20/min per user. More generous than /api/generate
+  // because legit users will sometimes batch-upload reference images,
+  // but still blocks a scripted loop that would blow through fal
+  // storage quota.
+  const rl = rateLimit(rateLimitKey(req, userId), {
+    windowMs: 60_000,
+    max: 20,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error: "rate_limited",
+        message: "Too many uploads. Please slow down.",
+        retryAfter: Math.ceil(rl.retryAfterMs / 1000),
+      },
+      {
+        status: 429,
+        headers: {
+          "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)),
+        },
+      }
+    );
   }
 
   const key = process.env.FAL_KEY;

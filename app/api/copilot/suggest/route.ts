@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildCopilotSuggestion } from "@/lib/copilot";
 import { callLlm } from "@/lib/ai/llm";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 // NOTE: Copilot suggestions do NOT burn generation credits — they are purely
 // a routing helper. The 401 / auth gate is only triggered by downstream
@@ -19,6 +20,30 @@ interface Message {
 }
 
 export async function POST(req: NextRequest) {
+  // Copilot is intentionally open to anon users (routing helper, no
+  // credit burn) but each request still calls fal-ai's LLM, which is
+  // NOT free. Cap at 15/min per IP so a single abusive client can't
+  // run up a bill.
+  const rl = rateLimit(rateLimitKey(req, null), {
+    windowMs: 60_000,
+    max: 15,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error: "rate_limited",
+        message: "Too many messages. Please slow down.",
+        retryAfter: Math.ceil(rl.retryAfterMs / 1000),
+      },
+      {
+        status: 429,
+        headers: {
+          "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)),
+        },
+      }
+    );
+  }
+
   let body: { messages?: unknown; intent?: unknown };
   try {
     body = await req.json();

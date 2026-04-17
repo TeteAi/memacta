@@ -14,6 +14,7 @@ import {
   incrementAnonGenerationCount,
 } from "@/lib/anonymous-credits";
 import { cookies } from "next/headers";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 const Body = z.object({
   prompt: z.string().min(1),
@@ -38,6 +39,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
   const body = parsed.data;
+
+  // Per-caller burst throttle. Signed-in users already have a daily
+  // credit cap; this catches the "generate in a tight loop" scripted
+  // abuse that would otherwise burn through credits + fal bill in
+  // minutes. Anon users hit this before their free-gen cookie too, so
+  // someone can't fan out across cookies from the same IP.
+  const preSessionCheck = rateLimit(rateLimitKey(req, null), {
+    windowMs: 60_000,
+    max: 10,
+  });
+  if (!preSessionCheck.ok) {
+    return NextResponse.json(
+      {
+        error: "rate_limited",
+        message: "Too many requests. Please slow down.",
+        retryAfter: Math.ceil(preSessionCheck.retryAfterMs / 1000),
+      },
+      {
+        status: 429,
+        headers: {
+          "retry-after": String(Math.ceil(preSessionCheck.retryAfterMs / 1000)),
+        },
+      }
+    );
+  }
 
   // Prompt moderation — runs BEFORE auth/credits so we don't even authenticate
   // a user whose prompt is going to be rejected. Saves a DB roundtrip on every

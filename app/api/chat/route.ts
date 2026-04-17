@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { auth } from "@/auth";
 import { callLlm, type LlmMessage } from "@/lib/ai/llm";
 
 const Body = z.object({
@@ -11,11 +12,16 @@ const Body = z.object({
   ),
 });
 
-// Legacy /api/chat endpoint. Preserved for any direct callers / legacy tests.
-// Now backed by the real LLM wrapper — no more mock replies. If FAL_KEY is
-// missing or the call fails, we return a graceful fallback so the client
-// doesn't error out.
+// /api/chat — LLM-backed chat for the AI copilot. Now requires auth so
+// anonymous visitors can't burn FAL/LLM credits by POSTing directly.
+
 export async function POST(req: Request) {
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) {
+    return NextResponse.json({ error: "auth_required" }, { status: 401 });
+  }
+
   let json: unknown;
   try {
     json = await req.json();

@@ -99,13 +99,22 @@ export async function POST(req: Request) {
   try {
     fal.config({ credentials: key });
     const url = await fal.storage.upload(file);
-    return NextResponse.json({ url, size: file.size, type: file.type });
+    // Derive a stable storage key from the URL path so callers can reference
+    // the object for later deletion (cascade cleanup in persona photo delete).
+    let storageKey: string;
+    try {
+      storageKey = new URL(url).pathname.replace(/^\//, "");
+    } catch {
+      storageKey = url;
+    }
+    return NextResponse.json({ url, key: storageKey, size: file.size, type: file.type });
   } catch (storageErr) {
     try {
       const buffer = Buffer.from(await file.arrayBuffer());
       const dataUri = `data:${file.type};base64,${buffer.toString("base64")}`;
       return NextResponse.json({
         url: dataUri,
+        key: null,
         size: file.size,
         type: file.type,
         fallback: "data-uri",

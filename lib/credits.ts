@@ -1,3 +1,22 @@
+// ─── Persona credit weights ───────────────────────────────────────────────────
+// Source of truth: memacta-research/decisions.md §"Credit weights (first pass)"
+// These constants are also used by the persona API route handlers so that the
+// weights stay in sync without duplicating magic numbers.
+
+/** Credits charged per image for an instant (PuLID-Flux) generation. */
+export const PERSONA_INSTANT_CREDIT = 1;
+
+/** Credits charged per image for a premium (trained LoRA) generation. */
+export const PERSONA_PREMIUM_CREDIT = 1;
+
+/** Number of preview images generated per preview request (always 4). */
+export const PERSONA_PREVIEW_COUNT = 4;
+
+/** Total credits charged for one preview request (PREVIEW_COUNT × INSTANT_CREDIT). */
+export const PERSONA_PREVIEW_TOTAL = PERSONA_PREVIEW_COUNT * PERSONA_INSTANT_CREDIT;
+
+// ─── Model-level credit costs ─────────────────────────────────────────────────
+
 export const CREDIT_COSTS: Record<string, { image: number; video: number }> = {
   // Budget Image
   "wan-25-image": { image: 3, video: 0 },

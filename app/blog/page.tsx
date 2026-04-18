@@ -19,9 +19,9 @@ const POSTS = [
   },
   {
     slug: "soul-id-deep-dive",
-    title: "Soul ID: A Deep Dive",
+    title: "Persona: A Deep Dive",
     excerpt:
-      "Learn how Soul ID lets you create persistent AI characters that maintain identity across generations.",
+      "Learn how Persona lets you create persistent AI characters that maintain identity across generations.",
     date: "2026-03-18",
   },
 ];

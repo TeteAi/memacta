@@ -13,7 +13,7 @@ export function generateStaticParams() {
 const TITLES: Record<string, string> = {
   "welcome-to-memacta": "Welcome to memacta",
   "ai-video-revolution": "The AI Video Revolution",
-  "soul-id-deep-dive": "Soul ID: A Deep Dive",
+  "soul-id-deep-dive": "Persona: A Deep Dive",
 };
 
 export default async function BlogPostPage({

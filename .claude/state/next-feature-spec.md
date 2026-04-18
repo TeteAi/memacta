@@ -1,259 +1,408 @@
-# Feature: polish-pass-8
+# Feature: soul-id
 
-**Name:** Polish Pass — Prompt Builder v2 + Careers + Discord + Footer sweep
-**Category:** P6/P7 polish (marketing surface, static pages, conversion utility)
-**Priority:** P2 (closes 3 remaining gap items + 1 meta-sweep)
+- memacta UI name: Persona
+- Internal name: `persona`
+- Feature id (cross-ref): `soul-id`
+- Category: Identity
+- Priority: P2 (wedge feature; first sprint of memacta product arc)
+- Sprint: 1 (Persona v1)
+- Est. effort: 6-8 eng-days (Tier A: D1-D4, Tier B: D5-D7)
+- Brief: memacta-research/briefs/soul-id.md
+- Policy: memacta-research/decisions.md
+- Naming map: memacta-research/naming.md
 
-## Why this, why now
-
-After 9 feature loops, the remaining candidates in `feature-gap-analysis.md` are honestly thin:
-
-- **UGC Factory** — caller-flagged in the directive as structurally near-identical to the just-shipped Fashion Factory. Building it would be a re-skin. SKIP.
-- **Reference Extension** — overlaps materially with shipped Multi Reference + Soul ID + Soul Moodboard + Soul Cast. SKIP.
-- **Sora 2 Upscale** — narrow single-model duplicate of the shipped Upscale tool. SKIP.
-- **Careers page** — genuine gap, low-effort. INCLUDE.
-- **Discord link** — trivial sweep. INCLUDE.
-- **Prompt Guide** — currently a 2-section static page (6 tips + 4 example prompts at `app/prompt-guide/page.tsx`). The biggest quality delta remaining is upgrading it into an **interactive prompt builder**. This gives the site a third conversion surface (after Copilot chat and preset tools) and turns a dead static page into a working tool that deep-links into /create. INCLUDE.
-
-This batched polish pass ships three real gap items + one meaningful UX upgrade in a single loop, with zero Prisma deltas, zero Stripe, zero new providers.
+Naming rule: use "Persona" in all user-visible copy and in code identifiers (Persona, /personas, /api/persona/*). Third-party technical names (LoRA, PuLID, Flux, FLUX.1-dev, IP-Adapter, InstantID, DreamBooth, InsightFace, ArcFace, fal.ai, Replicate) are preserved in code comments and model pickers.
 
 ## User story
 
-> As a new visitor I want to craft a great prompt before I spend credits, so I land on /prompt-guide, pick a category (video / image / character), fill in chips (subject, style, lighting, camera, mood), watch my prompt build live, copy it or deep-link straight into /create/video?prompt= to generate — no signup required to experiment.
-
-> As a recruiter I want to see what the company is about, so I land on /careers, read the mission + values + open role blurbs, and hit an email mailto link.
-
-> As a community member I want a place to chat, so I see the Discord link in the footer socials row next to Twitter/Instagram/TikTok/YouTube.
+1. **Create an Instant Persona.** A signed-in, email-verified user uploads 1-5 photos of a face, accepts consent, names the persona, and within seconds has a READY persona (tier=INSTANT) selectable in the generate panel. No training wait.
+2. **Upgrade to Premium.** From a READY instant Persona, the user clicks Upgrade to Premium. After the 24h cooling period since signup and if the lifetime premium train has not been used, memacta kicks off fal-ai/flux-lora-fast-training (~15-20 min). The detail page polls status and flips to tier=PREMIUM with a loraUrl when the webhook lands.
+3. **Generate with a persona.** From /create, the user picks a persona chip. The server sends identity={kind:'instant',...} or {kind:'lora',...} based on tier. On free tier every output returns with a server-baked memacta watermark; attempting to download raw opens the upgrade paywall. Every Generation row carries personaId.
 
 ## Wireframe
 
-### /prompt-guide (upgraded in place)
-
+### /personas
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│  Prompt Guide                             [Video] [Image] [Character]│  <- category toggle
-│  Build a killer prompt, chip by chip.                                │
-├──────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   1. Subject                                                         │
-│   [a golden retriever puppy] (text input, required)                  │
-│                                                                      │
-│   2. Style (pick 1)                                                  │
-│   [cinematic] [photoreal] [anime] [oil painting] [3D render]         │
-│                                                                      │
-│   3. Lighting (pick 1)                                               │
-│   [golden hour] [neon glow] [soft studio] [volumetric fog]           │
-│                                                                      │
-│   4. Camera (pick 1, video/image only)                               │
-│   [close-up] [wide angle] [bird's eye] [tracking shot] [dolly zoom]  │
-│                                                                      │
-│   5. Motion (video only)                                             │
-│   [slow motion] [timelapse] [panning left] [orbiting]                │
-│                                                                      │
-│   6. Mood (pick 1)                                                   │
-│   [ethereal] [dramatic] [peaceful] [mysterious] [nostalgic]          │
-│                                                                      │
-├──────────────────────────────────────────────────────────────────────┤
-│  Live prompt preview:                                                │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │ a golden retriever puppy, cinematic, golden hour lighting,   │   │
-│  │ close-up, slow motion, dramatic mood                         │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                      │
-│  [Copy prompt]    [Open in Create ->]    [Send to Copilot]           │
-│                                                                      │
-├──────────────────────────────────────────────────────────────────────┤
-│  Tips & tricks (existing 6-tip grid, unchanged)                      │
-│  Example prompts (existing 4-prompt gallery) - each now has a        │
-│  "Try it" link that deep-links with ?prompt=...                      │
-└──────────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------+
+| memacta                                      [avatar]      |
++------------------------------------------------------------+
+| Sidebar |  Personas                         [+ New Persona]|
+|         |                                                  |
+| Create  |  +----------+  +----------+  +----------+        |
+| Library |  | [cover]  |  | [cover]  |  | [cover]  |        |
+| Persona*|  | Alex Rae |  | Nova     |  | Kiro     |        |
+| Billing |  | PREMIUM  |  | INSTANT  |  | TRAINING |        |
+|         |  | 12 gens  |  | 3 gens   |  | ~ 12 min |        |
+|         |  +----------+  +----------+  +----------+        |
++------------------------------------------------------------+
 ```
 
-### /careers
-
+### /personas/new (wizard)
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│  Careers at memacta                                                  │
-│  Build the creator tools of tomorrow.                                │
-├──────────────────────────────────────────────────────────────────────┤
-│  ┌─ Our mission ─────┐ ┌─ Our values ──────┐ ┌─ How we work ──────┐ │
-│  │  Democratize      │ │ - Ship fast        │ │ - Remote-first     │ │
-│  │  creative AI for  │ │ - Creators first   │ │ - Async            │ │
-│  │  everyone.        │ │ - Open source      │ │ - Equity for all   │ │
-│  └───────────────────┘ └───────────────────┘ └───────────────────┘ │
-├──────────────────────────────────────────────────────────────────────┤
-│  Open roles (4-6 stub cards)                                         │
-│  ┌───────────────────────────────────────────────────────────────┐  │
-│  │ Senior AI Engineer - Remote - Full-time                        │  │
-│  │ Work on our fal.ai adapter layer and next-gen model pipeline. │  │
-│  │ [Apply via email ->]                                           │  │
-│  └───────────────────────────────────────────────────────────────┘  │
-│  ...                                                                 │
-├──────────────────────────────────────────────────────────────────────┤
-│  Don't see a fit? [careers@memacta.ai]                               │
-└──────────────────────────────────────────────────────────────────────┘
+Step 1 — Upload photos (1-5)
+  [drop zone: drag photos or click to select]
+  [thumb][thumb][thumb]  <- green check (face+adult+not-nsfw)
+                         <- red X if rejected w/ reason
+
+Step 2 — Consent
+  [ ] "This is me, or I have explicit permission from the
+       person shown." (required)
+  Learn more about memacta's consent + takedown policy.
+
+Step 3 — Name
+  Name: [________]   Trigger word (auto): koi-alex-rae
+  [Finish — generate 4 previews (4 credits)]
+
+Step 4 — READY
+  Here are 4 instant previews. Your Persona is ready.
+  [preview grid]
+  [Go to Persona]   [Use in Create]
 ```
 
-### Discord link (footer)
+### /personas/[id]
+```
++-------------------------------------------------------------+
+| Alex Rae   INSTANT    3 generations                         |
+|  cover image                                                |
+|  [Use in Create]   [Upgrade to Premium *]   [...delete]     |
++-------------------------------------------------------------+
+| Upgrade to Premium                                          |
+|   fuchsia->orange card                                      |
+|   "Train a dedicated model on your photos. ~15 min.         |
+|    92-98% identity match. 1 free train on Free plan."       |
+|   Status: READY — available                                 |
+|   [Start Training]                                          |
++-------------------------------------------------------------+
+| Recent Generations                                          |
+|  [tile][tile][tile][tile]                                   |
++-------------------------------------------------------------+
+```
 
-- Add 5th social icon in the footer brand-row socials cluster (alongside existing Twitter, Instagram, TikTok, YouTube in `components/footer.tsx` lines 81-94).
-- href `https://discord.gg/memacta` (stub — placeholder URL).
-- aria-label "Join our Discord".
-- Same styling class chain as the other 4 icons (`w-9 h-9 rounded-full bg-white/15 ...`).
+### Persona selector chip in /create
+```
+Model: [Flux v]   Identity: [ None | Alex Rae* | Nova | + ]
+                                        ^gradient glow when selected
+```
 
 ## Routes
 
-- `/prompt-guide` — upgraded in place (renders `<PromptBuilder />` above existing tips/examples grids).
-- `/careers` — new static page `app/careers/page.tsx`.
-- Footer — add Discord icon + Careers link in `col1Links`.
+Page routes (in `app/(app)/`):
+- `/personas`                -> `app/(app)/personas/page.tsx`
+- `/personas/new`            -> `app/(app)/personas/new/page.tsx`
+- `/personas/[id]`           -> `app/(app)/personas/[id]/page.tsx`
 
-No API routes, no middleware changes.
+API routes:
+- `POST   /api/persona`                                -> `app/api/persona/route.ts`
+- `GET    /api/persona`                                -> `app/api/persona/route.ts`
+- `GET    /api/persona/[id]`                           -> `app/api/persona/[id]/route.ts`
+- `DELETE /api/persona/[id]`                           -> `app/api/persona/[id]/route.ts`
+- `POST   /api/persona/[id]/photos`                    -> `app/api/persona/[id]/photos/route.ts`
+- `DELETE /api/persona/[id]/photos/[photoId]`          -> `app/api/persona/[id]/photos/[photoId]/route.ts`
+- `POST   /api/persona/[id]/finalize-instant`          -> `app/api/persona/[id]/finalize-instant/route.ts`
+- `POST   /api/persona/[id]/upgrade-premium`           -> `app/api/persona/[id]/upgrade-premium/route.ts`
+- `POST   /api/persona/[id]/preview`                   -> `app/api/persona/[id]/preview/route.ts`
+- `POST   /api/persona/[id]/takedown`                  -> `app/api/persona/[id]/takedown/route.ts`
+- `POST   /api/webhooks/fal/training`                  -> `app/api/webhooks/fal/training/route.ts`
+
+All authenticated routes call `auth()` (NextAuth v5), run through `lib/rate-limit.ts` with a key of `persona:${userId}`, and enforce `emailVerified != null` where noted in acceptance criteria. Existing `/api/generate` gains optional `personaId`.
+
+Test-only route (NODE_ENV !== 'production'): `POST /api/test/verify-email` to unblock E2E.
 
 ## Components
 
-**Create:**
+New under `components/persona/`:
+- `PersonaCard.tsx`, `PersonaTierBadge.tsx`, `PersonaStatusBadge.tsx`
+- `PersonaWizard.tsx`, `UploadStep.tsx`, `NameStep.tsx`, `InstantPreview.tsx`
+- `UpgradeCta.tsx`, `TrainingProgress.tsx`, `PersonaSelector.tsx`
+- `ConsentBlock.tsx`, `PersonaDetailHeader.tsx`
+- `DownloadPaywallModal.tsx`, `TakedownDialog.tsx`
 
-- `lib/prompt-builder.ts` — **pure** helpers (no React, no network):
-  - `composePrompt(inputs: PromptInputs, category: PromptCategory): string`
-  - `CATEGORY_FIELDS: Record<PromptCategory, PromptField[]>` — which fields show per category
-  - `PROMPT_CATEGORIES = ["video", "image", "character"] as const`
-  - `STYLE_OPTIONS`, `LIGHTING_OPTIONS`, `CAMERA_OPTIONS`, `MOTION_OPTIONS`, `MOOD_OPTIONS` — typed string arrays
-- `components/prompt-builder/prompt-builder.tsx` — client component (`"use client"`). Holds category toggle + chip state + live preview + 3 action buttons. Uses `useState`. Does NOT read `useSearchParams` (writes to URL via `<Link>` href only).
-- `components/prompt-builder/chip-group.tsx` — presentational: list of toggle buttons with single-select or null-select semantics.
-- `app/careers/page.tsx` — server component, static content.
-- `components/careers/open-role-card.tsx` — server component.
-- `tests/unit/prompt-builder.test.ts`
-- `tests/e2e/prompt-builder.spec.ts`
+Changes to existing:
+- `components/create/GeneratePanel.tsx` (or equivalent) — import and render `<PersonaSelector />`; thread `personaId` into the generate body.
+- `components/library/*` — show persona chip overlay on persona-attributed tiles; swap download action for `<DownloadPaywallModal />` on free tier.
+- `components/sidebar.tsx` — add a "Personas" entry below "Library".
 
-**Modify:**
+New server helpers:
+- `lib/persona/service.ts` — Persona CRUD + orchestration
+- `lib/persona/gates.ts` — `canCreatePersona`, `canStartPremiumTrain`, `canDownloadClean`
+- `lib/persona/consent.ts` — `computeContentHash`, `persistAttestation`
+- `lib/persona/trigger-word.ts` — deterministic per-user unique trigger word generator
+- `lib/persona/blocklist.ts` — celebrity name matcher (case+diacritic normalized, edit-distance-1)
+- `lib/persona/webhook-token.ts` — HS256 JWT sign/verify for fal webhook
+- `lib/watermark/apply.ts` — pixel-level watermark compositor via `sharp`
+- `lib/ai/providers/fal.ts` — extended with 4 new functions below
+- `lib/ai/identity/faceEmbed.ts` — 512-d ArcFace extraction wrapper
+- `lib/analytics/persona.ts` — typed analytics event emitters
 
-- `app/prompt-guide/page.tsx` — render `<PromptBuilder />` at top (wrap in `<Suspense>` only if builder reads search params; current spec says it does NOT, so no Suspense needed). Add a `<Link href={"/create/video?prompt=" + encodeURIComponent(prompt)}>Try it</Link>` anchor inside each example card; image-type examples link to `/create/image?prompt=...`.
-- `components/footer.tsx` — add Discord svg anchor to the 4-socials block, add `{ href: "/careers", label: "Careers" }` to `col1Links` right after the "About" entry.
+## Data model deltas (migration: `persona_v1`)
 
-**Do NOT modify:**
+### User (edit, non-destructive)
+- Do NOT rename existing `emailVerified DateTime?` — treat it as the canonical verified signal in `lib/persona/gates.ts`.
+- Add `premiumLoraTrainsUsed Int @default(0)`.
+- Add relations: `personas Persona[]`, `consentAttestations ConsentAttestation[]`.
 
-- `components/sidebar.tsx` — no QUICK_LINKS change, no new section entry.
-- `app/apps/page.tsx`
-- `app/copilot/page.tsx`
-- `lib/copilot.ts`
-- `prisma/schema.prisma`
-- Any existing route's client component.
+### New enums
+```prisma
+enum PersonaTier   { INSTANT PREMIUM }
+enum PersonaStatus { DRAFT READY TRAINING FAILED }
+```
 
-## Data model deltas
+### New model Persona
+```prisma
+model Persona {
+  id                String   @id @default(cuid())
+  userId            String
+  name              String
+  slug              String
+  triggerWord       String
+  tier              PersonaTier    @default(INSTANT)
+  status            PersonaStatus  @default(DRAFT)
+  primaryPhotoUrl   String?
+  coverImageUrl     String?
+  faceEmbedding     Bytes?
+  loraUrl           String?
+  loraBaseModel     String?
+  loraScale         Float?
+  trainingJobId     String?
+  trainingSteps     Int?
+  trainingStartedAt DateTime?
+  trainingEndedAt   DateTime?
+  trainingError     String?
+  voiceId           String?   // reserved — Talking Studio sprint
+  stylePresetId     String?   // reserved — VibeLock sprint
+  celebrityFlag     Boolean   @default(false)
+  minorFlag         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  archivedAt        DateTime?
 
-**None.** No Prisma migration. Verified current `prisma/schema.prisma` has: User, Subscription, CreditTransaction, Project, Character, Generation, Post, Like, CreditPackage, Purchase, SocialAccount, ScheduledPost, PostAnalytics, Account, Session, VerificationToken — zero touch needed.
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos        PersonaPhoto[]
+  attestations  ConsentAttestation[]
+  generations   Generation[]
 
-## API contracts
+  @@unique([userId, slug])
+  @@unique([userId, triggerWord])
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+```
 
-**None.** Pure frontend feature. Prompt Builder composes a string client-side via `lib/prompt-builder.ts` and either copies it (navigator.clipboard) or navigates to `/create/*?prompt=...` / `/copilot?prompt=...` via `<Link>`. No server route.
+### New model PersonaPhoto
+```prisma
+model PersonaPhoto {
+  id           String   @id @default(cuid())
+  personaId    String
+  url          String
+  storageKey   String
+  isPrimary    Boolean  @default(false)
+  faceBbox     Json?
+  faceScore    Float?
+  ageEstimate  Float?
+  nsfwScore    Float?   @default(0)
+  rejected     Boolean  @default(false)
+  rejectReason String?
+  createdAt    DateTime @default(now())
 
-No `handleAuthRequired` needed — this feature adds zero network requests.
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
 
-## Design tokens (must-hold)
+  @@index([personaId])
+  @@index([personaId, isPrimary])
+}
+```
 
-- Card surface `bg-[#181828]`.
-- Card border `border-white/15`.
-- Page bg `bg-[#0a0a16]` or transparent on top of layout root.
-- Gradient text: `text-brand-gradient` CSS utility (globals.css line 71). **NEVER** `bg-brand-gradient bg-clip-text text-transparent`.
-- Primary CTA: `bg-brand-gradient` + `glow-btn` + `text-white font-semibold`.
-- Active chip: `bg-brand-gradient text-white`.
-- Inactive chip: `bg-white/10 text-white/70 hover:bg-white/15`.
-- **Zero `slate-*` or `zinc-*` tokens.** Grep must pass a word-boundary check (`/\b(slate|zinc)-\d/`) — not `[class*="slate-"]` which false-matches `translate-x-*`.
+### New model ConsentAttestation
+```prisma
+model ConsentAttestation {
+  id                String   @id @default(cuid())
+  userId            String
+  personaId         String?
+  statementVersion  String   // e.g. "v1-2026-04"
+  contentHash       String   // sha256 over sorted storageKeys
+  ipAddress         String
+  userAgent         String
+  timestamp         DateTime @default(now())
 
-## Deep-link contract
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persona Persona? @relation(fields: [personaId], references: [id], onDelete: SetNull)
 
-Prompt Builder's "Open in Create" button href maps by category:
+  @@index([userId, timestamp])
+  @@index([personaId])
+}
+```
 
-| Category  | Target                                      |
-|-----------|---------------------------------------------|
-| video     | `/create/video?prompt={urlencoded}`         |
-| image     | `/create/image?prompt={urlencoded}`         |
-| character | `/tools/soul-id?prompt={urlencoded}`        |
+### Edit Generation (add only)
+```prisma
+personaId String?
+persona   Persona? @relation(fields: [personaId], references: [id], onDelete: SetNull)
 
-"Send to Copilot" -> `/copilot?prompt={urlencoded}` (Copilot already Suspense-wraps useSearchParams — no rework).
+@@index([personaId])
+```
 
-Existing `/create/video` + `/create/image` pages already honor `?prompt=`. Verify, don't re-wire.
+Non-destructive migration. Rollback path: drop two new tables, drop enums, drop added `User.premiumLoraTrainsUsed`, drop added `Generation.personaId`.
+
+## Provider adapter contract
+
+### IdentitySpec (in `lib/ai/provider.ts`)
+```ts
+export type IdentitySpec =
+  | { kind: 'instant'; referenceImageUrl: string; strength?: number }
+  | { kind: 'lora'; loraUrl: string; triggerWord: string; scale?: number };
+```
+
+`ImageGenParams` gains `identity?: IdentitySpec`. Existing `GenerationRequest` gains optional `identity?: IdentitySpec` and `personaId?: string`.
+
+### New functions in `lib/ai/providers/fal.ts`
+
+```ts
+export async function createFaceDetect(p: {
+  imageUrl: string;
+}): Promise<{
+  faceCount: number;
+  primaryBbox?: { x: number; y: number; w: number; h: number };
+  primaryScore?: number;
+  ageEstimate?: number;
+  nsfwScore?: number;
+  embedding?: Float32Array;
+}>;
+
+export async function createFluxPulidGeneration(p: {
+  referenceImageUrl: string;
+  prompt: string;
+  negativePrompt?: string;
+  width?: number;
+  height?: number;
+  seed?: number;
+  strength?: number;
+}): Promise<{
+  status: 'succeeded' | 'failed';
+  url?: string;
+  error?: string;
+  requestId: string;
+}>;
+
+export async function startFluxLoraTraining(p: {
+  imagesZipUrl: string;
+  triggerWord: string;
+  webhookUrl: string;
+  steps?: number;           // default 1000
+  baseModel?: 'flux-dev';   // default 'flux-dev'
+}): Promise<{
+  jobId: string;
+  status: 'queued' | 'running' | 'failed';
+  error?: string;
+}>;
+
+export async function createFluxLoraGeneration(p: {
+  loraUrl: string;
+  triggerWord: string;
+  scale?: number;           // default 0.9
+  prompt: string;
+  negativePrompt?: string;
+  width?: number;
+  height?: number;
+  seed?: number;
+}): Promise<{
+  status: 'succeeded' | 'failed';
+  url?: string;
+  error?: string;
+  requestId: string;
+}>;
+```
+
+Endpoint mapping:
+- `fal-ai/imageutils/face-detect` (+ NSFW chain)
+- `fal-ai/flux-pulid`
+- `fal-ai/flux-lora-fast-training` (with `webhook_url`)
+- `fal-ai/flux-lora`
+
+All four: lazy `FAL_KEY` read, structured failure (not throw), error mapping via existing `friendlyFalError`, log prefix `[fal:persona]`.
+
+### Webhook contract (`POST /api/webhooks/fal/training?token=...`)
+- `token` = HS256 JWT signed by `PERSONA_WEBHOOK_SECRET`, payload `{personaId, jobId, exp}`, TTL 30 min.
+- `lib/persona/webhook-token.ts` exposes `sign()` / `verify()`.
+- Expected body: `{status: 'COMPLETED' | 'FAILED', request_id, output?: {diffusers_lora_file?: {url}}}`.
+- On COMPLETED: set `loraUrl`, `tier=PREMIUM`, `status=READY`, `trainingEndedAt`, `loraScale=0.9`, bump `user.premiumLoraTrainsUsed += 1` — **single Prisma transaction**.
+- On FAILED: `status=FAILED`, `trainingError` set; do NOT increment `premiumLoraTrainsUsed`.
+- Idempotent on `jobId`.
+
+### Watermark compositor (`lib/watermark/apply.ts`)
+```ts
+export async function applyPixelWatermark(p: {
+  input: Buffer;
+  label?: string;            // default 'memacta'
+  corner?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  widthRatio?: number;       // default 0.1
+  format?: 'png' | 'jpeg' | 'webp';
+}): Promise<{ output: Buffer; format: string; width: number; height: number }>;
+```
+- Uses `sharp` (add to dependencies).
+- SVG pill with fuchsia->orange gradient (`#fe2c55 -> #ff9f40`). 8px safe-area inset.
+- Pure function. Falls back to PNG encode on unknown input.
+- Pairs with existing client-side `lib/watermark.ts`; `/api/generate` post-processes free-tier persona-attributed outputs through it **before persisting `Generation.resultUrl`**.
 
 ## Acceptance criteria
 
-1. `npx next build` succeeds.
-2. `/prompt-guide` renders a category toggle with three buttons (Video, Image, Character); default is Video.
-3. Switching category shows/hides the correct field chips — Motion only for Video; Camera for Video+Image; Character shows Subject/Style/Lighting/Mood only.
-4. Each chip group is single-select with a visually active/inactive state using `bg-brand-gradient` vs `bg-white/10`.
-5. Subject textarea is required; "Open in Create" button is disabled (attribute) until Subject has non-empty trimmed text.
-6. Live prompt preview updates on every keystroke/chip toggle, joins active fields with `, `, and renders inside a `bg-[#181828] border-white/15 rounded` surface with `data-testid="prompt-preview"`.
-7. "Copy prompt" button calls `navigator.clipboard.writeText` with the composed string; on success shows a transient "Copied!" inline label for ~1500ms.
-8. "Open in Create" button navigates to `/create/video?prompt=...` for Video, `/create/image?prompt=...` for Image, `/tools/soul-id?prompt=...` for Character. The prompt query string is URL-encoded.
-9. "Send to Copilot" button navigates to `/copilot?prompt=...`.
-10. Existing 6 Tips cards and 4 Example cards remain rendered below the builder (no regression of static content). Each example prompt has a "Try it" anchor that deep-links based on its `type` field (Video -> `/create/video?prompt=...`, Image -> `/create/image?prompt=...`).
-11. `/careers` page renders: h1 "Careers at memacta" with `text-brand-gradient`, 3-card mission/values/how-we-work row, 4-6 open-role stub cards (each with a `mailto:careers@memacta.ai?subject=...` link), and a footer CTA. Use `data-testid="open-role-card"` on each role card.
-12. Footer has a 5th social icon for Discord with `aria-label="Join our Discord"`, `href="https://discord.gg/memacta"`, and the same styling class chain as the existing four (`w-9 h-9 rounded-full bg-white/15 ...`).
-13. Footer `col1Links` includes a `{ href: "/careers", label: "Careers" }` entry inserted right after the "About" entry (position 2).
-14. Zero new `slate-*` / `zinc-*` tokens in any modified or new file. Word-boundary regex `/\b(slate|zinc)-\d/` must match nothing in the diff.
-15. `text-brand-gradient` class is used for all gradient headings; zero occurrences of `bg-brand-gradient bg-clip-text text-transparent` in new code.
-16. No new Prisma model, no new migration, no new API route.
-17. No new dependency added in `package.json` (`navigator.clipboard` is standard browser API; category state uses React `useState`).
-18. Sidebar and QUICK_LINKS remain unchanged (no bloat).
+1. `npm run build` succeeds after migration + new routes.
+2. Migration `persona_v1` applies cleanly; no existing column is renamed.
+3. `POST /api/persona`: 401 signed-out; 403 `{reason:'email_unverified'}` if `emailVerified` null; otherwise creates DRAFT/INSTANT Persona.
+4. `POST /api/persona/:id/photos`: up to 5 uploads, runs `createFaceDetect`, first accepted = primary. 422 when `faceCount != 1` or `ageEstimate < 18` or `nsfwScore > 0.6`; rejected photos stored with `rejected=true` for audit.
+5. Celebrity blocklist runs at finalize-instant and upgrade-premium. 422 `{reason:'blocklisted_name'}` on match. V1 list = exactly 10 hardcoded names (documented in test file).
+6. `POST /api/persona/:id/finalize-instant` requires: (a) a primary non-rejected photo, (b) valid ConsentAttestation matching current `contentHash`, (c) `emailVerified != null`. Sets `status=READY`, `primaryPhotoUrl`, `coverImageUrl`.
+7. Consent attestation persists BEFORE any training or generation. `contentHash = sha256(sortedStorageKeys.join('|'))`. Fail-closed on missing/mismatched.
+8. `POST /api/persona/:id/preview` generates up to 4 PuLID samples; debits 4 credits (1 each). Fails closed on insufficient credits.
+9. `POST /api/persona/:id/upgrade-premium` enforces ALL of:
+   - `emailVerified != null`
+   - `now - user.createdAt >= 24h` (bypass when `process.env.TEST_SKIP_COOLING_PERIOD === 'true'` AND `NODE_ENV !== 'production'`)
+   - `premiumLoraTrainsUsed < 1` on free plan (paid plans use per-month cap via `lib/persona/gates.ts`)
+   - persona `status=READY` and `tier=INSTANT`.
+   On success: zip photos, call `startFluxLoraTraining` with signed `webhook_url`, set `status=TRAINING`. Does NOT yet bump `premiumLoraTrainsUsed`.
+10. Training webhook verifies JWT, is idempotent on `jobId`, and on COMPLETED flips status/tier and bumps `premiumLoraTrainsUsed` in a single Prisma tx. 401 on bad/expired token.
+11. `PersonaSelector` renders on the generate panel and lists only READY personas. Chosen `personaId` is sent to `/api/generate` and persisted on the Generation row.
+12. `/api/generate` resolves `personaId` server-side:
+    - INSTANT -> `{kind:'instant', referenceImageUrl: persona.primaryPhotoUrl}`
+    - PREMIUM -> `{kind:'lora', loraUrl, triggerWord, scale: persona.loraScale ?? 0.9}`
+    Auto-prepend `triggerWord` when absent in the prompt.
+13. Credit debits match `decisions.md` weights: 1/image (instant or premium); preview debits 4.
+14. Every free-tier persona-attributed generation is baked via `applyPixelWatermark` (bottom-right, 10% width). Paid-tier callers skip baking.
+15. Free users hitting Download see `<DownloadPaywallModal />`; no raw file served. Paid users get clean original.
+16. `DELETE /api/persona/:id` cascades PersonaPhoto, SetNull on `ConsentAttestation.personaId` and `Generation.personaId`. Photo `storageKey`s queued for deletion at the storage provider.
+17. Analytics events fire with exact names from `decisions.md`: `persona.created`, `persona.instant_preview_generated`, `persona.upgraded_to_premium`, `persona.training_started`, `persona.training_completed`, `persona.training_failed`, `persona.first_generation`, `persona.download_paywall_hit`, `persona.share_watermark_shown`.
+18. Rate limits (`lib/rate-limit.ts`): `POST /api/persona` 10/hr/user; `/photos` 30/hr/user; `/preview` 10/hr/user; `/upgrade-premium` 3/day/user; webhook 60/min/IP.
+19. UI uses fuchsia-pink-orange gradient + cyan accents on near-black. No Higgsfield neutrals.
+20. Diff grep for "Soul ID" returns zero hits outside `memacta-research/` and cross-reference comments.
 
-## Test plan
+## Test cases
 
-### Unit tests — `tests/unit/prompt-builder.test.ts` (target 8 cases)
+### Vitest unit tests
+1. `tests/lib/persona/gates.test.ts` — all `canCreatePersona` / `canStartPremiumTrain` / `canDownloadClean` branches including `TEST_SKIP_COOLING_PERIOD` bypass, lifetime_limit on free, per-month caps on paid.
+2. `tests/lib/persona/consent.test.ts` — `computeContentHash` deterministic + order-insensitive; changes on any storage-key byte delta; rejects empty `statementVersion`.
+3. `tests/lib/persona/trigger-word.test.ts` — regex shape, length bounds, deterministic fixture, 10k-synthetic uniqueness stress.
+4. `tests/lib/persona/blocklist.test.ts` — exact 10-name seed, case+diacritic normalized, edit-distance-1 near matches rejected, offending match returned.
+5. `tests/lib/ai/provider.test.ts` — `IdentitySpec` discriminator narrowing; `ImageGenParams.identity` optional doesn't break existing consumers.
+6. `tests/lib/credits.test.ts` (extend) — instant=1, premium=1, preview debits 4.
+7. `tests/lib/watermark/apply.test.ts` — pixel-sample asserts on a solid-white 1024x1024 fixture: top-left stays 0xFFFFFF, bottom-right has non-white pixel; dims preserved; corner option honored; PNG/JPEG round-trip.
+8. `tests/lib/persona/webhook-token.test.ts` — sign/verify round-trip, rejects expired, rejects wrong-secret.
+9. `tests/lib/persona/minor-rejection.test.ts` — mocked `ageEstimate=16` rejects with `reason='minor'` and audits `rejected=true`.
 
-All import the pure helper module `@/lib/prompt-builder`.
+### Playwright E2E (`e2e/persona.spec.ts`, env: `TEST_SKIP_COOLING_PERIOD=true`, `MOCK_FAL=true`)
+1. Sign up + verify email via test-only `/api/test/verify-email` (NODE_ENV !== 'production').
+2. `/personas/new` — upload 3 fixtures from `e2e/fixtures/persona/*.jpg`, green chips, consent, name "Alex Rae", step 3 shows INSTANT READY + 4 previews, Finish.
+3. `/personas` shows the new row with INSTANT READY.
+4. `/create` — pick flux-kontext, select Alex Rae chip (asserts glow), prompt "cinematic portrait", Generate, download asserts a PNG with non-white pixels in the watermark region.
+5. Paywall on raw download — test-only "View original" affordance triggers `<DownloadPaywallModal />`; analytics probe caught `persona.download_paywall_hit`.
+6. Upgrade to premium — status -> TRAINING; mock webhook caller posts to `/api/webhooks/fal/training?token=<valid>` with `{status:'COMPLETED', output:{diffusers_lora_file:{url:'https://test/lora.safetensors'}}}`; UI polls and within 5s flips to PREMIUM READY with trigger word visible.
+7. Generate with premium — request body contains `identity.kind === 'lora'` and prompt starts with trigger word; download still watermarked (user still on free plan).
+8. Second upgrade blocked — button disabled w/ tooltip; direct API hit returns 403 `{reason:'lifetime_limit'}`.
 
-1. `composePrompt({subject: "a puppy", style: "cinematic", lighting: "golden hour"}, "video")` returns `"a puppy, cinematic, golden hour"`.
-2. `composePrompt({subject: "a puppy"}, "video")` returns `"a puppy"` — filters empty fields.
-3. `composePrompt({subject: "   hello   "}, "video")` returns `"hello"` — trims subject.
-4. Category filter: `composePrompt({subject: "x", motion: "slow motion"}, "image")` — output does NOT contain "slow motion" (image has no motion field).
-5. Category filter: `composePrompt({subject: "x", camera: "close-up", motion: "timelapse"}, "character")` — output does NOT contain "close-up" or "timelapse".
-6. `CATEGORY_FIELDS.video` contains `"motion"`; `CATEGORY_FIELDS.image` does NOT contain `"motion"`; `CATEGORY_FIELDS.character` does NOT contain `"motion"` or `"camera"`.
-7. `composePrompt({subject: "", style: "cinematic"}, "video")` returns empty string.
-8. `PROMPT_CATEGORIES` is a readonly tuple with exactly `["video", "image", "character"]` in that order.
+Fixtures: `e2e/fixtures/persona/face{1,2,3}.jpg` (synthetic; content irrelevant because `MOCK_FAL=true` stubs `createFaceDetect`/`createFluxPulidGeneration`/`startFluxLoraTraining`/`createFluxLoraGeneration`).
 
-### E2E tests — `tests/e2e/prompt-builder.spec.ts` (target 10 cases)
+## Implementation day breakdown
 
-Scope tests to the builder surface. Use `data-testid` selectors to avoid sidebar/footer collisions. Any `getByRole("button", { name: "Video" | "Image" | "Character" })` MUST be scoped via `page.getByTestId("prompt-builder").getByRole(...)` — sidebar has a section labeled "Video Tools" which would collide.
-
-1. Page renders: `await page.goto("/prompt-guide")`, expect h1 text "Prompt Guide" visible, `data-testid="prompt-builder"` visible, `data-testid="prompt-preview"` present with empty-string content initially.
-2. Category toggle: default is Video, clicking `getByTestId("prompt-builder").getByRole("button", { name: "Image" })` switches; Motion chip-group disappears, Camera remains.
-3. Character toggle hides both Motion and Camera chip-groups.
-4. Chip select: fill subject "neon street", click chip "cinematic", expect `getByTestId("prompt-preview")` text contains "neon street" and "cinematic" comma-separated.
-5. Chip deselect (click same chip twice): preview drops that keyword.
-6. "Open in Create" button is disabled when subject is empty (`await expect(btn).toBeDisabled()`).
-7. "Open in Create" deep-link: fill subject "skyline", click Image category, click style "photoreal", click button, expect URL to match `/\/create\/image\?prompt=/` and the decoded query string to include "skyline" and "photoreal".
-8. "Copy prompt" button calls clipboard (override `navigator.clipboard.writeText` via `page.addInitScript` to capture writes on a global) and shows "Copied!" inline for ~1500ms.
-9. `/careers` smoke: visit `/careers`, expect h1 containing "Careers" visible, expect `page.getByTestId("open-role-card")` count >= 4.
-10. Footer Discord: visit `/`, scope to `page.getByRole("contentinfo")`, expect a link with `aria-label="Join our Discord"` whose `href` starts with `https://discord.gg/`.
-
-Do **NOT** add `test.skip(!process.env.FAL_KEY)` — this feature makes zero fal.ai calls.
-
-For the footer Discord test, use `page.getByRole("contentinfo")` (the `<footer>` element semantic role) to avoid matching a future sidebar entry.
-
-## Constraints to pass to the builder (checklist)
-
-- [ ] `npx next build` not `npm run build`.
-- [ ] Suspense-wrap any client component using `useSearchParams` — **N/A**: Prompt Builder does NOT read URL search params.
-- [ ] `Promise.allSettled` fan-out — **N/A**, no generation.
-- [ ] `handleAuthRequired` from `@/lib/auth-redirect` — **N/A**, no protected fetches.
-- [ ] `test.skip(!process.env.FAL_KEY)` — **N/A**.
-- [ ] Playwright color-token check via word-boundary regex (`/\b(slate|zinc)-\d/`) with `page.evaluate`.
-- [ ] Use `text-brand-gradient` utility, NEVER `bg-brand-gradient bg-clip-text text-transparent`.
-- [ ] Use `glow-btn` class on primary CTAs ("Open in Create", "Apply via email").
-- [ ] No `slate-*` or `zinc-*` tokens.
-- [ ] No Prisma migration.
-- [ ] No Stripe / billing changes.
-- [ ] Scope footer tests to `getByRole("contentinfo")`.
-- [ ] Scope category-toggle button lookups to `getByTestId("prompt-builder")` to dodge sidebar "Video Tools" collision.
-- [ ] `/apps` gallery cards already carry `data-testid="tool-card"` + `data-slug` — unaffected.
-- [ ] Do NOT modify `components/sidebar.tsx` QUICK_LINKS.
-- [ ] Do NOT touch `/apps` page, `/chat` legacy, or existing `/copilot` client (Suspense wrap already in place).
-
-## Out of scope (explicitly)
-
-- No new Prisma models / migrations / SQLite touches.
-- No new API routes.
-- No real Discord OAuth — link is a plain anchor to a placeholder URL.
-- No job-board integration — careers roles are hard-coded stubs.
-- No server-rendered SEO per-role pages — all roles render inline on `/careers`.
-- No changes to existing `/copilot`, `/tools/*`, `/models/*`, `/u/*`, `/apps`.
-- No "send prompt to Soul Cinema" or "send prompt to Popcorn" links — those tools use richer structured inputs, a free-text prompt would not map cleanly.
+- **D1:** Prisma deltas + `persona_v1` migration, `lib/persona/service.ts` skeleton, CRUD `/api/persona` + `/api/persona/[id]`, empty `/personas` page.
+- **D2:** Photo upload route, `createFaceDetect` in `lib/ai/providers/fal.ts`, NSFW/age/face gates, UploadStep UI, consent persistence, blocklist seed.
+- **D3:** `createFluxPulidGeneration`, `/api/persona/:id/preview`, InstantPreview UI, finalize-instant endpoint, end-to-end instant creation.
+- **D4:** PersonaSelector injected into `/create`, `/api/generate` personaId wiring, `lib/watermark/apply.ts` server compositor, paywall modal.
+- **D5:** `startFluxLoraTraining`, zip uploader, signed webhook helper, `/api/persona/:id/upgrade-premium`, TrainingProgress polling.
+- **D6:** `/api/webhooks/fal/training`, `createFluxLoraGeneration`, tier-aware identity resolution in `/api/generate`, analytics events.
+- **D7:** Test hardening, rate limits, takedown dialog, copy polish, gradient styling pass, `npm run build` green, all Vitest + Playwright suites green.

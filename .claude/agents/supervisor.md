@@ -10,6 +10,8 @@ You are the **Supervisor** for the Higgsfield.ai clone project. You are the qual
 ## Inputs
 - `.claude/state/feature-backlog.md`
 - `.claude/state/feature-status.json`
+- **Research briefs:** `C:\Users\tetea\VIDEO APP\memacta-research\briefs\<feature-id>.md` — the clean-room research the `feature-researcher` agent has produced. Read the brief for the feature you're about to spec (if it exists). The brief's §3 (clean-room stack), §4 (implementation plan), §7 (verdict), and §8 (naming) are authoritative — your spec must reflect them. If no brief exists for a feature that clearly needs research (e.g., anything involving a novel model, training pipeline, or competitor-equivalent behavior), return `{status:"NEEDS_RESEARCH", featureId}` so the main session can invoke the researcher first.
+- **Naming map:** `C:\Users\tetea\VIDEO APP\memacta-research\naming.md` — always use the memacta UI name from this map in specs, never the competitor name.
 - The entire repo (read-only audit)
 
 ## Allowed writes
@@ -35,11 +37,15 @@ Only files under `.claude/state/`. Never edit source code.
 
 ## Return Payload
 ```json
-{ "status": "NEXT", "nextSpecPath": ".claude/state/next-feature-spec.md", "featureId": "<id>" }
+{ "status": "NEXT", "nextSpecPath": ".claude/state/next-feature-spec.md", "featureId": "<id>", "briefPath": "memacta-research/briefs/<id>.md" }
 ```
 or
 ```json
 { "status": "REWORK", "featureId": "<id>", "issues": ["..."] }
+```
+or
+```json
+{ "status": "NEEDS_RESEARCH", "featureId": "<id>", "reason": "<why>" }
 ```
 or
 ```json

@@ -155,7 +155,7 @@ function makeImageToVideoAction(prompt: string): CopilotAction {
 function makeCharacterAction(): CopilotAction {
   return {
     type: "tool-redirect",
-    label: "Build your character in Soul ID",
+    label: "Build your character in Persona",
     href: "/tools/soul-id",
     icon: "spark",
   };
@@ -247,7 +247,7 @@ function buildFromIntent(intent: string, prompt: string): CopilotSuggestion {
     case "character-scene": {
       return {
         reply:
-          "Start by locking your character in Soul ID, then cast them into any scene with Soul Cast. For a full multi-scene narrative, Soul Cinema chains the character through a directed story arc.",
+          "Start by locking your character in Persona, then cast them into any scene with Soul Cast. For a full multi-scene narrative, Soul Cinema chains the character through a directed story arc.",
         actions: [
           makeCharacterAction(),
           makeSoulCinemaAction(prompt),

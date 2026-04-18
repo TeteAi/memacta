@@ -19,6 +19,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Persona feature (soul-id sprint)
+  premiumLoraTrainsUsed Int @default(0)
+
   accounts Account[]
   sessions Session[]
   generations Generation[]
@@ -31,6 +34,8 @@ model User {
   scheduledPosts ScheduledPost[]
   subscription   Subscription?
   transactions   CreditTransaction[]
+  personas             Persona[]
+  consentAttestations  ConsentAttestation[]
 }
 
 model Subscription {
@@ -90,6 +95,12 @@ model Generation {
   resultUrl  String?
   error      String?
   createdAt  DateTime @default(now())
+
+  // Persona attribution (soul-id sprint)
+  personaId  String?
+  persona    Persona? @relation(fields: [personaId], references: [id], onDelete: SetNull)
+
+  @@index([personaId])
 }
 
 model Post {
@@ -236,4 +247,93 @@ model ContactMessage {
   createdAt DateTime @default(now())
 
   @@index([status, createdAt])
+}
+
+// ─── Persona (soul-id sprint) ───────────────────────────────────────────────
+
+enum PersonaTier {
+  INSTANT
+  PREMIUM
+}
+
+enum PersonaStatus {
+  DRAFT
+  READY
+  TRAINING
+  FAILED
+}
+
+model Persona {
+  id                String        @id @default(cuid())
+  userId            String
+  name              String
+  slug              String
+  triggerWord       String
+  tier              PersonaTier   @default(INSTANT)
+  status            PersonaStatus @default(DRAFT)
+  primaryPhotoUrl   String?
+  coverImageUrl     String?
+  faceEmbedding     Bytes?
+  loraUrl           String?
+  loraBaseModel     String?
+  loraScale         Float?
+  trainingJobId     String?
+  trainingSteps     Int?
+  trainingStartedAt DateTime?
+  trainingEndedAt   DateTime?
+  trainingError     String?
+  voiceId           String?       // reserved — Talking Studio sprint
+  stylePresetId     String?       // reserved — VibeLock sprint
+  celebrityFlag     Boolean       @default(false)
+  minorFlag         Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  archivedAt        DateTime?
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos       PersonaPhoto[]
+  attestations ConsentAttestation[]
+  generations  Generation[]
+
+  @@unique([userId, slug])
+  @@unique([userId, triggerWord])
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model PersonaPhoto {
+  id           String   @id @default(cuid())
+  personaId    String
+  url          String
+  storageKey   String
+  isPrimary    Boolean  @default(false)
+  faceBbox     Json?
+  faceScore    Float?
+  ageEstimate  Float?
+  nsfwScore    Float?   @default(0)
+  rejected     Boolean  @default(false)
+  rejectReason String?
+  createdAt    DateTime @default(now())
+
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([personaId])
+  @@index([personaId, isPrimary])
+}
+
+model ConsentAttestation {
+  id               String   @id @default(cuid())
+  userId           String
+  personaId        String?
+  statementVersion String
+  contentHash      String
+  ipAddress        String
+  userAgent        String
+  timestamp        DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persona Persona? @relation(fields: [personaId], references: [id], onDelete: SetNull)
+
+  @@index([userId, timestamp])
+  @@index([personaId])
 }

@@ -7,6 +7,7 @@ import ModelPicker from "@/components/create/model-picker";
 import { imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
 import { handleAuthRequired } from "@/lib/auth-redirect";
+import PersonaSelector from "@/components/persona/PersonaSelector";
 
 const STYLE_PRESETS = [
   { label: "Photorealistic", value: "photorealistic, high detail, 8k" },
@@ -36,8 +37,11 @@ function ImageGenerationInner() {
   const [aspectRatio, setAspectRatio] = useState<"1:1" | "16:9" | "9:16" | "4:3" | "3:4">("1:1");
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [showNegative, setShowNegative] = useState(false);
-  const [result, setResult] = useState<{ url?: string; error?: string } | null>(null);
+  const [result, setResult] = useState<{ url?: string; resultUrl?: string; error?: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(
+    searchParams.get("personaId") ?? null
+  );
 
   const handleModelChange = (id: string) => {
     setModel(id);
@@ -73,6 +77,7 @@ function ImageGenerationInner() {
           model,
           mediaType: "image",
           aspectRatio,
+          personaId: selectedPersonaId ?? undefined,
         }),
       });
       const data = await res.json();
@@ -174,6 +179,9 @@ function ImageGenerationInner() {
             />
           )}
         </div>
+
+        {/* Persona selector */}
+        <PersonaSelector selectedPersonaId={selectedPersonaId} onSelect={setSelectedPersonaId} />
 
         {/* Settings row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

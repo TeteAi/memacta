@@ -22,7 +22,7 @@ const col1Links = [
 
 const col2Links = [
   { href: "/create?tool=image-gen", label: "Create Image" },
-  { href: "/tools/soul-id", label: "Soul ID Character" },
+  { href: "/tools/soul-id", label: "Persona Character" },
   { href: "/tools/draw-to-edit", label: "Draw to Edit" },
   { href: "/tools/edit-image", label: "Edit Image" },
   { href: "/tools/upscale", label: "Image Upscale" },

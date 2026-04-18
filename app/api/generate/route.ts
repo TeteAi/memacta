@@ -15,6 +15,9 @@ import {
 } from "@/lib/anonymous-credits";
 import { cookies } from "next/headers";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
+import { applyPixelWatermark } from "@/lib/watermark/apply";
+import { shouldApplyServerWatermark } from "@/lib/persona/gates";
+import { trackFirstGeneration } from "@/lib/analytics/persona";
 
 const Body = z.object({
   prompt: z.string().min(1),
@@ -25,6 +28,8 @@ const Body = z.object({
   // Incoming from the video form as a string ("5", "10", …). Coerce to a number.
   duration: z.coerce.number().int().min(1).max(60).optional(),
   seed: z.number().int().optional(),
+  // Persona attribution (soul-id feature)
+  personaId: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -101,6 +106,7 @@ export async function POST(req: Request) {
     aspectRatio: body.aspectRatio,
     durationSec: body.duration,
     seed: body.seed,
+    personaId: body.personaId,
   };
 
   // Auth check
@@ -255,6 +261,72 @@ export async function POST(req: Request) {
     );
   }
 
+  // Resolve Persona identity if personaId is provided
+  let resolvedResultUrl = result.url ?? null;
+  let personaId: string | null = body.personaId ?? null;
+
+  if (personaId && result.url && body.mediaType === "image") {
+    try {
+      // Fetch the persona to get identity info + determine watermark need
+      const persona = await prisma.persona.findFirst({
+        where: { id: personaId, userId },
+        select: {
+          id: true,
+          tier: true,
+          status: true,
+          primaryPhotoUrl: true,
+          loraUrl: true,
+          triggerWord: true,
+          loraScale: true,
+          createdAt: true,
+        },
+      });
+
+      if (persona) {
+        // Check if this is the first generation with this persona
+        const genCount = await prisma.generation.count({ where: { userId, personaId } });
+        if (genCount === 0) {
+          trackFirstGeneration({
+            userId,
+            personaId,
+            timeSinceCreateMs: Date.now() - persona.createdAt.getTime(),
+          });
+        }
+
+        // Apply server-side watermark for free-tier users with persona-attributed outputs
+        const userForGate = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            emailVerified: true,
+            createdAt: true,
+            premiumLoraTrainsUsed: true,
+            subscription: { select: { planId: true } },
+          },
+        });
+
+        if (userForGate && shouldApplyServerWatermark(userForGate)) {
+          // Fetch the image and apply watermark
+          const imgRes = await fetch(result.url).catch(() => null);
+          if (imgRes?.ok) {
+            const imgBuf = Buffer.from(await imgRes.arrayBuffer());
+            const watermarked = await applyPixelWatermark({
+              input: imgBuf,
+              corner: "bottom-right",
+              widthRatio: 0.1,
+            });
+            // For v1: encode as data URL; in production upload to storage and use that URL
+            resolvedResultUrl = `data:image/${watermarked.format};base64,${watermarked.output.toString("base64")}`;
+          }
+        }
+      }
+    } catch (e) {
+      // Non-fatal: persona resolution errors don't block generation
+      // eslint-disable-next-line no-console
+      console.warn("[generate] persona resolution error:", e instanceof Error ? e.message : String(e));
+    }
+  }
+
   // Persist generation record
   try {
     await prisma.generation.create({
@@ -265,12 +337,13 @@ export async function POST(req: Request) {
         prompt: body.prompt,
         imageUrl: body.imageUrl ?? null,
         status: result.status,
-        resultUrl: result.url ?? null,
+        resultUrl: resolvedResultUrl,
+        personaId: personaId ?? undefined,
       },
     });
   } catch {
     // ignore persistence errors
   }
 
-  return NextResponse.json({ ...result, creditsRemaining: updatedUser.credits });
+  return NextResponse.json({ ...result, resultUrl: resolvedResultUrl, creditsRemaining: updatedUser.credits });
 }

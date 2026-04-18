@@ -20,7 +20,7 @@ export const P2_TOOLS: ToolDef[] = [
   {
     id: "soul-id",
     slug: "soul-id",
-    name: "Soul ID",
+    name: "Persona",
     description: "Lock in a consistent character from up to 4 reference shots.",
     category: "identity",
     mediaOut: "image",
@@ -151,7 +151,7 @@ export const P2_TOOLS: ToolDef[] = [
     id: "soul-cinema",
     slug: "soul-cinema",
     name: "Soul Cinema",
-    description: "Turn a story beat into a character-driven reel. Pick a Soul ID character, describe your story, and auto-generate a multi-scene narrative video.",
+    description: "Turn a story beat into a character-driven reel. Pick a Persona character, describe your story, and auto-generate a multi-scene narrative video.",
     category: "identity",
     mediaOut: "video",
     inputs: [

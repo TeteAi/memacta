@@ -40,7 +40,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
       </svg>
     ),
     items: [
-      { label: "Soul ID", href: "/tools/soul-id" },
+      { label: "Persona", href: "/personas" },
       { label: "Soul Moodboard", href: "/tools/soul-moodboard" },
       { label: "Soul Cast", href: "/tools/soul-cast" },
       { label: "Character Swap 2", href: "/tools/character-swap-2" },
@@ -186,6 +186,15 @@ const QUICK_LINKS: SidebarItem[] = [
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Personas",
+    href: "/personas",
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
       </svg>
     ),
   },

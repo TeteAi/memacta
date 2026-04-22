@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { fal } from "@fal-ai/client";
 import { auth } from "@/auth";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
+import { uploadPersonaPhoto } from "@/lib/storage/upload";
 
 // Tightened from 20 MB → 4 MB so the data-URI fallback path still fits under
 // Vercel's 4.5 MB serverless body limit when the URL is forwarded to
@@ -18,14 +19,13 @@ const ALLOWED = new Set([
 ]);
 
 /**
- * Uploads a reference image to fal.ai's storage and returns a public URL.
+ * Uploads a reference image or persona photo.
  *
- * Used by the image-to-video form and the AI-influencer builder as a
- * one-shot upload endpoint — the returned `url` is then sent to
- * `/api/generate` as `imageUrl` so the provider can fetch it.
+ * Standard (no context): uploads to fal.ai storage, returns public URL.
+ * context=persona-photo: uploads to our private persona-photos Supabase bucket,
+ *   returns signed URL + storageKey. personaId must be provided in the form.
  *
- * Requires an authenticated user — anonymous users should upload via the
- * preview flow and sign up before they can actually submit a generation.
+ * Requires an authenticated user.
  */
 export async function POST(req: Request) {
   const session = await auth();
@@ -34,11 +34,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "auth_required" }, { status: 401 });
   }
 
-  // Cap uploads at 20/min per user. More generous than /api/generate
-  // because legit users will sometimes batch-upload reference images,
-  // but still blocks a scripted loop that would blow through fal
-  // storage quota.
-  const rl = rateLimit(rateLimitKey(req, userId), {
+  // Cap uploads at 20/min per user.
+  const rl = await rateLimit(rateLimitKey(req, userId), {
     windowMs: 60_000,
     max: 20,
   });
@@ -55,14 +52,6 @@ export async function POST(req: Request) {
           "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)),
         },
       }
-    );
-  }
-
-  const key = process.env.FAL_KEY;
-  if (!key) {
-    return NextResponse.json(
-      { error: "Upload service is not configured" },
-      { status: 503 }
     );
   }
 
@@ -92,15 +81,52 @@ export async function POST(req: Request) {
     );
   }
 
+  const context = form.get("context");
+
+  // ── Persona photo path: upload to Supabase private bucket ──────────────────
+  if (context === "persona-photo") {
+    const personaId = form.get("personaId");
+    if (typeof personaId !== "string" || !personaId) {
+      return NextResponse.json({ error: "personaId required for persona-photo context" }, { status: 400 });
+    }
+
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const result = await uploadPersonaPhoto(userId, personaId, buffer, file.type);
+
+      if (!result) {
+        // Supabase not configured (dev) — fall back to fal.ai storage
+        // eslint-disable-next-line no-console
+        console.log("[upload] Supabase storage not configured; falling back to fal.ai for persona-photo");
+      } else {
+        return NextResponse.json({
+          url: result.signedUrl,
+          key: result.storageKey,
+          size: file.size,
+          type: file.type,
+          bucket: "persona-photos",
+        });
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return NextResponse.json({ error: `Storage upload failed: ${msg}` }, { status: 500 });
+    }
+  }
+
+  // ── Standard path: upload to fal.ai storage ────────────────────────────────
+  const key = process.env.FAL_KEY;
+  if (!key) {
+    return NextResponse.json(
+      { error: "Upload service is not configured" },
+      { status: 503 }
+    );
+  }
+
   // Strategy: try fal.storage first (hosted URL, smallest downstream payload).
-  // If it 403s / fails for any reason (inference-only keys don't get storage
-  // scope by default), fall back to a base64 data URI — fal.ai inference
-  // endpoints accept data URIs natively as `image_url`.
+  // If it fails for any reason, fall back to a base64 data URI.
   try {
     fal.config({ credentials: key });
     const url = await fal.storage.upload(file);
-    // Derive a stable storage key from the URL path so callers can reference
-    // the object for later deletion (cascade cleanup in persona photo delete).
     let storageKey: string;
     try {
       storageKey = new URL(url).pathname.replace(/^\//, "");

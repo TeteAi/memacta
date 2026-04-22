@@ -5,6 +5,16 @@ import {
   __resetRateLimits,
 } from "@/lib/rate-limit";
 
+// Ensure Upstash env is unset so we use the in-memory fallback in all tests.
+beforeEach(() => {
+  vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+  vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe("rateLimit", () => {
   beforeEach(() => {
     __resetRateLimits();
@@ -14,52 +24,59 @@ describe("rateLimit", () => {
     vi.useRealTimers();
   });
 
-  it("allows up to max hits within the window", () => {
+  it("allows up to max hits within the window", async () => {
     for (let i = 0; i < 5; i++) {
-      const r = rateLimit("test-key", { windowMs: 60_000, max: 5 });
+      const r = await rateLimit("test-key", { windowMs: 60_000, max: 5 });
       expect(r.ok).toBe(true);
       expect(r.remaining).toBe(4 - i);
     }
   });
 
-  it("blocks the (max+1)th hit", () => {
+  it("blocks the (max+1)th hit", async () => {
     for (let i = 0; i < 3; i++) {
-      rateLimit("test-key", { windowMs: 60_000, max: 3 });
+      await rateLimit("test-key", { windowMs: 60_000, max: 3 });
     }
-    const blocked = rateLimit("test-key", { windowMs: 60_000, max: 3 });
+    const blocked = await rateLimit("test-key", { windowMs: 60_000, max: 3 });
     expect(blocked.ok).toBe(false);
     expect(blocked.remaining).toBe(0);
     expect(blocked.retryAfterMs).toBeGreaterThan(0);
   });
 
-  it("keys are isolated from each other", () => {
+  it("keys are isolated from each other", async () => {
     for (let i = 0; i < 3; i++) {
-      rateLimit("key-a", { windowMs: 60_000, max: 3 });
+      await rateLimit("key-a", { windowMs: 60_000, max: 3 });
     }
     expect(
-      rateLimit("key-a", { windowMs: 60_000, max: 3 }).ok
+      (await rateLimit("key-a", { windowMs: 60_000, max: 3 })).ok
     ).toBe(false);
     // key-b has never been hit — still at full allowance.
     expect(
-      rateLimit("key-b", { windowMs: 60_000, max: 3 }).ok
+      (await rateLimit("key-b", { windowMs: 60_000, max: 3 })).ok
     ).toBe(true);
   });
 
-  it("drops timestamps after the window expires", () => {
+  it("drops timestamps after the window expires", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
     for (let i = 0; i < 3; i++) {
-      rateLimit("test-key", { windowMs: 60_000, max: 3 });
+      await rateLimit("test-key", { windowMs: 60_000, max: 3 });
     }
     expect(
-      rateLimit("test-key", { windowMs: 60_000, max: 3 }).ok
+      (await rateLimit("test-key", { windowMs: 60_000, max: 3 })).ok
     ).toBe(false);
 
     // Advance past the window.
     vi.setSystemTime(new Date("2026-01-01T00:01:01Z"));
     expect(
-      rateLimit("test-key", { windowMs: 60_000, max: 3 }).ok
+      (await rateLimit("test-key", { windowMs: 60_000, max: 3 })).ok
     ).toBe(true);
+  });
+
+  it("dev-mode fallback: uses in-memory map when UPSTASH env unset", async () => {
+    // UPSTASH vars are stubbed to empty in beforeEach so this confirms the in-memory path
+    const r = await rateLimit("dev-test", { windowMs: 60_000, max: 5 });
+    expect(r.ok).toBe(true);
+    expect(r.remaining).toBe(4);
   });
 });
 

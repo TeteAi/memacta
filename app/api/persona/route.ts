@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   }
 
   // Rate limit: 10 persona creations per hour per user
-  const rl = rateLimit(`persona:create:${userId}`, { windowMs: 60 * 60 * 1000, max: 10 });
+  const rl = await rateLimit(`persona:create:${userId}`, { windowMs: 60 * 60 * 1000, max: 10 });
   if (!rl.ok) {
     return NextResponse.json(
       { error: "rate_limited", retryAfter: Math.ceil(rl.retryAfterMs / 1000) },

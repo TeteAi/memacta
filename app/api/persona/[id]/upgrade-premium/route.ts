@@ -41,7 +41,7 @@ export async function POST(req: Request, { params }: Params) {
   }
 
   // Rate limit: 3 upgrade attempts per day per user
-  const rl = rateLimit(`persona:upgrade:${userId}`, {
+  const rl = await rateLimit(`persona:upgrade:${userId}`, {
     windowMs: 24 * 60 * 60 * 1000,
     max: 3,
   });

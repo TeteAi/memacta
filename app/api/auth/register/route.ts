@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendVerificationEmail } from "@/lib/auth/email-verify";
 
 const RegisterSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -58,8 +59,18 @@ export async function POST(req: Request) {
     },
   });
 
+  // Send verification email (non-fatal — don't block signup on email failure)
+  sendVerificationEmail({
+    userId: user.id,
+    email: user.email,
+    name: user.name,
+  }).catch((e) => {
+    // eslint-disable-next-line no-console
+    console.error("[register] verification email failed:", e instanceof Error ? e.message : String(e));
+  });
+
   return NextResponse.json({
     success: true,
-    message: "Account created successfully",
+    message: "Account created successfully. Please check your email to verify your account.",
   });
 }

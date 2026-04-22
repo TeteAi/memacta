@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   // credit burn) but each request still calls fal-ai's LLM, which is
   // NOT free. Cap at 15/min per IP so a single abusive client can't
   // run up a bill.
-  const rl = rateLimit(rateLimitKey(req, null), {
+  const rl = await rateLimit(rateLimitKey(req, null), {
     windowMs: 60_000,
     max: 15,
   });

@@ -23,10 +23,12 @@ import { prisma } from "@/lib/db";
 import { verify } from "@/lib/persona/webhook-token";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 import { trackTrainingCompleted, trackTrainingFailed } from "@/lib/analytics/persona";
+import { sendEmail } from "@/lib/email/client";
+import { renderPersonaTrainingCompleteEmail } from "@/lib/email/templates/persona-training-complete";
 
 export async function POST(req: Request) {
   // Rate limit by IP: 60/min
-  const rl = rateLimit(rateLimitKey(req, null), { windowMs: 60_000, max: 60 });
+  const rl = await rateLimit(rateLimitKey(req, null), { windowMs: 60_000, max: 60 });
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
@@ -123,6 +125,37 @@ export async function POST(req: Request) {
     ]);
 
     trackTrainingCompleted({ userId: persona.userId, personaId });
+
+    // Send training-complete email (non-fatal)
+    void (async () => {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: persona.userId },
+          select: { email: true, name: true },
+        });
+        const personaFull = await prisma.persona.findUnique({
+          where: { id: personaId },
+          select: { name: true, slug: true },
+        });
+        if (user && personaFull) {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+          const { html, text } = renderPersonaTrainingCompleteEmail({
+            userName: user.name ?? undefined,
+            personaName: personaFull.name,
+            personaUrl: `${appUrl}/personas/${personaId}`,
+          });
+          await sendEmail({
+            to: user.email,
+            subject: `Your Persona "${personaFull.name}" is ready!`,
+            html,
+            text,
+          });
+        }
+      } catch {
+        // Non-fatal — don't fail the webhook response over an email error
+      }
+    })();
+
     return NextResponse.json({ ok: true, result: "completed" });
   }
 

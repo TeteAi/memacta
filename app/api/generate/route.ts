@@ -18,6 +18,7 @@ import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 import { applyPixelWatermark } from "@/lib/watermark/apply";
 import { shouldApplyServerWatermark } from "@/lib/persona/gates";
 import { trackFirstGeneration } from "@/lib/analytics/persona";
+import { uploadGenerationOutput } from "@/lib/storage/upload";
 
 const Body = z.object({
   prompt: z.string().min(1),
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
   // abuse that would otherwise burn through credits + fal bill in
   // minutes. Anon users hit this before their free-gen cookie too, so
   // someone can't fan out across cookies from the same IP.
-  const preSessionCheck = rateLimit(rateLimitKey(req, null), {
+  const preSessionCheck = await rateLimit(rateLimitKey(req, null), {
     windowMs: 60_000,
     max: 10,
   });
@@ -315,8 +316,21 @@ export async function POST(req: Request) {
               corner: "bottom-right",
               widthRatio: 0.1,
             });
-            // For v1: encode as data URL; in production upload to storage and use that URL
-            resolvedResultUrl = `data:image/${watermarked.format};base64,${watermarked.output.toString("base64")}`;
+            // Upload to Supabase Storage when configured; fall back to data URL in dev
+            const genId = crypto.randomUUID();
+            const uploadResult = await uploadGenerationOutput(
+              userId,
+              genId,
+              watermarked.output,
+              `image/${watermarked.format}`
+            ).catch(() => null);
+
+            if (uploadResult) {
+              resolvedResultUrl = uploadResult.publicUrl;
+            } else {
+              // Dev fallback: data URL (storage not configured)
+              resolvedResultUrl = `data:image/${watermarked.format};base64,${watermarked.output.toString("base64")}`;
+            }
           }
         }
       }

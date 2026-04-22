@@ -34,8 +34,10 @@ model User {
   scheduledPosts ScheduledPost[]
   subscription   Subscription?
   transactions   CreditTransaction[]
-  personas             Persona[]
-  consentAttestations  ConsentAttestation[]
+  personas                  Persona[]
+  consentAttestations       ConsentAttestation[]
+  emailVerificationTokens   EmailVerificationToken[]
+  passwordResetTokens       PasswordResetToken[]
 }
 
 model Subscription {
@@ -247,6 +249,36 @@ model ContactMessage {
   createdAt DateTime @default(now())
 
   @@index([status, createdAt])
+}
+
+// ─── Auth tokens (beta-readiness-1-5 sprint) ────────────────────────────────
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
 }
 
 // ─── Persona (soul-id sprint) ───────────────────────────────────────────────

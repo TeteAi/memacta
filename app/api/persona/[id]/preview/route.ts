@@ -41,7 +41,7 @@ export async function POST(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "auth_required" }, { status: 401 });
   }
 
-  const rl = rateLimit(`persona:preview:${userId}`, { windowMs: 60 * 60 * 1000, max: 10 });
+  const rl = await rateLimit(`persona:preview:${userId}`, { windowMs: 60 * 60 * 1000, max: 10 });
   if (!rl.ok) {
     return NextResponse.json(
       { error: "rate_limited", retryAfter: Math.ceil(rl.retryAfterMs / 1000) },

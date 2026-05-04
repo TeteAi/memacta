@@ -7,3 +7,9 @@ out
 prisma/dev.db*
 
 .vercel
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Orphaned agent worktrees
+.claude/worktrees/

@@ -335,6 +335,16 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           ))}
         </div>
 
+        {/* Legal links */}
+        <div className="px-3 pb-2 pt-1">
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            <Link href="/legal/terms" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">Terms</Link>
+            <Link href="/legal/privacy" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">Privacy</Link>
+            <Link href="/legal/ai-likeness" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">AI Likeness</Link>
+            <Link href="/legal/dmca" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">DMCA</Link>
+          </div>
+        </div>
+
         {/* Bottom CTA */}
         <div className="p-3 border-t border-white/10">
           <Link

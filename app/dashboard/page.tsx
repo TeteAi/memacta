@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import DashboardClient from "./dashboard-client";
+import WelcomeModal from "@/components/onboarding/WelcomeModal";
 
 export const metadata = { title: "memacta – Dashboard" };
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export default async function DashboardPage() {
   }
 
   const [user, generations, postedPosts, scheduledPosts, socialAccounts] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId }, select: { credits: true, name: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { credits: true, name: true, onboardedAt: true } }),
     prisma.generation.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 10 }),
     prisma.scheduledPost.findMany({
       where: { userId, status: "posted" },
@@ -97,14 +98,19 @@ export default async function DashboardPage() {
     createdAt: g.createdAt.toISOString(),
   }));
 
+  const showOnboarding = !user?.onboardedAt;
+
   return (
-    <DashboardClient
-      userName={user?.name ?? "Creator"}
-      stats={stats}
-      recentPosts={recentPosts}
-      upcoming={upcoming}
-      recentCreations={recentCreations}
-      connectedPlatforms={socialAccounts.map((a) => ({ platform: a.platform, username: a.username ?? "" }))}
-    />
+    <>
+      <WelcomeModal show={showOnboarding} />
+      <DashboardClient
+        userName={user?.name ?? "Creator"}
+        stats={stats}
+        recentPosts={recentPosts}
+        upcoming={upcoming}
+        recentCreations={recentCreations}
+        connectedPlatforms={socialAccounts.map((a) => ({ platform: a.platform, username: a.username ?? "" }))}
+      />
+    </>
   );
 }

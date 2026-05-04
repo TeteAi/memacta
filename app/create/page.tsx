@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PersonaNudgeBanner from "@/components/create/persona-nudge-banner";
 
 export const metadata = { title: "memacta – Create" };
 
@@ -46,22 +47,25 @@ const CREATE_OPTIONS = [
 
 export default function CreatePage() {
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
+      {/* Persona nudge banner — dismissible per session */}
+      <PersonaNudgeBanner />
+
       <div className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-white mb-3">
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
           What do you want to <span className="text-brand-gradient">create</span>?
         </h1>
-        <p className="text-white/60 text-lg max-w-xl mx-auto">
+        <p className="text-white/60 text-base sm:text-lg max-w-xl mx-auto">
           Choose your creation type to get started with the right tools and models
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
         {CREATE_OPTIONS.map((opt) => (
           <Link
             key={opt.title}
             href={opt.href}
-            className="group relative rounded-2xl bg-[#181828] border border-white/10 hover:border-white/25 p-6 transition-all hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 flex flex-col"
+            className="group relative rounded-2xl bg-[#181828] border border-white/10 hover:border-white/25 p-5 sm:p-6 transition-all hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 flex flex-col"
           >
             {opt.badge && (
               <span className="absolute top-4 right-4 px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-brand-gradient text-white">
@@ -104,7 +108,7 @@ export default function CreatePage() {
         ))}
       </div>
 
-      <div className="mt-10 flex items-center justify-center gap-6">
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
         <Link href="/tools" className="text-sm text-white/50 hover:text-white transition-colors flex items-center gap-1.5">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" />
@@ -116,6 +120,12 @@ export default function CreatePage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
           </svg>
           Browse effects
+        </Link>
+        <Link href="/personas/new" className="text-sm text-white/50 hover:text-white transition-colors flex items-center gap-1.5">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+          Create a Persona
         </Link>
       </div>
     </main>

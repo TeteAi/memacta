@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand";
 
+const legalLinks = [
+  { href: "/legal/terms", label: "Terms of Service" },
+  { href: "/legal/privacy", label: "Privacy Policy" },
+  { href: "/legal/ai-likeness", label: "AI Likeness Policy" },
+  { href: "/legal/dmca", label: "DMCA / Takedowns" },
+  { href: "/cookies", label: "Cookie Policy" },
+];
+
 const col1Links = [
   { href: "/about", label: "About" },
   { href: "/careers", label: "Careers" },
@@ -97,17 +105,21 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Link href="/privacy" className="text-xs text-white/50 hover:text-white transition-colors">Privacy</Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/legal/privacy" className="text-xs text-white/50 hover:text-white transition-colors">Privacy</Link>
             <span className="text-white/20">|</span>
-            <Link href="/terms" className="text-xs text-white/50 hover:text-white transition-colors">Terms</Link>
+            <Link href="/legal/terms" className="text-xs text-white/50 hover:text-white transition-colors">Terms</Link>
+            <span className="text-white/20">|</span>
+            <Link href="/legal/ai-likeness" className="text-xs text-white/50 hover:text-white transition-colors">AI Likeness</Link>
+            <span className="text-white/20">|</span>
+            <Link href="/legal/dmca" className="text-xs text-white/50 hover:text-white transition-colors">DMCA</Link>
             <span className="text-white/20">|</span>
             <Link href="/cookies" className="text-xs text-white/50 hover:text-white transition-colors">Cookies</Link>
           </div>
         </div>
 
-        {/* 4-Column Feature Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+        {/* 5-Column Feature + Legal Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
           <div>
             <h3 className="text-sm font-bold text-white mb-4">memacta</h3>
             <ul className="space-y-2">
@@ -151,6 +163,19 @@ export default function Footer() {
             <h3 className="text-sm font-bold text-orange-400 mb-4">Edit</h3>
             <ul className="space-y-2">
               {col4Links.map((link) => (
+                <li key={link.href + link.label}>
+                  <Link href={link.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-fuchsia-400 mb-4">Legal</h3>
+            <ul className="space-y-2">
+              {legalLinks.map((link) => (
                 <li key={link.href + link.label}>
                   <Link href={link.href} className="text-sm text-white/60 hover:text-white transition-colors">
                     {link.label}

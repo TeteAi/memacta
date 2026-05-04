@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 import PersonaNudgeBanner from "@/components/create/persona-nudge-banner";
 
 export const metadata = { title: "memacta – Create" };
+export const dynamic = "force-dynamic";
 
 const CREATE_OPTIONS = [
   {
@@ -45,11 +48,22 @@ const CREATE_OPTIONS = [
   },
 ];
 
-export default function CreatePage() {
+export default async function CreatePage() {
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  // Show the nudge only when there's a real chance the user benefits:
+  // signed-in users who haven't built a Persona yet. Anonymous users see
+  // a different conversion path (the signup CTA in the header).
+  const personaCount = userId
+    ? await prisma.persona.count({
+        where: { userId, archivedAt: null },
+      })
+    : -1;
+  const showPersonaNudge = userId !== undefined && personaCount === 0;
+
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
-      {/* Persona nudge banner — dismissible per session */}
-      <PersonaNudgeBanner />
+      {showPersonaNudge && <PersonaNudgeBanner />}
 
       <div className="mb-10 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">

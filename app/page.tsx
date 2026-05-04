@@ -153,11 +153,11 @@ export default function Page() {
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-10">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-10 max-w-md mx-auto">
               {STATS.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className={`text-xl md:text-3xl font-black ${stat.color}`}>{stat.value}</p>
-                  <p className="text-xs text-white/40 mt-0.5">{stat.label}</p>
+                  <p className="text-[10px] sm:text-xs text-white/40 mt-0.5 leading-tight">{stat.label}</p>
                 </div>
               ))}
             </div>

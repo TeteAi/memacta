@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { videoModels, imageModels } from "@/lib/ai/models";
+import { getAppUrl } from "@/lib/app-url";
 
 // Static sitemap for the top-level public routes. Anything behind auth
 // (/account, /library, /studio, /admin/*) is deliberately excluded —
@@ -7,13 +8,11 @@ import { videoModels, imageModels } from "@/lib/ai/models";
 // case we accidentally leak internal route shapes.
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base =
-    process.env.APP_URL ??
-    process.env.AUTH_URL ??
-    "https://memacta.vercel.app";
-
+  const base = getAppUrl();
   const now = new Date();
 
+  // Note: /terms and /privacy 308 to /legal/terms and /legal/privacy. We
+  // only list the canonicals here so search engines consolidate signal.
   const staticRoutes: string[] = [
     "",
     "/about",
@@ -27,8 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/tools",
     "/models",
     "/trust",
-    "/privacy",
-    "/terms",
     "/cookies",
     "/legal/terms",
     "/legal/privacy",

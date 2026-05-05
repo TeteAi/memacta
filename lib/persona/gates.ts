@@ -103,11 +103,12 @@ export function canStartPremiumTrain(user: GateUser): GateResult {
 
 /**
  * Can the user download a clean (no watermark) output?
- * Free tier users always get watermarked; paid users get clean.
+ * Delegates to the shared plan rule in lib/plan.ts so client-side
+ * smartDownload and this server-side gate stay in lock-step.
  */
+import { isPaidPlan } from "@/lib/plan";
 export function canDownloadClean(user: GateUser): boolean {
-  const planId = user.subscription?.planId ?? "free";
-  return planId !== "free";
+  return isPaidPlan(user.subscription?.planId);
 }
 
 /**

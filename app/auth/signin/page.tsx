@@ -197,7 +197,7 @@ export default function SignInPage() {
                 <div>
                   <p className="text-white text-sm font-semibold mb-0.5">You&apos;ve used your free generation</p>
                   <p className="text-white/60 text-xs leading-relaxed">
-                    Sign up now to get <span className="text-fuchsia-300 font-semibold">3 free credits</span> and keep creating.
+                    Sign up now to get <span className="text-fuchsia-300 font-semibold">100 free credits</span> and keep creating.
                   </p>
                 </div>
               </div>
@@ -305,9 +305,12 @@ export default function SignInPage() {
 
             {mode === "signin" && (
               <div className="flex justify-end">
-                <button type="button" className="text-xs text-fuchsia-400 hover:text-fuchsia-300 transition-colors">
+                <Link
+                  href="/auth/forgot"
+                  className="text-xs text-fuchsia-400 hover:text-fuchsia-300 transition-colors"
+                >
                   Forgot password?
-                </button>
+                </Link>
               </div>
             )}
 
@@ -328,7 +331,7 @@ export default function SignInPage() {
           {mode === "signup" && (
             <div className="mt-4 rounded-xl bg-fuchsia-500/5 border border-fuchsia-500/15 px-4 py-3 text-center">
               <p className="text-xs text-fuchsia-300">
-                <span className="font-bold">Welcome bonus:</span> Get 3 free credits when you sign up
+                <span className="font-bold">Welcome bonus:</span> Get 100 free credits when you sign up
               </p>
             </div>
           )}

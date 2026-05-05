@@ -93,10 +93,13 @@ describe("lib/stripe helpers", () => {
       expect(getAppUrl()).toBe("https://memacta.vercel.app");
     });
 
-    it("defaults to localhost", () => {
+    it("defaults to the Vercel preview URL", () => {
+      // After unifying with lib/app-url.ts the fallback is the production
+      // preview URL (so emails / sitemap / Stripe return URLs land on a real
+      // page even when APP_URL/AUTH_URL aren't set).
       delete process.env.APP_URL;
       delete process.env.AUTH_URL;
-      expect(getAppUrl()).toBe("http://localhost:3000");
+      expect(getAppUrl()).toBe("https://memacta.vercel.app");
     });
   });
 });

@@ -9,13 +9,29 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email/client";
 import { renderWelcomeEmail } from "@/lib/email/templates/welcome";
+import { getAppUrl } from "@/lib/app-url";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Resolve the public origin for redirects. Mirrors the request-host pattern
+ * used by /api/auth/forgot-password — always lands the user on whichever
+ * domain they came from. Falls back to APP_URL/AUTH_URL via getAppUrl()
+ * when headers aren't available (tests, curl).
+ */
+function resolveOrigin(req: Request): string {
+  const host = req.headers.get("host");
+  if (host) {
+    const proto = req.headers.get("x-forwarded-proto") ?? "https";
+    return `${proto}://${host}`;
+  }
+  return getAppUrl();
+}
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = resolveOrigin(req);
 
   if (!token) {
     return NextResponse.redirect(`${appUrl}/auth/signin?error=invalid_token`);
@@ -50,11 +66,12 @@ export async function GET(req: Request) {
     }),
   ]);
 
-  // Send welcome email (non-fatal)
+  // Send welcome email (non-fatal). Land users on /personas (the actual
+  // listing page); the previous /persona singular returned 404.
   if (!record.user.emailVerified) {
     const { html, text } = renderWelcomeEmail({
       userName: record.user.name ?? undefined,
-      dashboardUrl: `${appUrl}/persona`,
+      dashboardUrl: `${appUrl}/personas`,
     });
     await sendEmail({
       to: record.user.email,
@@ -64,5 +81,5 @@ export async function GET(req: Request) {
     }).catch(() => {/* non-fatal */});
   }
 
-  return NextResponse.redirect(`${appUrl}/persona?verified=1`);
+  return NextResponse.redirect(`${appUrl}/personas?verified=1`);
 }

@@ -12,6 +12,13 @@
  */
 
 import { downloadWithWatermark } from "@/lib/watermark";
+import { isPaidPlan } from "@/lib/plan";
+
+// Re-export so existing callers (`import { isPaidPlan } from "@/lib/download"`)
+// keep working without changes. Server contexts that only need the plan check
+// should import directly from "@/lib/plan" to avoid pulling in this
+// DOM-dependent module.
+export { isPaidPlan };
 
 export type MediaType = "image" | "video";
 
@@ -20,12 +27,6 @@ export interface SmartDownloadOptions {
   filename: string;
   /** Override the default "memacta" watermark label. */
   label?: string;
-}
-
-/** Free / paid tier check. Free is the conservative default. */
-export function isPaidPlan(planId: string | null | undefined): boolean {
-  // Anything other than "free" is paid (matches lib/persona/gates.canDownloadClean).
-  return Boolean(planId) && planId !== "free";
 }
 
 /**

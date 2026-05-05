@@ -53,10 +53,7 @@ export function resolvePriceId(id: string): string | null {
 }
 
 // Return URL helper — Stripe redirects the user back here after checkout.
-// Use AUTH_URL if set (matches NextAuth redirect base); fall back to a
-// dev default so local testing Just Works.
-export function getAppUrl(): string {
-  return (
-    process.env.APP_URL ?? process.env.AUTH_URL ?? "http://localhost:3000"
-  );
-}
+// Re-exported from lib/app-url.ts so there's a single source of truth across
+// Stripe, NextAuth, sitemap, email-link builders, etc. Setting APP_URL once
+// in Vercel updates every downstream URL.
+export { getAppUrl } from "@/lib/app-url";

@@ -389,12 +389,19 @@ export default function TransitionsTool() {
     setter({ preview: null, uploadedUrl: null, uploading: false, kind: null });
   }
 
-  /** Upload an arbitrary Blob (e.g. an extracted frame) and return its URL. */
+  /** Upload an arbitrary Blob (e.g. an extracted frame) and return its URL.
+   *  Mirrors the auth-redirect handling used by the initial Clip A upload —
+   *  if the session expired mid-pipeline, the user lands back at sign-in
+   *  with their callbackUrl preserved instead of seeing a generic 401. */
   async function uploadBlob(blob: Blob, filename: string): Promise<string> {
     const form = new FormData();
     form.append("file", new File([blob], filename, { type: blob.type }));
     const res = await fetch("/api/upload", { method: "POST", body: form });
     const json = await res.json();
+    if (handleAuthRequired(res, json)) {
+      // handleAuthRequired triggered a redirect; abort the pipeline.
+      throw new Error("session_expired");
+    }
     if (!res.ok) throw new Error(json.error || `Upload failed: ${res.status}`);
     return json.url as string;
   }

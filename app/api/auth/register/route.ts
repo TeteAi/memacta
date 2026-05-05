@@ -38,13 +38,18 @@ export async function POST(req: Request) {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  // Create user with signup bonus credits
+  // 100-credit welcome bonus — must match auth.ts createUser hook (OAuth path)
+  // and the "100-credit welcome bonus" copy on /pricing + /auth/signin.
+  // Anything else and the daily-cap math (100/day in lib/daily-cap.ts) leaves
+  // new users unable to run a single standard-tier video.
+  const SIGNUP_BONUS = 100;
+
   const user = await prisma.user.create({
     data: {
       email,
       name: name || null,
       password: hashedPassword,
-      credits: 3, // signup bonus
+      credits: SIGNUP_BONUS,
     },
   });
 
@@ -52,10 +57,10 @@ export async function POST(req: Request) {
   await prisma.creditTransaction.create({
     data: {
       userId: user.id,
-      amount: 3,
-      balance: 3,
+      amount: SIGNUP_BONUS,
+      balance: SIGNUP_BONUS,
       type: "signup",
-      description: "Welcome bonus — 3 free credits",
+      description: `Welcome bonus — ${SIGNUP_BONUS} free credits`,
     },
   });
 

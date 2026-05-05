@@ -21,38 +21,11 @@
  * but plenty for the 5-15 s clips memacta typically generates.
  */
 
+import { loadFfmpeg, fetchAsBytes } from "@/lib/ffmpeg-loader";
+
 const BRAND = "memacta";
 const PILL_WIDTH = 240;
 const PILL_HEIGHT = 60;
-
-// Cache the loaded ffmpeg instance — first call pays the ≈30 MB load cost,
-// subsequent calls reuse the same WebAssembly instance.
-let ffmpegInstance: import("@ffmpeg/ffmpeg").FFmpeg | null = null;
-let loadPromise: Promise<import("@ffmpeg/ffmpeg").FFmpeg> | null = null;
-
-async function loadFfmpeg() {
-  if (ffmpegInstance) return ffmpegInstance;
-  if (loadPromise) return loadPromise;
-
-  loadPromise = (async () => {
-    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-    const { toBlobURL } = await import("@ffmpeg/util");
-
-    const ffmpeg = new FFmpeg();
-    // Pin to a known-good single-threaded core. Pulled from unpkg the first
-    // time, then served from the user's HTTP cache.
-    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
-    });
-
-    ffmpegInstance = ffmpeg;
-    return ffmpeg;
-  })();
-
-  return loadPromise;
-}
 
 async function renderWatermarkPng(label: string): Promise<Uint8Array> {
   // Same gradient + dark pill as lib/watermark.ts so brand stays consistent
@@ -122,12 +95,7 @@ export async function watermarkVideo(
   opts: WatermarkVideoOptions = {}
 ): Promise<Blob> {
   const ffmpeg = await loadFfmpeg();
-
-  // Fetch the source video. credentials:omit avoids leaking cookies to
-  // cross-origin CDNs (fal/Supabase) and keeps the Cors response cacheable.
-  const res = await fetch(videoUrl, { mode: "cors", credentials: "omit" });
-  if (!res.ok) throw new Error(`Source video fetch failed: ${res.status}`);
-  const videoBytes = new Uint8Array(await res.arrayBuffer());
+  const videoBytes = await fetchAsBytes(videoUrl);
 
   const wmBytes = await renderWatermarkPng(opts.label ?? BRAND);
 

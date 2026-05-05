@@ -8,11 +8,22 @@ import { smartDownload } from "@/lib/download";
 import WatermarkHint from "@/components/watermark-hint";
 import { handleAuthRequired } from "@/lib/auth-redirect";
 
+type ClipKind = "video" | "image";
+
 type ClipState = {
   preview: string | null;
   uploadedUrl: string | null;
   uploading: boolean;
+  kind: ClipKind | null;
 };
+
+type GenStep =
+  | "idle"
+  | "extracting"
+  | "generating"
+  | "stitching"
+  | "done"
+  | "error";
 
 type Preset = {
   id: string;
@@ -252,6 +263,76 @@ function ClipDropzone({
   );
 }
 
+type ProgressState = "pending" | "active" | "done" | "skip";
+
+const STEP_ORDER: GenStep[] = ["extracting", "generating", "stitching", "done"];
+
+function stepIndex(current: GenStep, target: GenStep): ProgressState {
+  if (current === "idle" || current === "error") return "pending";
+  const ci = STEP_ORDER.indexOf(current);
+  const ti = STEP_ORDER.indexOf(target);
+  if (ti === -1) return "pending";
+  if (ci > ti) return "done";
+  if (ci === ti) return "active";
+  return "pending";
+}
+
+function ProgressRow({
+  label,
+  state,
+  skipText,
+}: {
+  label: string;
+  state: ProgressState;
+  skipText?: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+        {state === "active" ? (
+          <div className="w-3.5 h-3.5 rounded-full border-2 border-fuchsia-500 border-t-transparent animate-spin" />
+        ) : state === "done" ? (
+          <svg
+            className="w-4 h-4 text-emerald-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.4}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4.5 12.75l6 6 9-13.5"
+            />
+          </svg>
+        ) : state === "skip" ? (
+          <span className="w-2 h-2 rounded-full bg-white/20" />
+        ) : (
+          <span className="w-2 h-2 rounded-full bg-white/30" />
+        )}
+      </div>
+      <span
+        className={`flex-1 ${
+          state === "done"
+            ? "text-white/80"
+            : state === "active"
+            ? "text-white"
+            : state === "skip"
+            ? "text-white/30 line-through"
+            : "text-white/45"
+        }`}
+      >
+        {label}
+        {state === "skip" && skipText && (
+          <span className="text-white/30 no-underline ml-2 italic">
+            ({skipText})
+          </span>
+        )}
+      </span>
+    </div>
+  );
+}
+
 export default function TransitionsTool() {
   const { data: sessionData } = useSession();
   const planId =
@@ -261,24 +342,29 @@ export default function TransitionsTool() {
     preview: null,
     uploadedUrl: null,
     uploading: false,
+    kind: null,
   });
   const [clipB, setClipB] = useState<ClipState>({
     preview: null,
     uploadedUrl: null,
     uploading: false,
+    kind: null,
   });
   const [presetId, setPresetId] = useState<string>("whip-pan");
   const [override, setOverride] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<GenStep>("idle");
   const [error, setError] = useState<string | null>(null);
 
   const preset = PRESETS.find((p) => p.id === presetId);
+  const willStitch = clipA.kind === "video" && clipB.kind === "video";
 
   async function uploadClip(file: File, which: "a" | "b") {
     const setter = which === "a" ? setClipA : setClipB;
     const preview = URL.createObjectURL(file);
-    setter({ preview, uploadedUrl: null, uploading: true });
+    const kind: ClipKind = file.type.startsWith("video/") ? "video" : "image";
+    setter({ preview, uploadedUrl: null, uploading: true, kind });
 
     const formData = new FormData();
     formData.append("file", file);
@@ -288,19 +374,29 @@ export default function TransitionsTool() {
       if (handleAuthRequired(res, json)) return;
       if (!res.ok) {
         setError(json.error || "Upload failed.");
-        setter({ preview, uploadedUrl: null, uploading: false });
+        setter({ preview, uploadedUrl: null, uploading: false, kind });
         return;
       }
-      setter({ preview, uploadedUrl: json.url, uploading: false });
+      setter({ preview, uploadedUrl: json.url, uploading: false, kind });
     } catch (e) {
       setError((e as Error).message);
-      setter({ preview, uploadedUrl: null, uploading: false });
+      setter({ preview, uploadedUrl: null, uploading: false, kind });
     }
   }
 
   function clear(which: "a" | "b") {
     const setter = which === "a" ? setClipA : setClipB;
-    setter({ preview: null, uploadedUrl: null, uploading: false });
+    setter({ preview: null, uploadedUrl: null, uploading: false, kind: null });
+  }
+
+  /** Upload an arbitrary Blob (e.g. an extracted frame) and return its URL. */
+  async function uploadBlob(blob: Blob, filename: string): Promise<string> {
+    const form = new FormData();
+    form.append("file", new File([blob], filename, { type: blob.type }));
+    const res = await fetch("/api/upload", { method: "POST", body: form });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || `Upload failed: ${res.status}`);
+    return json.url as string;
   }
 
   async function onGenerate() {
@@ -310,23 +406,42 @@ export default function TransitionsTool() {
       setError("Pick a transition preset first.");
       return;
     }
-    if (!clipA.uploadedUrl) {
-      setError("Upload Clip A — it's used as the starting frame.");
+    if (!clipA.uploadedUrl || !clipA.kind) {
+      setError("Upload Clip A first.");
       return;
     }
     setLoading(true);
-
-    const promptParts = [`[Transition: ${preset.name}]`, preset.promptFragment];
-    if (override.trim()) {
-      promptParts.push(`Custom direction: ${override.trim()}`);
-    }
-    if (clipB.uploadedUrl) {
-      promptParts.push(
-        `Ending scene reference: ${clipB.uploadedUrl}. Match its mood and composition.`
-      );
-    }
+    setStep("idle");
 
     try {
+      // ─── 1. Pick the AI's starting frame ──────────────────────────────
+      // Video → extract last frame and upload it.
+      // Image → use the uploaded URL directly.
+      let startFrameUrl: string;
+      if (clipA.kind === "video") {
+        setStep("extracting");
+        const { extractFrame } = await import("@/lib/video-stitch");
+        const frame = await extractFrame(clipA.uploadedUrl, "last");
+        startFrameUrl = await uploadBlob(frame, `clipA-last-${Date.now()}.jpg`);
+      } else {
+        startFrameUrl = clipA.uploadedUrl;
+      }
+
+      // ─── 2. Generate the AI middle ────────────────────────────────────
+      setStep("generating");
+      const promptParts = [
+        `[Transition: ${preset.name}]`,
+        preset.promptFragment,
+      ];
+      if (override.trim()) {
+        promptParts.push(`Custom direction: ${override.trim()}`);
+      }
+      if (clipB.uploadedUrl) {
+        promptParts.push(
+          `End on a scene that matches this reference: ${clipB.uploadedUrl}.`
+        );
+      }
+
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -334,18 +449,36 @@ export default function TransitionsTool() {
           prompt: promptParts.join(" "),
           model: "kling-3",
           mediaType: "video",
-          imageUrl: clipA.uploadedUrl,
+          imageUrl: startFrameUrl,
           aspectRatio: "9:16",
         }),
       });
       const data = await res.json();
       if (handleAuthRequired(res, data)) return;
       if (!res.ok) {
-        setError(data.message || data.error || "Generation failed. Please try again.");
-      } else {
-        setResult(data.url ?? data.result ?? null);
+        throw new Error(data.message || data.error || "Generation failed.");
       }
+      const middleUrl: string | null = data.url ?? data.result ?? null;
+      if (!middleUrl) throw new Error("AI returned no video URL.");
+
+      // ─── 3. Stitch (only when both clips are real videos) ─────────────
+      if (clipA.kind === "video" && clipB.kind === "video" && clipB.uploadedUrl) {
+        setStep("stitching");
+        const { concatVideos } = await import("@/lib/video-stitch");
+        const finalBlob = await concatVideos([
+          clipA.uploadedUrl,
+          middleUrl,
+          clipB.uploadedUrl,
+        ]);
+        const finalObjUrl = URL.createObjectURL(finalBlob);
+        setResult(finalObjUrl);
+      } else {
+        // Fallback: just show the AI middle (no real footage to splice).
+        setResult(middleUrl);
+      }
+      setStep("done");
     } catch (e) {
+      setStep("error");
       setError((e as Error).message);
     } finally {
       setLoading(false);
@@ -461,18 +594,34 @@ export default function TransitionsTool() {
         className="w-full py-3 rounded-xl bg-brand-gradient text-white font-bold text-sm hover:opacity-90 transition-all glow-btn disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {loading
-          ? "Generating transition…"
+          ? "Working…"
           : preset
-          ? `Generate · ${preset.name}`
+          ? `Generate · ${preset.name}${willStitch ? " (full stitch)" : ""}`
           : "Generate"}
       </button>
 
       {loading && (
-        <div className="text-center py-6">
-          <div className="w-9 h-9 mx-auto rounded-full border-2 border-fuchsia-500 border-t-transparent animate-spin mb-2" />
-          <p className="text-white/70 text-sm animate-pulse">
-            Stitching your transition…
-          </p>
+        <div className="rounded-xl border border-white/10 bg-[#1e1e32] px-5 py-4">
+          <div className="space-y-2">
+            <ProgressRow
+              label="Extract last frame of Clip A"
+              state={
+                clipA.kind === "video"
+                  ? stepIndex(step, "extracting")
+                  : "skip"
+              }
+              skipText="not a video"
+            />
+            <ProgressRow
+              label={`Generate AI transition (${preset?.name ?? ""})`}
+              state={stepIndex(step, "generating")}
+            />
+            <ProgressRow
+              label="Stitch Clip A + AI middle + Clip B"
+              state={willStitch ? stepIndex(step, "stitching") : "skip"}
+              skipText="needs both clips as videos"
+            />
+          </div>
         </div>
       )}
 

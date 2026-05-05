@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import type { Session } from "next-auth";
 import { BrandMark } from "@/components/brand";
 import CreditsDisplay from "@/components/credits-display";
@@ -77,7 +78,7 @@ export default function Nav({
         </nav>
 
         {/* Right: Auth / Credits */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {session?.user ? (
             <>
               <div className="hidden sm:block">
@@ -103,14 +104,34 @@ export default function Nav({
               >
                 Account
               </Link>
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                aria-label="Sign out"
+                title="Sign out"
+                className="px-3 sm:px-4 py-2 text-sm font-medium rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                <span className="hidden sm:inline">Sign out</span>
+              </button>
             </>
           ) : (
-            <Link
-              href="/auth/signin"
-              className="px-5 py-2 text-sm font-semibold rounded-lg bg-brand-gradient text-white hover:opacity-90 transition-all glow-btn"
-            >
-              Sign In
-            </Link>
+            <>
+              <Link
+                href="/auth/signin"
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg bg-brand-gradient text-white hover:opacity-90 transition-all glow-btn"
+              >
+                Sign up free
+              </Link>
+            </>
           )}
         </div>
       </div>

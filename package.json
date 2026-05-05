@@ -21,6 +21,8 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@fal-ai/client": "^1.9.5",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@prisma/client": "^6.19.3",
     "@radix-ui/react-slot": "^1.2.4",
     "@sentry/nextjs": "^10.49.0",

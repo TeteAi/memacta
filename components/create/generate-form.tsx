@@ -7,7 +7,7 @@ import ModelPicker from "./model-picker";
 import PromptBox from "./prompt-box";
 import { videoModels, imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
-import { downloadWithWatermark } from "@/lib/watermark";
+import { smartDownload } from "@/lib/download";
 import { stashPendingGeneration } from "@/lib/pending-generations";
 
 type Props = {
@@ -43,7 +43,8 @@ export default function GenerateForm({ mediaType, initialModel: initialModelProp
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { status: sessionStatus } = useSession();
+  const { status: sessionStatus, data: sessionData } = useSession();
+  const planId = (sessionData?.user as { planId?: string } | undefined)?.planId ?? "free";
 
   const handleModelChange = (id: string) => {
     setModel(id);
@@ -147,36 +148,21 @@ export default function GenerateForm({ mediaType, initialModel: initialModelProp
             )}
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <ShareButton mediaUrl={result.url} mediaType={mediaType} caption={prompt} />
-              {mediaType === "video" ? (
-                <a
-                  href={result.url}
-                  download={`memacta-video-${Date.now()}.mp4`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                  Download
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!result.url) return;
-                    void downloadWithWatermark(result.url, {
-                      filename: `memacta-image-${Date.now()}`,
-                    });
-                  }}
-                  className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                  Download
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!result.url) return;
+                  void smartDownload(result.url, mediaType, planId, {
+                    filename: `memacta-${mediaType}-${Date.now()}`,
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download
+              </button>
               <Link
                 href="/library"
                 className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-medium rounded-xl px-4 py-2 transition-all"

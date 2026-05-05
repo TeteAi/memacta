@@ -78,13 +78,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id as string;
       }
-      // Refresh credits on every token refresh
+      // Refresh credits + plan on every token refresh so the client always
+      // knows whether to watermark downloads, surface paywalls, etc.
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { credits: true },
+          select: {
+            credits: true,
+            subscription: { select: { planId: true } },
+          },
         });
-        if (dbUser) token.credits = dbUser.credits;
+        if (dbUser) {
+          token.credits = dbUser.credits;
+          token.planId = dbUser.subscription?.planId ?? "free";
+        }
       }
       return token;
     },
@@ -93,6 +100,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         (session.user as { id: string }).id = token.id as string;
         (session.user as { credits: number }).credits =
           (token.credits as number) ?? 0;
+        (session.user as unknown as { planId: string }).planId =
+          (token.planId as string) ?? "free";
       }
       return session;
     },

@@ -1,6 +1,7 @@
 "use client";
 
-import { downloadWithWatermark } from "@/lib/watermark";
+import { useSession } from "next-auth/react";
+import { smartDownload } from "@/lib/download";
 
 export type ShotStatus = "idle" | "running" | "succeeded" | "failed";
 
@@ -23,6 +24,9 @@ export default function LookbookTile({
   outfitLabel,
   onRetry,
 }: LookbookTileProps) {
+  const { data: sessionData } = useSession();
+  const planId = (sessionData?.user as { planId?: string } | undefined)?.planId ?? "free";
+
   return (
     <div
       data-testid={`lookbook-tile-${index}`}
@@ -74,7 +78,7 @@ export default function LookbookTile({
             <button
               type="button"
               onClick={() =>
-                downloadWithWatermark(shot.url!, {
+                smartDownload(shot.url!, "image", planId, {
                   filename: `memacta-look-${index + 1}-${Date.now()}`,
                 })
               }

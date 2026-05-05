@@ -10,6 +10,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email/client";
 import { renderPasswordResetEmail } from "@/lib/email/templates/password-reset";
+import { getAppUrl } from "@/lib/app-url";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,22 @@ const Body = z.object({
 });
 
 const TOKEN_EXPIRY_HOURS = 2;
+
+/**
+ * Resolve the public origin for the reset link. Prefers the actual incoming
+ * request's host (set by Vercel via the `host` + `x-forwarded-proto` headers)
+ * so the email link always matches whichever domain the user requested the
+ * reset from. Falls back to the APP_URL / AUTH_URL helper when headers are
+ * unavailable (e.g. local curl tests).
+ */
+function resolveOrigin(req: Request): string {
+  const host = req.headers.get("host");
+  if (host) {
+    const proto = req.headers.get("x-forwarded-proto") ?? "https";
+    return `${proto}://${host}`;
+  }
+  return getAppUrl();
+}
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -35,6 +52,7 @@ export async function POST(req: Request) {
   }
 
   const { email } = parsed.data;
+  const origin = resolveOrigin(req);
 
   // Fire and forget — don't await so timing attacks can't probe existence
   void (async () => {
@@ -59,8 +77,7 @@ export async function POST(req: Request) {
         data: { userId: user.id, token, expiresAt },
       });
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-      const resetUrl = `${appUrl}/auth/reset?token=${token}`;
+      const resetUrl = `${origin}/auth/reset?token=${token}`;
 
       const { html, text } = renderPasswordResetEmail({
         userName: user.name ?? undefined,

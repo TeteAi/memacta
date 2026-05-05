@@ -8,6 +8,12 @@ import bcrypt from "bcryptjs";
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  // Trust the request Host header. Without this, NextAuth pins the OAuth
+  // callback URL to whatever AUTH_URL points at — and if AUTH_URL is the
+  // vercel.app preview URL while users browse via the custom domain, every
+  // Google sign-in fails because Google rejects the cross-host redirect.
+  // Vercel strips/sets Host correctly so this is safe in production.
+  trustHost: true,
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin",

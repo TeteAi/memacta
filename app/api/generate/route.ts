@@ -175,13 +175,24 @@ export async function POST(req: Request) {
   if (!isAdminEmail(userEmail)) {
     const capCheck = await checkDailyCap(userId, creditCost);
     if (!capCheck.ok) {
+      const { cap, usedToday, remaining, resetAt } = capCheck.status;
+      const resetLocal = resetAt.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "UTC",
+      });
+      const message =
+        `This generation costs ${creditCost} credits, but only ${remaining} of your daily ${cap}-credit limit is left ` +
+        `(${usedToday} used in the last 24h). Try a budget model, upgrade your plan, or come back after ${resetLocal} UTC.`;
       return NextResponse.json(
         {
           error: "daily_cap_reached",
-          message: "You've hit today's generation cap. Comes back in a few hours.",
-          cap: capCheck.status.cap,
-          usedToday: capCheck.status.usedToday,
-          resetAt: capCheck.status.resetAt.toISOString(),
+          message,
+          cap,
+          usedToday,
+          remaining,
+          requested: creditCost,
+          resetAt: resetAt.toISOString(),
         },
         { status: 429 }
       );

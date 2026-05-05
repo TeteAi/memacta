@@ -5,11 +5,14 @@ import { prisma } from "@/lib/db";
  * user can burn in any rolling 24-hour window — protects the fal.ai bill from
  * a single bad actor (or an overeager tester) draining the pool in minutes.
  *
- * MVP is a flat 30 credits / 24h for every user — matches the "free" tier in
- * PLANS. Once Stripe / paid tiers actually gate themselves, this function
- * should branch on the user's plan and return a higher ceiling accordingly.
+ * Set to 100 so a freshly-signed-up user (100-credit welcome bonus) can
+ * actually use their welcome credits in one session — including one
+ * standard-tier video (Seedance 2.0 / Kling 3 / Kling o1 = 50 credits) plus
+ * a few images. Once paid tiers actually gate themselves through Stripe,
+ * this function should branch on the user's plan and return a higher
+ * ceiling for paid users.
  */
-export const DEFAULT_DAILY_CAP = 30;
+export const DEFAULT_DAILY_CAP = 100;
 
 export interface DailyCapStatus {
   cap: number;

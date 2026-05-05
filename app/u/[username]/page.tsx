@@ -26,9 +26,16 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
 
-  // Try DB user first
+  // Try DB user first.
+  // NOTE: long-term fix is a `username String @unique` column on User and
+  // `findUnique({ where: { username } })`. Until that ships, we cap the load
+  // so the public profile route doesn't scan the whole user table on every
+  // hit when the user count grows. Recent signups win when the slug collides
+  // with an older account that's been inactive — acceptable trade-off for now.
   const allUsers = await prisma.user.findMany({
     select: { id: true, name: true },
+    orderBy: { createdAt: "desc" },
+    take: 5000,
   });
   const matched = matchUsernameToUser(decodeURIComponent(username), allUsers);
   if (matched) {
@@ -81,9 +88,12 @@ export default async function CreatorProfilePage({ params, searchParams }: Props
       take: PAGE_SIZE,
     });
 
+    // Email deliberately NOT selected — public profile pages have no
+    // legitimate use for it and any future tweak that prints userFull.email
+    // would silently leak. Server-only call keeps it that way.
     const userFull = await prisma.user.findUnique({
       where: { id: matchedUser.id },
-      select: { name: true, image: true, createdAt: true, email: true },
+      select: { name: true, image: true, createdAt: true },
     });
 
     const stats = computeProfileStats(allPostsForStats);

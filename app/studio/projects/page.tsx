@@ -1,10 +1,21 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) {
+    redirect("/auth/signin?callbackUrl=/studio/projects");
+  }
+
   let projects: { id: string; name: string; createdAt: Date }[] = [];
   try {
     projects = await prisma.project.findMany({
+      where: { userId },
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, createdAt: true },
     });

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { auth } from "@/auth";
 import ShareButton from "@/components/social/share-button";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,15 @@ export default async function LibraryDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const generation = await prisma.generation.findUnique({ where: { id } });
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) {
+    redirect(`/auth/signin?callbackUrl=/library/${encodeURIComponent(id)}`);
+  }
+
+  // Ownership-scoped read closes the IDOR. Foreign generations return null →
+  // notFound() — a guesser can't tell them apart from non-existent ids.
+  const generation = await prisma.generation.findFirst({ where: { id, userId } });
   if (!generation) notFound();
 
   const mediaUrl = generation.resultUrl ?? generation.imageUrl;

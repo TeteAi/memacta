@@ -12,10 +12,24 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const persona = await prisma.persona.findUnique({ where: { id }, select: { name: true } });
-  return {
-    title: persona ? `${persona.name} | Personas | memacta` : "Persona | memacta",
-  };
+  // Persona name is biometric likeness data (often a real person's
+  // identifier under BIPA / GDPR Art.9). The page body is correctly
+  // ownership-gated below, but `generateMetadata` runs without auth and
+  // its output ends up in <title> — visible in HTML even when the user
+  // isn't signed in. Only reveal the name when the requesting session
+  // owns the persona; otherwise return a generic title.
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (userId) {
+    const persona = await prisma.persona.findFirst({
+      where: { id, userId, archivedAt: null },
+      select: { name: true },
+    });
+    if (persona) {
+      return { title: `${persona.name} | Personas | memacta` };
+    }
+  }
+  return { title: "Persona | memacta" };
 }
 
 export default async function PersonaDetailPage({ params }: Props) {

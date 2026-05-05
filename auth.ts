@@ -19,7 +19,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     error: "/auth/signin",
   },
   providers: [
-    // Google OAuth — add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env
+    // Google OAuth. allowDangerousEmailAccountLinking is gated by the
+    // signIn callback below — we only let Google merge into an existing
+    // User row when that row's emailVerified is already set, so an
+    // attacker who registered via credentials with an unverified email
+    // can't be silently merged with the rightful Google owner.
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
@@ -74,13 +78,40 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    /**
+     * Reject Google sign-in attempts that would silently merge into an
+     * unverified credentials account (account-takeover vector). User must
+     * verify their existing email first.
+     */
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.email) {
+        const existing = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { id: true, emailVerified: true, password: true },
+        });
+        if (existing && existing.password && !existing.emailVerified) {
+          // Existing credentials account with unverified email — block the
+          // OAuth link. NextAuth surfaces this as `?error=AccessDenied`.
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id as string;
       }
-      // Refresh credits + plan on every token refresh so the client always
-      // knows whether to watermark downloads, surface paywalls, etc.
-      if (token.id) {
+
+      // Refresh credits + planId from the DB only on initial signin or after
+      // 5 minutes — every authenticated request previously hit the DB here,
+      // doubling load on hot paths. Routes that need real-time accuracy
+      // (api/generate, api/popcorn/pack) already query User.credits directly.
+      const FIVE_MIN_MS = 5 * 60 * 1000;
+      const lastSync = (token.lastSyncAt as number | undefined) ?? 0;
+      const isStale = Date.now() - lastSync > FIVE_MIN_MS;
+      const isFresh = trigger === "signIn" || trigger === "signUp" || trigger === "update";
+
+      if (token.id && (isStale || isFresh)) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
@@ -91,6 +122,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         if (dbUser) {
           token.credits = dbUser.credits;
           token.planId = dbUser.subscription?.planId ?? "free";
+          token.lastSyncAt = Date.now();
         }
       }
       return token;

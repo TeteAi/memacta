@@ -45,10 +45,46 @@ export function middleware() {
     "max-age=31536000; includeSubDomains; preload"
   );
 
-  // NOTE: no Content-Security-Policy yet. Adding a strict CSP needs an
-  // audit of every inline script / style the app serves (Next's preload
-  // hints, Tailwind JIT, next/image blurDataURL, etc.). Left as a
-  // dedicated follow-up so we don't ship a broken one in a hurry.
+  // Content-Security-Policy — shipped as Report-Only first so we can spot
+  // any real-world breakage before flipping to enforced. Locks the app's
+  // network surface to the integrations we actually use; a future XSS
+  // can't pivot to attacker.tld to exfil session cookies even if it lands.
+  //
+  // 'unsafe-inline' on script/style is unfortunately required by Next 15's
+  // App Router (inline runtime + preload hints + Tailwind injection). Once
+  // we move to nonce-based CSP we can drop it.
+  //
+  // ffmpeg-core is now self-hosted (lib/ffmpeg-loader.ts) so wasm-src can
+  // be 'self' only — no third-party CDN allowed.
+  const csp = [
+    "default-src 'self'",
+    "img-src 'self' https: data: blob:",
+    "media-src 'self' https: blob:",
+    "font-src 'self' data:",
+    "script-src 'self' 'unsafe-inline' https://js.stripe.com",
+    "style-src 'self' 'unsafe-inline'",
+    "connect-src 'self' " + [
+      "https://*.fal.ai",
+      "https://*.fal.run",
+      "https://*.upstash.io",
+      "https://*.supabase.co",
+      "https://*.supabase.in",
+      "https://api.resend.com",
+      "https://api.stripe.com",
+      "https://o*.ingest.sentry.io",
+      "https://*.sentry.io",
+      "https://images.unsplash.com",
+    ].join(" "),
+    "frame-src https://js.stripe.com https://hooks.stripe.com",
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+
+  res.headers.set("content-security-policy-report-only", csp);
 
   return res;
 }

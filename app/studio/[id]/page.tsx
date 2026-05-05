@@ -1,8 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import StudioEditor from "@/components/studio/studio-editor";
 import type { Clip } from "@/components/studio/timeline";
+
+export const dynamic = "force-dynamic";
 
 export default async function StudioProjectPage({
   params,
@@ -10,10 +13,18 @@ export default async function StudioProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) {
+    redirect(`/auth/signin?callbackUrl=/studio/${encodeURIComponent(id)}`);
+  }
+
   let project: { id: string; name: string; clipsJson: string } | null = null;
   try {
-    project = await prisma.project.findUnique({
-      where: { id },
+    // findFirst with userId in the where closes the IDOR — even if a foreign
+    // project id is guessed, ownership mismatch returns null → notFound().
+    project = await prisma.project.findFirst({
+      where: { id, userId },
       select: { id: true, name: true, clipsJson: true },
     });
   } catch {

@@ -77,11 +77,27 @@ export async function POST(_req: Request, { params }: Params) {
     );
   }
 
-  // Deduct credits before generation
-  await prisma.user.update({
+  // Deduct credits before generation, log a CreditTransaction so the ledger
+  // matches User.credits (otherwise billing-dispute audits show un-explained
+  // deltas).
+  const debited = await prisma.user.update({
     where: { id: userId },
     data: { credits: { decrement: TOTAL_COST } },
+    select: { credits: true },
   });
+  try {
+    await prisma.creditTransaction.create({
+      data: {
+        userId,
+        amount: -TOTAL_COST,
+        balance: debited.credits,
+        type: "persona_preview",
+        description: `Persona preview x${PREVIEW_COUNT} (${id})`,
+      },
+    });
+  } catch {
+    /* non-fatal — main user.credits update already committed */
+  }
 
   // Generate previews in parallel
   const results = await Promise.all(
@@ -98,12 +114,27 @@ export async function POST(_req: Request, { params }: Params) {
   const succeeded = results.filter((r) => r.status === "succeeded");
   const failed = results.length - succeeded.length;
 
-  // Refund credits for failed generations
+  // Refund credits for failed generations + matching ledger entry.
   if (failed > 0) {
-    await prisma.user.update({
+    const refundAmount = failed * CREDIT_PER_IMAGE;
+    const refunded = await prisma.user.update({
       where: { id: userId },
-      data: { credits: { increment: failed * CREDIT_PER_IMAGE } },
+      data: { credits: { increment: refundAmount } },
+      select: { credits: true },
     });
+    try {
+      await prisma.creditTransaction.create({
+        data: {
+          userId,
+          amount: refundAmount,
+          balance: refunded.credits,
+          type: "refund",
+          description: `Persona preview refund — ${failed} of ${PREVIEW_COUNT} failed (${id})`,
+        },
+      });
+    } catch {
+      /* non-fatal */
+    }
   }
 
   trackInstantPreviewGenerated({ userId, personaId: id });

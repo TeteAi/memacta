@@ -95,9 +95,29 @@ export async function POST(req: Request) {
       const result = await uploadPersonaPhoto(userId, personaId, buffer, file.type);
 
       if (!result) {
-        // Supabase not configured (dev) — fall back to fal.ai storage
+        // Persona photos are biometric likeness data (BIPA / GDPR Art.9) —
+        // they MUST land in the private Supabase bucket. In production a
+        // missing storage client is a hard failure, not a silent fall-through
+        // to fal.ai's globally-readable URL space. In dev we still warn but
+        // continue so local hacking can use the fal upload path.
+        if (process.env.NODE_ENV === "production") {
+          // eslint-disable-next-line no-console
+          console.error(
+            "[upload] persona-photo: Supabase storage missing in production — refusing fall-through."
+          );
+          return NextResponse.json(
+            {
+              error: "storage_unavailable",
+              message:
+                "Photo storage is temporarily unavailable. Please try again in a few minutes.",
+            },
+            { status: 503 }
+          );
+        }
         // eslint-disable-next-line no-console
-        console.log("[upload] Supabase storage not configured; falling back to fal.ai for persona-photo");
+        console.warn(
+          "[upload] persona-photo: Supabase not configured (dev only); falling back to fal.ai."
+        );
       } else {
         return NextResponse.json({
           url: result.signedUrl,

@@ -9,6 +9,7 @@ import { videoModels, imageModels, getModel } from "@/lib/ai/models";
 import ShareButton from "@/components/social/share-button";
 import { smartDownload } from "@/lib/download";
 import { stashPendingGeneration } from "@/lib/pending-generations";
+import WatermarkHint from "@/components/watermark-hint";
 
 type Props = {
   mediaType: "video" | "image";
@@ -173,6 +174,7 @@ export default function GenerateForm({ mediaType, initialModel: initialModelProp
                 Save to Library
               </Link>
             </div>
+            <WatermarkHint planId={planId} mediaType={mediaType} variant="block" />
           </>
         )}
       </div>

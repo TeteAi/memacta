@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import type { ToolDef } from "@/lib/tools/p2-tools";
 import ShareButton from "@/components/social/share-button";
 import { smartDownload } from "@/lib/download";
+import WatermarkHint from "@/components/watermark-hint";
 
 export function ToolPage({ tool }: { tool: ToolDef }) {
   const { data: sessionData } = useSession();
@@ -233,6 +234,7 @@ export function ToolPage({ tool }: { tool: ToolDef }) {
               Save to Library
             </Link>
           </div>
+          <WatermarkHint planId={planId} mediaType={tool.mediaOut} variant="block" />
         </div>
       )}
     </div>

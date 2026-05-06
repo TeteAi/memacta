@@ -46,10 +46,10 @@ export default async function CommunityPage() {
   const allCards = [...cards, ...featuredCards];
 
   return (
-    <main className="p-8 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <main className="p-4 sm:p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h1 className="text-3xl font-bold text-brand-gradient">Community</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Link
             href="/community/contests"
             className="text-sm font-medium px-4 py-2 rounded-xl bg-white/15 text-white hover:bg-white/25 transition-colors"

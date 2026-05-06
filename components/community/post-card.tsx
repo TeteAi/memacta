@@ -88,9 +88,11 @@ export default function PostCard({ post }: { post: PostCardData }) {
           )}
         </div>
         <button
+          type="button"
           onClick={toggleLike}
           aria-label={liked ? "Unlike" : "Like"}
-          className="flex items-center gap-1 text-sm shrink-0"
+          aria-pressed={liked}
+          className="flex items-center gap-1 text-sm shrink-0 px-3 py-2 -mr-2 -my-1 min-h-[44px] rounded-lg hover:bg-white/5 transition-colors"
         >
           <span className={liked ? "text-[#FE2C55]" : "text-white/60 hover:text-white/80"}>
             {liked ? "\u2665" : "\u2661"}

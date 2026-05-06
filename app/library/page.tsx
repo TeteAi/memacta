@@ -95,9 +95,14 @@ export default async function LibraryPage() {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-4xl mx-auto px-6">
               {showcasePreview.map((item) => (
-                <div
+                // Wrap each preview tile in a Link so taps actually navigate.
+                // Previously a styled-as-clickable <div> with no handler —
+                // a top mobile complaint. Targets /community since these
+                // are seeded showcase items, not real DB posts.
+                <Link
                   key={item.id}
-                  className="aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/40 transition-all hover:scale-105 cursor-pointer"
+                  href="/community"
+                  className="aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/40 transition-all hover:scale-105 block focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500/60"
                 >
                   {item.mediaType === "video" ? (
                     <video
@@ -117,7 +122,7 @@ export default async function LibraryPage() {
                       loading="lazy"
                     />
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           </div>

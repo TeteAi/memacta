@@ -34,11 +34,14 @@ export default function Nav({
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 max-w-full">
         {/* Left: Sidebar toggle + Brand */}
         <div className="flex items-center gap-2">
-          {/* Sidebar toggle button */}
+          {/* Sidebar toggle button — 44×44 to clear the Apple HIG minimum
+              tap target. Mis-taps below the previous 36×36 fell through
+              to the parent header div, which silently did nothing — the
+              #1 mobile complaint surface. */}
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all lg:hidden"
+            className="w-11 h-11 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all lg:hidden"
             aria-label="Toggle sidebar"
           >
             {sidebarOpen ? (

@@ -98,7 +98,7 @@ function TextToVideoInner() {
                   key={a}
                   type="button"
                   onClick={() => setAspectRatio(a)}
-                  className={`flex-1 rounded-lg px-2 py-2.5 text-xs font-medium transition-all ${
+                  className={`flex-1 min-h-[44px] rounded-lg px-2 py-3 text-xs font-medium transition-all ${
                     aspectRatio === a
                       ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                       : "bg-[#1e1e32] text-white/50 border border-white/10 hover:border-white/20"

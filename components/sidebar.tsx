@@ -335,13 +335,16 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           ))}
         </div>
 
-        {/* Legal links */}
+        {/* Legal links — sized for touch (each link is its own row at
+            text-xs / py-1.5 ≈ 28 px). The previous text-[10px] inline
+            cluster gave 15-px-tall hit targets in the busiest part of
+            the drawer; mis-taps hit the wrong link or missed entirely. */}
         <div className="px-3 pb-2 pt-1">
-          <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <Link href="/legal/terms" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">Terms</Link>
-            <Link href="/legal/privacy" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">Privacy</Link>
-            <Link href="/legal/ai-likeness" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">AI Likeness</Link>
-            <Link href="/legal/dmca" onClick={onClose} className="text-[10px] text-white/35 hover:text-white/60 transition-colors">DMCA</Link>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+            <Link href="/legal/terms" onClick={onClose} className="text-xs text-white/45 hover:text-white/80 transition-colors py-1.5">Terms</Link>
+            <Link href="/legal/privacy" onClick={onClose} className="text-xs text-white/45 hover:text-white/80 transition-colors py-1.5">Privacy</Link>
+            <Link href="/legal/ai-likeness" onClick={onClose} className="text-xs text-white/45 hover:text-white/80 transition-colors py-1.5">AI Likeness</Link>
+            <Link href="/legal/dmca" onClick={onClose} className="text-xs text-white/45 hover:text-white/80 transition-colors py-1.5">DMCA</Link>
           </div>
         </div>
 

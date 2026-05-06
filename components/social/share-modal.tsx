@@ -118,8 +118,9 @@ export default function ShareModal({
           <div className="flex items-center justify-between px-6 pt-6 pb-4">
             <h2 className="text-lg font-bold text-white">Share to Social</h2>
             <button
+              type="button"
               onClick={onClose}
-              className="text-white/60 hover:text-white transition-colors text-xl leading-none"
+              className="text-white/60 hover:text-white transition-colors text-xl leading-none w-11 h-11 flex items-center justify-center -mr-3 rounded-lg hover:bg-white/5"
               data-testid="share-modal-close"
               aria-label="Close"
             >

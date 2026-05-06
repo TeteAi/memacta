@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import TurnstileWidget from "@/components/auth/turnstile-widget";
 
 const SHOWCASE_IMAGES = [
   { src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80", label: "Aria Nova · 2.4M followers" },
@@ -40,6 +41,18 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Turnstile state — only required for the signup branch. The widget
+  // returns null when (a) the env var isn't configured (dev) or (b) the
+  // token expired. The server still gates final acceptance, so the worst
+  // a missing/expired token does is show a "please complete verification"
+  // message before the user retries.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const handleTurnstile = useCallback((token: string | null) => {
+    setTurnstileToken(token);
+  }, []);
+  const turnstileReady = !turnstileSiteKey || Boolean(turnstileToken);
+
   async function handleOAuth(provider: string) {
     setLoading(true);
     await signIn(provider, { callbackUrl });
@@ -51,12 +64,26 @@ export default function SignInPage() {
     setFormError(null);
 
     if (mode === "signup") {
+      // Belt-and-suspenders: server still verifies the token, but block the
+      // request here too so users get an immediate, clear message if they
+      // submit before solving the challenge.
+      if (turnstileSiteKey && !turnstileToken) {
+        setFormError("Please complete the verification challenge before continuing.");
+        setLoading(false);
+        return;
+      }
+
       // Create account first
       try {
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email, name, password }),
+          body: JSON.stringify({
+            email,
+            name,
+            password,
+            turnstileToken: turnstileToken ?? undefined,
+          }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -314,9 +341,15 @@ export default function SignInPage() {
               </div>
             )}
 
+            {/* Bot challenge — only on signup, only when configured.
+                Renders nothing in dev / preview deploys without keys. */}
+            {mode === "signup" && (
+              <TurnstileWidget onToken={handleTurnstile} showStatus />
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === "signup" && !turnstileReady)}
               className="w-full py-3.5 rounded-xl bg-brand-gradient text-white font-bold text-sm hover:opacity-90 transition-all glow-btn disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading

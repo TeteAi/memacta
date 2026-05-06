@@ -3,14 +3,41 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { sendVerificationEmail } from "@/lib/auth/email-verify";
+import {
+  isTurnstileConfigured,
+  turnstileRemoteIp,
+  verifyTurnstile,
+} from "@/lib/turnstile";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 const RegisterSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().min(1, "Name is required").optional(),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  turnstileToken: z.string().optional(),
 });
 
 export async function POST(req: Request) {
+  // Per-IP burst limit on registrations. Even with Turnstile in front, a
+  // residential-proxy bot farm could solve challenges and create a few
+  // accounts per IP. Cap at 5 successful registrations per hour per IP so
+  // the welcome-bonus pool can't be drained at scale.
+  const burstCheck = await rateLimit(rateLimitKey(req, null), {
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+  });
+  if (!burstCheck.ok) {
+    return NextResponse.json(
+      {
+        error:
+          "Too many signups from this network. Please try again in an hour, " +
+          "or contact support if you believe this is in error.",
+        retryAfter: Math.ceil(burstCheck.retryAfterMs / 1000),
+      },
+      { status: 429 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -24,7 +51,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: firstError }, { status: 400 });
   }
 
-  const { email, name, password } = parsed.data;
+  const { email, name, password, turnstileToken } = parsed.data;
+
+  // Bot-challenge gate. When TURNSTILE_SECRET_KEY is configured, refuse the
+  // request unless we get a verified token; without the env var, the
+  // verifier returns ok=true skipped=true so dev/preview keep working.
+  if (isTurnstileConfigured()) {
+    const ts = await verifyTurnstile(turnstileToken, turnstileRemoteIp(req));
+    if (!ts.ok) {
+      return NextResponse.json(
+        {
+          error:
+            "Verification failed. Reload the page and complete the challenge again.",
+          reason: ts.reason,
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   // Check if user already exists
   const existing = await prisma.user.findUnique({ where: { email } });

@@ -61,7 +61,9 @@ export function middleware() {
     "img-src 'self' https: data: blob:",
     "media-src 'self' https: blob:",
     "font-src 'self' data:",
-    "script-src 'self' 'unsafe-inline' https://js.stripe.com",
+    // Stripe + Cloudflare Turnstile challenge bundle are allow-listed
+    // explicitly; everything else falls through to 'self'.
+    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
     "connect-src 'self' " + [
       "https://*.fal.ai",
@@ -74,8 +76,10 @@ export function middleware() {
       "https://o*.ingest.sentry.io",
       "https://*.sentry.io",
       "https://images.unsplash.com",
+      "https://challenges.cloudflare.com",
     ].join(" "),
-    "frame-src https://js.stripe.com https://hooks.stripe.com",
+    // Turnstile renders inside an iframe served from challenges.cloudflare.com.
+    "frame-src https://js.stripe.com https://hooks.stripe.com https://challenges.cloudflare.com",
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",

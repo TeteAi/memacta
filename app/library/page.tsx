@@ -16,19 +16,26 @@ export default async function LibraryPage() {
   // effectively exposing every user's library. Now: signed out → empty
   // result, so the page shows the signin/"Start Creating" CTA instead
   // of other people's work.
+  // Bounded queries — a power user with 10k+ generations would OOM the
+  // serverless lambda on an unbounded findMany. 500 is enough to fill
+  // several pages of the tabbed view; real pagination is a follow-up.
+  const LIBRARY_PAGE_LIMIT = 500;
   const [generations, characters, projects] = userId
     ? await Promise.all([
         prisma.generation.findMany({
           where: { userId },
           orderBy: { createdAt: "desc" },
+          take: LIBRARY_PAGE_LIMIT,
         }),
         prisma.character.findMany({
           where: { userId },
           orderBy: { createdAt: "desc" },
+          take: LIBRARY_PAGE_LIMIT,
         }),
         prisma.project.findMany({
           where: { userId },
           orderBy: { createdAt: "desc" },
+          take: LIBRARY_PAGE_LIMIT,
         }),
       ])
     : [[], [], []] as const;

@@ -91,13 +91,102 @@ function aspectToSize(a?: "16:9" | "9:16" | "1:1"):
   return undefined;
 }
 
-function buildInput(req: GenerationRequest): Record<string, unknown> {
+// Per-endpoint input schema. Every fal video endpoint enforces strict enums
+// on `duration` and `aspect_ratio`; sending an out-of-enum value silently
+// falls back to defaults or 400s, which manifests as "the model ignored
+// my prompt / settings". This table mirrors fal's documented schemas as of
+// 2026-04. Update when fal ships a new model.
+type VideoSchema = {
+  durations: readonly string[];     // valid enum values in fal's expected format
+  aspectRatios: readonly string[];  // valid enum values
+  // Some endpoints accept i2v via the same endpoint; others have a separate i2v slug.
+  // `acceptsImageUrl: false` means we must NOT pass image_url even if supplied.
+  acceptsImageUrl: boolean;
+};
+
+// Keyed by endpoint slug (not internal model id) so multi-aliased models share config.
+const VIDEO_SCHEMAS: Record<string, VideoSchema> = {
+  // Kling family — accepts "5" or "10" seconds, 16:9 / 9:16 / 1:1
+  "fal-ai/kling-video/v2/master/text-to-video":     { durations: ["5", "10"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: false },
+  "fal-ai/kling-video/v2/master/image-to-video":    { durations: ["5", "10"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: true },
+  "fal-ai/kling-video/v2.5-turbo/text-to-video":    { durations: ["5", "10"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: false },
+  "fal-ai/kling-video/v2.5-turbo/image-to-video":   { durations: ["5", "10"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: true },
+
+  // Sora 2 — accepts 4/8/12/16/20 seconds, 16:9 or 9:16 only
+  "fal-ai/sora-2/text-to-video":                    { durations: ["4", "8", "12", "16", "20"], aspectRatios: ["16:9", "9:16"], acceptsImageUrl: false },
+
+  // Veo 3 fast — accepts "4s" / "6s" / "8s" (note: with "s" suffix!), 16:9 or 9:16 only
+  "fal-ai/veo3/fast":                               { durations: ["4s", "6s", "8s"], aspectRatios: ["16:9", "9:16"], acceptsImageUrl: false },
+
+  // Wan 2.5 — accepts "5" or "10", 16:9 / 9:16 / 1:1
+  "fal-ai/wan-25-preview/text-to-video":            { durations: ["5", "10"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: false },
+
+  // Hailuo 02 — accepts "6" or "10" ONLY (not 5!), no aspect_ratio param
+  "fal-ai/minimax/hailuo-02/standard/text-to-video":  { durations: ["6", "10"], aspectRatios: [], acceptsImageUrl: false },
+  "fal-ai/minimax/hailuo-02/standard/image-to-video": { durations: ["6", "10"], aspectRatios: [], acceptsImageUrl: true },
+
+  // Seedance — accepts 2-12 second integers, full aspect set
+  "fal-ai/bytedance/seedance/v1/pro/text-to-video":  { durations: ["2","3","4","5","6","7","8","9","10","11","12"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: false },
+  "fal-ai/bytedance/seedance/v1/pro/image-to-video": { durations: ["2","3","4","5","6","7","8","9","10","11","12"], aspectRatios: ["16:9", "9:16", "1:1"], acceptsImageUrl: true },
+};
+
+// Snap a user-requested duration to the nearest valid enum value for the
+// endpoint. Without this, fal silently rejects the duration and falls back
+// to its default, which makes "I asked for 15s, got 5s" look like a bug —
+// because it is a bug. This function is the bug fix.
+function snapDuration(requestedSec: number, allowed: readonly string[]): string {
+  if (allowed.length === 0) return String(requestedSec);
+  // Allowed values can be "5", "10", "4s", "6s", etc. Strip suffix for comparison.
+  let best = allowed[0];
+  let bestDiff = Infinity;
+  for (const v of allowed) {
+    const num = parseFloat(v.replace(/s$/, ""));
+    const diff = Math.abs(num - requestedSec);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = v;
+    }
+  }
+  return best;
+}
+
+function snapAspectRatio(
+  requested: "16:9" | "9:16" | "1:1" | undefined,
+  allowed: readonly string[]
+): string | undefined {
+  if (!requested) return undefined;
+  if (allowed.length === 0) return undefined; // endpoint has no aspect_ratio param
+  if (allowed.includes(requested)) return requested;
+  // Fall back to first allowed (typically the default — 16:9 across the board)
+  return allowed[0];
+}
+
+function buildInput(req: GenerationRequest, endpoint: string): Record<string, unknown> {
   const input: Record<string, unknown> = { prompt: req.prompt };
 
   if (req.mediaType === "video") {
-    if (req.durationSec) input.duration = String(req.durationSec);
-    if (req.aspectRatio) input.aspect_ratio = req.aspectRatio;
-    if (req.imageUrl) input.image_url = req.imageUrl;
+    const schema = VIDEO_SCHEMAS[endpoint];
+    if (schema) {
+      // Endpoint-aware path: snap to valid enum values
+      if (req.durationSec) {
+        input.duration = snapDuration(req.durationSec, schema.durations);
+      }
+      const ar = snapAspectRatio(req.aspectRatio, schema.aspectRatios);
+      if (ar) input.aspect_ratio = ar;
+      if (req.imageUrl && schema.acceptsImageUrl) input.image_url = req.imageUrl;
+      // If user supplied an imageUrl on a text-to-video endpoint, silently drop
+      // it rather than 400-ing — the request still produces a video, just from
+      // text only. We log so we can spot UX confusion in the field.
+      if (req.imageUrl && !schema.acceptsImageUrl) {
+        // eslint-disable-next-line no-console
+        console.warn(`[fal-provider] dropping image_url for text-to-video endpoint ${endpoint}`);
+      }
+    } else {
+      // Unknown endpoint — fall back to old behavior (best effort, may 400).
+      if (req.durationSec) input.duration = String(req.durationSec);
+      if (req.aspectRatio) input.aspect_ratio = req.aspectRatio;
+      if (req.imageUrl) input.image_url = req.imageUrl;
+    }
   } else {
     // image models
     const size = aspectToSize(req.aspectRatio);
@@ -163,7 +252,7 @@ export const falProvider: AIProvider = {
     fal.config({ credentials: key });
 
     const endpoint = resolveEndpoint(req.model, req.mediaType, req.imageUrl);
-    const input = buildInput(req);
+    const input = buildInput(req, endpoint);
 
     // Images → direct sync POST to fal.run. This uses the "inference" API
     // surface which all FAL_KEYs have access to. fal.subscribe uses the

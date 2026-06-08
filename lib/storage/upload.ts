@@ -113,6 +113,41 @@ export async function uploadGenerationOutput(
   return { storageKey, publicUrl: publicData.publicUrl };
 }
 
+/**
+ * Deletes storage objects from a bucket. Safe to call when storage isn't
+ * configured (no-op in dev), so callers don't need their own guards.
+ *
+ * Returns the count of keys actually removed, or 0 if storage is disabled.
+ * Errors are logged but never thrown — losing track of an orphan file is
+ * preferable to refusing to delete the user's persona because of an S3 hiccup.
+ */
+async function deleteFromBucket(bucket: string, keys: string[]): Promise<number> {
+  if (keys.length === 0) return 0;
+  const client = getStorageClient();
+  if (!client) {
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log(`[storage:dev] deleteFromBucket(${bucket}) called but Supabase not configured — skipping ${keys.length} keys`);
+    }
+    return 0;
+  }
+  const { data, error } = await client.storage.from(bucket).remove(keys);
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.warn(`[storage] delete from ${bucket} failed for ${keys.length} keys:`, error.message);
+    return 0;
+  }
+  return data?.length ?? 0;
+}
+
+export async function deletePersonaPhotos(storageKeys: string[]): Promise<number> {
+  return deleteFromBucket(PERSONA_PHOTOS_BUCKET, storageKeys);
+}
+
+export async function deleteGenerationOutputs(storageKeys: string[]): Promise<number> {
+  return deleteFromBucket(GENERATIONS_BUCKET, storageKeys);
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function mimeToExt(mime: string): string {

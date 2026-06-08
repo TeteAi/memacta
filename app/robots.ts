@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getAppUrl } from "@/lib/app-url";
 
 // robots.txt. Disallow anything that's private (authed pages, internal
 // APIs, the admin triage view) and point crawlers at the sitemap for
@@ -6,10 +7,7 @@ import type { MetadataRoute } from "next";
 // if they forget to add noindex on an individual route.
 
 export default function robots(): MetadataRoute.Robots {
-  const base =
-    process.env.APP_URL ??
-    process.env.AUTH_URL ??
-    "https://memacta.vercel.app";
+  const base = getAppUrl();
 
   return {
     rules: [

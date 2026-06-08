@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getPersonaById, deletePersona } from "@/lib/persona/service";
+import { deletePersonaPhotos } from "@/lib/storage/upload";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -42,9 +43,16 @@ export async function DELETE(_req: Request, { params }: Params) {
 
   const { deletedStorageKeys } = await deletePersona(id, userId);
 
-  // TODO: queue storageKeys for deletion at the storage provider
-  // eslint-disable-next-line no-console
-  console.log(`[persona:delete] Queuing ${deletedStorageKeys.length} storage keys for deletion`, deletedStorageKeys);
+  // Best-effort storage cleanup. We delete the DB rows first (above), so even
+  // if storage deletion errors we still honor the user's request to delete
+  // the persona. Orphan files are reconciled by a periodic sweeper (TODO),
+  // not blocked on here — refusing to delete the persona because of an S3
+  // hiccup would be the wrong tradeoff.
+  const removed = await deletePersonaPhotos(deletedStorageKeys);
 
-  return NextResponse.json({ success: true, deletedStorageKeys });
+  return NextResponse.json({
+    success: true,
+    deletedStorageKeys,
+    storageObjectsRemoved: removed,
+  });
 }

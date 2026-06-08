@@ -168,6 +168,37 @@ export async function POST(req: Request) {
     );
   }
 
+  // Persona + video on the free tier → paywall. We can bake a pixel
+  // watermark into image outputs via sharp, but the video pipeline doesn't
+  // run frames through ffmpeg today. Without that, an unwatermarked
+  // free-tier persona video is a commercial loophole — creators could
+  // generate brand-quality AI-influencer footage for nothing. Gating
+  // here (before debit + generation) keeps the upgrade path clean: free
+  // users still get persona images, video requires Creator+.
+  if (body.mediaType === "video" && body.personaId) {
+    const userForGate = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        emailVerified: true,
+        createdAt: true,
+        premiumLoraTrainsUsed: true,
+        subscription: { select: { planId: true } },
+      },
+    });
+    if (userForGate && shouldApplyServerWatermark(userForGate)) {
+      return NextResponse.json(
+        {
+          error: "video_persona_premium_only",
+          message:
+            "Persona videos are a Creator-tier feature. Upgrade to generate videos with your Persona, or try image generation on the free tier.",
+          upgradeUrl: "/pricing",
+        },
+        { status: 402 }
+      );
+    }
+  }
+
   // Rolling 24h daily cap — prevents a single tester from torching the fal
   // bill in an hour. Net of refunds, so failed generations don't count.
   // Admins (owner allowlist) skip the cap so we can smoke-test freely; every

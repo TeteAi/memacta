@@ -44,16 +44,20 @@ export async function DELETE() {
         data: { userId: null },
       });
 
-      // Contact messages — scrub PII (name + email) but keep the body so
-      // we still have the bug report context for triage. ContactMessage
-      // has no foreign key on userId (just an optional string column),
-      // so the cascade on user.delete() doesn't touch these.
+      // Contact messages — fully scrub PII (name, email, AND body) on
+      // account deletion. Earlier we kept the body for triage context, but
+      // users sometimes paste passwords / personal details into bug
+      // reports, and a GDPR delete request that retains the original body
+      // is a privacy violation. ContactMessage has no FK on userId (just
+      // an optional string column), so the cascade on user.delete() won't
+      // touch these — we have to scrub explicitly.
       await tx.contactMessage.updateMany({
         where: { userId },
         data: {
           userId: null,
           name: "[deleted]",
           email: "[deleted]",
+          message: "[content removed at user request]",
         },
       });
 

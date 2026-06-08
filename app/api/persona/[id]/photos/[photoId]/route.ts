@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { deletePersonaPhotos } from "@/lib/storage/upload";
 
 type Params = { params: Promise<{ id: string; photoId: string }> };
 
@@ -48,6 +49,8 @@ export async function DELETE(_req: Request, { params }: Params) {
     }
   }
 
-  // TODO: queue storageKey for deletion at the storage provider
+  // Best-effort storage cleanup — see persona DELETE route for rationale.
+  await deletePersonaPhotos([photo.storageKey]);
+
   return NextResponse.json({ success: true, storageKey: photo.storageKey });
 }
